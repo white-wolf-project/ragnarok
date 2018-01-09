@@ -1,0 +1,9 @@
+Package:ragnarok
+Version:0.0.1
+Section: system
+Priority: optional
+Architecture: all
+Depends: bash
+Maintainer: White Wolf Team
+Description: A tool.
+Homepage: github.com/white-wolf-project

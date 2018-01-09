@@ -1,2 +1,1 @@
 # ragnarok
-School project
