@@ -1,6 +1,6 @@
 CC = gcc
-CLIENT = client
-SERVER = server
+CLIENT = ragnarok
+SERVER = ragnarok-srv
 uname_s = $(shell uname -s)
 arch = $(shell arch)
 INSTALL_DIR ?= /usr/local/bin/
@@ -17,12 +17,12 @@ LDFLAGS ?=
 CROSS_COMPILE ?=
 
 CLIENT_OBJECTS = 	$(CLIENT_SRC)/main.o \
-					$(CLIENT_SRC)/client_tool.o
+					$(CLIENT_SRC)/client.o
 
 CLIENT_SOURCES = $(CLIENT_OBJECTS:.o=.c)
 
 SRV_OBJECTS = 		$(SRV_SRC)/main.o \
-					$(SRV_SRC)/server_tool.o
+					$(SRV_SRC)/server.o
 
 SRV_SOURCES = $(SRV_OBJECTS:o=.c)	
 
