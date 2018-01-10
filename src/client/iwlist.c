@@ -13,6 +13,7 @@
 
 #include "iwlib.h"		/* Header */
 #include <sys/time.h>
+#include <include/common.h>
 
 /****************************** TYPES ******************************/
 
@@ -158,9 +159,9 @@ static void
 iw_print_value_name(unsigned int value, const char * names[], const unsigned int num_names)
 {
 	if(value >= num_names)
-		printf(" unknown (%d)", value);
+		debug(" unknown (%d)", value);
 	else
-		printf(" %s", names[value]);
+		printf("%s", names[value]);
 }
 
 /*------------------------------------------------------------------*/
@@ -197,22 +198,16 @@ iw_print_ie_wpa(unsigned char *	iebuf, int buflen)
 	if(ielen > buflen)
 		ielen = buflen;
 
-#ifdef DEBUG
+	#ifdef DEBUG_IW
 	/* Debugging code. In theory useless, because it's debugged ;-) */
 	printf("IE raw value %d [%02X", buflen, iebuf[0]);
 	for(i = 1; i < buflen; i++)
 		printf(":%02X", iebuf[i]);
 	printf("]\n");
-#endif
+	#endif
 
 	switch(iebuf[0]) {
 		case 0x30:		/* WPA2 */
-			/* Check if we have enough data */
-			// if(ielen < 4) {
-			// 	iw_print_ie_unknown(iebuf, buflen);
-			// 	return;
-			// }
-
 			wpa_oui = wpa2_oui;
 			break;
 
@@ -239,7 +234,7 @@ iw_print_ie_wpa(unsigned char *	iebuf, int buflen)
 	offset += 2;
 
 	if(iebuf[0] == 0xdd)
-		printf("WPA Version %d\n", ver);
+		printf("WPA Version : %d\n", ver);
 	if(iebuf[0] == 0x30)
 		printf("IEEE 802.11i/WPA2 Version %d\n", ver);
 
@@ -254,7 +249,7 @@ iw_print_ie_wpa(unsigned char *	iebuf, int buflen)
 	}
 	/* Next we have our group cipher. */
 	if(memcmp(&iebuf[offset], wpa_oui, 3) != 0) {
-		printf("Group Cipher : Proprietary\n");
+		printf("Group Cipher : Proprietary");
 	}
 	else {
 		printf("Group Cipher :");
@@ -274,16 +269,17 @@ iw_print_ie_wpa(unsigned char *	iebuf, int buflen)
 	/* Otherwise, we have some number of pairwise ciphers. */
 	cnt = iebuf[offset] | (iebuf[offset + 1] << 8);
 	offset += 2;
-	printf("Pairwise Ciphers (%d) :", cnt);
+	//printf("Pairwise Ciphers : ");
 
 	if(ielen < (offset + 4*cnt))
 		return;
 
 	for(i = 0; i < cnt; i++) {
 		if(memcmp(&iebuf[offset], wpa_oui, 3) != 0) {
-			printf(" Proprietary");
+			printf("Pairwise Ciphers : Proprietary");
 		}
 		else {
+			printf("Pairwise Ciphers : ");
 			iw_print_value_name(iebuf[offset+3], iw_ie_cypher_name, IW_IE_CYPHER_NUM);
 		}
 		offset+=4;
@@ -344,7 +340,7 @@ iw_print_gen_ie(unsigned char *	buffer, int buflen)
 				iw_print_ie_wpa(buffer + offset, buflen);
 				break;
 			default:
-				printf("unknown\n");//iw_print_ie_unknown(buffer + offset, buflen);
+				debug("[DEBUG] unknown\n");//iw_print_ie_unknown(buffer + offset, buflen);
 		}
 		/* Skip over this IE to the next one in the list. */
 		offset += buffer[offset+1] + 2;
@@ -375,7 +371,7 @@ print_scanning_token(struct stream_descr * stream, struct iw_event * event, stru
 	/* Now, let's decode the event */
 	switch(event->cmd) {
 		case SIOCGIWAP:
-			printf("=================== =========================== \n");
+			printf("\n=================== =========================== \n");
 			printf("Cell %02d - Address: %s\n", state->ap_num, iw_saether_ntop(&event->u.ap_addr, buffer));
 			state->ap_num++;
 			break;
@@ -387,8 +383,8 @@ print_scanning_token(struct stream_descr * stream, struct iw_event * event, stru
 			break;
 		case SIOCGIWFREQ:
 		{
-			double		freq;			/* Frequency/channel */
-			int		channel = -1;		/* Converted to channel */
+			double		freq;				/* Frequency/channel */
+			int			channel = -1;		/* Converted to channel */
 			freq = iw_freq2float(&(event->u.freq));
 			/* Convert to channel if possible */
 			if(has_range)
@@ -398,9 +394,12 @@ print_scanning_token(struct stream_descr * stream, struct iw_event * event, stru
 		}
 			break;
 		case SIOCGIWMODE:
+			#ifdef ADVANCED
 			/* Note : event->u.mode is unsigned, no need to check <= 0 */
 			if(event->u.mode >= IW_NUM_OPER_MODE) event->u.mode = IW_NUM_OPER_MODE;
-			printf("Mode:%s\n", iw_operation_mode[event->u.mode]);
+			("Mode:%s\n", iw_operation_mode[event->u.mode]);
+			#endif /* ADVANCED */
+
 			break;
 		case SIOCGIWNAME:
 			printf("Protocol:%-1.16s\n", event->u.name);
@@ -429,13 +428,14 @@ print_scanning_token(struct stream_descr * stream, struct iw_event * event, stru
 				memcpy(key, event->u.data.pointer, event->u.data.length);
 			else
 				event->u.data.flags |= IW_ENCODE_NOKEY;
-			printf("Encryption key:");
+			printf("Encryption key: ");
 			if(event->u.data.flags & IW_ENCODE_DISABLED)
-				printf("off\n");
+				printf("OFF\n");
 			else {
 				/* Display the key */
 				iw_print_key(buffer, sizeof(buffer), key, event->u.data.length, event->u.data.flags);
-				printf("%s", buffer);
+				if (!strcmp(buffer, "on"))
+					printf("ON");
 
 				/* Other info... */
 				if((event->u.data.flags & IW_ENCODE_INDEX) > 1)
@@ -449,40 +449,10 @@ print_scanning_token(struct stream_descr * stream, struct iw_event * event, stru
 		}
 			break;
 		case SIOCGIWRATE:
-			if(state->val_index == 0)
-				printf("Bit Rates:");
-			else {
-					if((state->val_index % 5) == 0)
-						printf("\n");
-					else
-						printf("; ");
-					iw_print_bitrate(buffer, sizeof(buffer), event->u.bitrate.value);
-					printf("%s", buffer);
-					/* Check for termination */
-					if(stream->value == NULL) {
-						printf("\n");
-						state->val_index = 0;
-					} else {
-						state->val_index++; break;
-					}
-			}
+			debug("[DEBUG] skipping SIOCGIWRATE\n");
+			break;
 		case SIOCGIWMODUL:
-		{
-			unsigned int modul = event->u.param.value;
-			int i;
-			int n = 0;
-			printf("Modulations :");
-			for(i = 0; i < IW_SIZE_MODUL_LIST; i++){
-				if((modul & iw_modul_list[i].mask) == iw_modul_list[i].mask) {
-					if((n++ % 8) == 7)
-						printf("\n");
-					else
-						printf(" ; ");
-					printf("%s", iw_modul_list[i].cmd);
-				}
-			}
-			printf("\n");
-		}
+			debug("[DEBUG] skipping SIOCGIWMODUL\n");
 			break;
 		case IWEVQUAL:
 			iw_print_stats(buffer, sizeof(buffer), &event->u.qual, iw_range, has_range);
@@ -499,8 +469,15 @@ print_scanning_token(struct stream_descr * stream, struct iw_event * event, stru
 			char custom[IW_CUSTOM_MAX+1];
 			if((event->u.data.pointer) && (event->u.data.length))
 				memcpy(custom, event->u.data.pointer, event->u.data.length);
+
 			custom[event->u.data.length] = '\0';
-			printf("Extra:%s\n", custom);
+
+			// condition is here to avoid this output :
+			// Extra:tsf=0000024479ed9ccc
+			if (custom[0] != 't')
+			{
+				debug("Extra:%s\n", custom);
+			}
 		}
 			break;
 		default:
@@ -732,7 +709,7 @@ print_scanning_info(int skfd, char * ifname, char *	args[],int count){
 			struct stream_descr	stream;
 			struct iwscan_state	state = { .ap_num = 1, .val_index = 0 };
 			int			ret;
-			#ifdef DEBUG
+			#ifdef DEBUG_IW
 				/* Debugging code. In theory useless, because it's debugged ;-) */
 				int	i;
 				printf("Scan result %d [%02X", wrq.u.data.length, buffer[0]);
@@ -755,7 +732,7 @@ print_scanning_info(int skfd, char * ifname, char *	args[],int count){
 	return(0);
 }
 
-int run_iwlist()
+int run_iwlist(char const * interface)
 {
 	int skfd;			/* generic raw socket desc.	*/
 	if((skfd = iw_sockets_open()) < 0)
@@ -764,8 +741,7 @@ int run_iwlist()
 		return -1;
 	}
 
-	print_scanning_info(skfd, "wlan0", NULL, 0);
-	printf("a\n");
+	print_scanning_info(skfd, (char *)interface, NULL, 0);
 	/* Close the socket. */
 	iw_sockets_close(skfd);
 

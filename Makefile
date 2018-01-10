@@ -10,9 +10,8 @@ SRV_SRC = src/server
 
 VERSION = $(shell cat resources/control| grep Version | cut -d:  -f 2)
 DEBUG ?=
-DEBUGYESNO ?=
-DBG ?=
-CFLAGS = -I. -c -Wall
+ADV ?=
+CFLAGS = $(DBG) $(ADV) -I. -c -Wall -g -o
 LDFLAGS = -liw
 CROSS_COMPILE ?=
 
@@ -27,28 +26,43 @@ SRV_OBJECTS = $(SRV_SRC)/main.o \
 
 SRV_SOURCES = $(SRV_OBJECTS:o=.c)	
 
+OBJECTS = src/common.o
+
+SOURCES = $(OBJECTS:o=.c)
+
+ifeq ($(DEBUG), 1)
+	DBG = -DDEBUG
+endif
+
+ifeq ($(ADV), 1)
+	DBG = -DADVANCED # advanced outputs not sure
+endif
+
 .PHONY : all clean
 
 all : $(CLIENT) $(SERVER)
 
 
-$(CLIENT) : $(CLIENT_OBJECTS)
+$(CLIENT) : $(OBJECTS) $(CLIENT_OBJECTS)
 	@echo "LD	$@"
-	@$(CC) $(CLIENT_OBJECTS) $(LDFLAGS) -o $(CLIENT)
+	@$(CC) $(CLIENT_OBJECTS) $(OBJECTS) $(LDFLAGS) -o $(CLIENT)
 
-$(SERVER) : $(SRV_OBJECTS)
+$(SERVER) : $(OBJECTS) $(SRV_OBJECTS)
 	@echo "LD 	$@"
 	@$(CC) $(SRV_OBJECTS) $(LDFLAGS) -o $(SERVER)
 
 $(CLIENT_SRC)/%.o : $(CLIENT_SRC)/%.c
 	@echo "CC	$<"
-	@$(CC) $(CFLAGS) $< -o $@
-
+	$(CC) $<  $(CFLAGS) $@
 
 $(SRV_SRC)/%.o : $(SRV_SRC)/%.c
 	@echo "CC 	$<"
-	@$(CC) $(CFLAGS) $< -o $@
+	@$(CC) $< $(CFLAGS) $@
+
+src/%.o : src/%.c
+	@echo "CC 	$<"
+	@$(CC) $< $(CFLAGS) $@
 
 clean :
 	rm -rf 	$(CLIENT) $(CLIENT_OBJECTS) \
-	$(SERVER) $(SRV_OBJECTS)
+	$(SERVER) $(SRV_OBJECTS) $(OBJECTS)
