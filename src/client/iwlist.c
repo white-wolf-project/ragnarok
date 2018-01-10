@@ -61,44 +61,44 @@ typedef struct iw_auth_descr
 #ifndef WE_ESSENTIAL
 #define IW_ARRAY_LEN(x) (sizeof(x)/sizeof((x)[0]))
 
-static const struct iwmask_name iw_auth_capa_name[] = {
+/*static const struct iwmask_name iw_auth_capa_name[] = {
 	{ IW_ENC_CAPA_WPA, "WPA" },
 	{ IW_ENC_CAPA_WPA2, "WPA2" },
 	{ IW_ENC_CAPA_CIPHER_TKIP, "CIPHER-TKIP" },
 	{ IW_ENC_CAPA_CIPHER_CCMP, "CIPHER-CCMP" },
-};
-#define	IW_AUTH_CAPA_NUM IW_ARRAY_LEN(iw_auth_capa_name)
-
+};*/
+//#define	IW_AUTH_CAPA_NUM IW_ARRAY_LEN(iw_auth_capa_name)
+/*
 static const struct iwmask_name iw_auth_cypher_name[] = {
 	{ IW_AUTH_CIPHER_NONE, "none" },
 	{ IW_AUTH_CIPHER_WEP40, "WEP-40" },
 	{ IW_AUTH_CIPHER_TKIP, "TKIP" },
 	{ IW_AUTH_CIPHER_CCMP, "CCMP" },
 	{ IW_AUTH_CIPHER_WEP104, "WEP-104" },
-};
-#define	IW_AUTH_CYPHER_NUM IW_ARRAY_LEN(iw_auth_cypher_name)
+};*/
+//#define	IW_AUTH_CYPHER_NUM IW_ARRAY_LEN(iw_auth_cypher_name)
 
-static const struct iwmask_name iw_wpa_ver_name[] = {
+/*static const struct iwmask_name iw_wpa_ver_name[] = {
 	{ IW_AUTH_WPA_VERSION_DISABLED, "disabled" },
 	{ IW_AUTH_WPA_VERSION_WPA, "WPA" },
 	{ IW_AUTH_WPA_VERSION_WPA2, "WPA2" },
-};
-#define	IW_WPA_VER_NUM IW_ARRAY_LEN(iw_wpa_ver_name)
+};*/
+//#define	IW_WPA_VER_NUM IW_ARRAY_LEN(iw_wpa_ver_name)
 
-static const struct iwmask_name iw_auth_key_mgmt_name[] = {
+/*static const struct iwmask_name iw_auth_key_mgmt_name[] = {
 	{ IW_AUTH_KEY_MGMT_802_1X, "802.1x" },
 	{ IW_AUTH_KEY_MGMT_PSK, "PSK" },
-};
-#define	IW_AUTH_KEY_MGMT_NUM IW_ARRAY_LEN(iw_auth_key_mgmt_name)
+};*/
+//#define	IW_AUTH_KEY_MGMT_NUM IW_ARRAY_LEN(iw_auth_key_mgmt_name)
 
-static const struct iwmask_name iw_auth_alg_name[] = {
+/*static const struct iwmask_name iw_auth_alg_name[] = {
 	{ IW_AUTH_ALG_OPEN_SYSTEM, "open" },
 	{ IW_AUTH_ALG_SHARED_KEY, "shared-key" },
 	{ IW_AUTH_ALG_LEAP, "LEAP" },
-};
-#define	IW_AUTH_ALG_NUM IW_ARRAY_LEN(iw_auth_alg_name)
+};*/
+//#define	IW_AUTH_ALG_NUM IW_ARRAY_LEN(iw_auth_alg_name)
 
-static const struct iw_auth_descr iw_auth_settings[] = {
+/*static const struct iw_auth_descr iw_auth_settings[] = {
 	{ IW_AUTH_WPA_VERSION, "WPA version", iw_wpa_ver_name, IW_WPA_VER_NUM },
 	{ IW_AUTH_KEY_MGMT, "Key management", iw_auth_key_mgmt_name, IW_AUTH_KEY_MGMT_NUM },
 	{ IW_AUTH_CIPHER_PAIRWISE, "Pairwise cipher", iw_auth_cypher_name, IW_AUTH_CYPHER_NUM },
@@ -109,18 +109,10 @@ static const struct iw_auth_descr iw_auth_settings[] = {
 	{ IW_AUTH_RX_UNENCRYPTED_EAPOL, "Receive unencrypted EAPOL", NULL, 0 },
 	{ IW_AUTH_ROAMING_CONTROL, "Roaming control", NULL, 0 },
 	{ IW_AUTH_PRIVACY_INVOKED, "Privacy invoked", NULL, 0 },
-};
-#define	IW_AUTH_SETTINGS_NUM IW_ARRAY_LEN(iw_auth_settings)
+};*/
+//#define	IW_AUTH_SETTINGS_NUM IW_ARRAY_LEN(iw_auth_settings)
 
-/* Values for the IW_ENCODE_ALG_* returned by SIOCSIWENCODEEXT */
-static const char *	iw_encode_alg_name[] = {
-	"none",
-	"WEP",
-	"TKIP",
-	"CCMP",
-	"unknown"
-};
-#define	IW_ENCODE_ALG_NUM IW_ARRAY_LEN(iw_encode_alg_name)
+//#define	IW_ENCODE_ALG_NUM IW_ARRAY_LEN(iw_encode_alg_name)
 
 #ifndef IW_IE_CIPHER_NONE
 /* Cypher values in GENIE (pairwise and group) */
@@ -176,20 +168,14 @@ iw_print_value_name(unsigned int value, const char * names[], const unsigned int
  * Parse, and display the results of an unknown IE.
  *
  */
-static void 
-iw_print_ie_unknown(unsigned char *	iebuf, int buflen)
-{
-	int ielen = iebuf[1] + 2;
-	int i;
+// static void 
+// iw_print_ie_unknown(unsigned char *	iebuf, int buflen)
+// {
+// 	int ielen = iebuf[1] + 2;
 
-	if(ielen > buflen)
-		ielen = buflen;
-//aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-/*  printf("Unknown: ");
-  for(i = 0; i < ielen; i++)
-    printf("%02X", iebuf[i]);
-  printf("\n");*/
-}
+// 	if(ielen > buflen)
+// 		ielen = buflen;
+// }
 
 /*------------------------------------------------------------------*/
 /*
@@ -222,10 +208,10 @@ iw_print_ie_wpa(unsigned char *	iebuf, int buflen)
 	switch(iebuf[0]) {
 		case 0x30:		/* WPA2 */
 			/* Check if we have enough data */
-			if(ielen < 4) {
-				iw_print_ie_unknown(iebuf, buflen);
-				return;
-			}
+			// if(ielen < 4) {
+			// 	iw_print_ie_unknown(iebuf, buflen);
+			// 	return;
+			// }
 
 			wpa_oui = wpa2_oui;
 			break;
@@ -236,10 +222,10 @@ iw_print_ie_wpa(unsigned char *	iebuf, int buflen)
 			/* Not all IEs that start with 0xdd are WPA.
 			 * So check that the OUI is valid. Note : offset==2
 			 */
-			if((ielen < 8) || (memcmp(&iebuf[offset], wpa_oui, 3) != 0) || (iebuf[offset + 3] != 0x01)) {
-				iw_print_ie_unknown(iebuf, buflen);
-				return;
-			}
+			// if((ielen < 8) || (memcmp(&iebuf[offset], wpa_oui, 3) != 0) || (iebuf[offset + 3] != 0x01)) {
+			// 	iw_print_ie_unknown(iebuf, buflen);
+			// 	return;
+			// }
 
 			/* Skip the OUI type */
 			offset += 4;
@@ -358,7 +344,7 @@ iw_print_gen_ie(unsigned char *	buffer, int buflen)
 				iw_print_ie_wpa(buffer + offset, buflen);
 				break;
 			default:
-				iw_print_ie_unknown(buffer + offset, buflen);
+				printf("unknown\n");//iw_print_ie_unknown(buffer + offset, buflen);
 		}
 		/* Skip over this IE to the next one in the list. */
 		offset += buffer[offset+1] + 2;
@@ -465,20 +451,21 @@ print_scanning_token(struct stream_descr * stream, struct iw_event * event, stru
 		case SIOCGIWRATE:
 			if(state->val_index == 0)
 				printf("Bit Rates:");
-			else
-				if((state->val_index % 5) == 0)
-					printf("\n");
-				else
-					printf("; ");
-				iw_print_bitrate(buffer, sizeof(buffer), event->u.bitrate.value);
-				printf("%s", buffer);
-				/* Check for termination */
-				if(stream->value == NULL) {
-					printf("\n");
-					state->val_index = 0;
-				} else
-					state->val_index++;
-					break;
+			else {
+					if((state->val_index % 5) == 0)
+						printf("\n");
+					else
+						printf("; ");
+					iw_print_bitrate(buffer, sizeof(buffer), event->u.bitrate.value);
+					printf("%s", buffer);
+					/* Check for termination */
+					if(stream->value == NULL) {
+						printf("\n");
+						state->val_index = 0;
+					} else {
+						state->val_index++; break;
+					}
+			}
 		case SIOCGIWMODUL:
 		{
 			unsigned int modul = event->u.param.value;
@@ -768,29 +755,7 @@ print_scanning_info(int skfd, char * ifname, char *	args[],int count){
 	return(0);
 }
 
-/*------------------------------------------------------------------*/
-/*
- * Print Power Management range for each type
- */
-static void
-print_retry_value_range(char * name, int mask, int iwr_flags, int iwr_min,
-			int iwr_max, char * buffer, int buflen, int we_version_compiled)
-{
-	if(iwr_flags & mask) { 
-		int	flags = (iwr_flags & ~(IW_RETRY_MIN | IW_RETRY_MAX));
-		/* Display if auto or fixed */
-		printf("%s %s ; ", (iwr_flags & IW_POWER_MIN) ? "Auto " : "Fixed", name);
-
-		/* Print the range */
-		iw_print_retry_value(buffer, buflen, iwr_min, flags | IW_POWER_MIN, we_version_compiled);
-		printf("%s\n", buffer);
-
-		iw_print_retry_value(buffer, buflen, iwr_max, flags | IW_POWER_MAX, we_version_compiled);
-		printf("%s\n", buffer);
-	}
-}
-
-int main()
+int run_iwlist()
 {
 	int skfd;			/* generic raw socket desc.	*/
 	if((skfd = iw_sockets_open()) < 0)
@@ -799,7 +764,7 @@ int main()
 		return -1;
 	}
 
-	print_scanning_info(skfd, "wlo1", NULL, 0);
+	print_scanning_info(skfd, "wlan0", NULL, 0);
 	printf("a\n");
 	/* Close the socket. */
 	iw_sockets_close(skfd);
