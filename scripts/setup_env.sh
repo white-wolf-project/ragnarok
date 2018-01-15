@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #######################################################################
 #
-#  Project......: bootstrap.sh
+#  Project......: setup_env.sh
 #  Creator......: matteyeux
 #  Description..: setup dev env for Ragnarok
 #  Type.........: Public
