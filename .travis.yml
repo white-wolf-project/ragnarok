@@ -1,0 +1,17 @@
+# This file is used to configure travis-ci build
+os :
+  - linux
+
+dist: trusty
+sudo: required
+
+language: C
+
+compiler:
+  - gcc
+
+script :
+  - ./scripts/travis_test.sh
+
+notifications:
+    slack: racletteteam:6qgUsplRJUd3nhnX42ewKDP0
