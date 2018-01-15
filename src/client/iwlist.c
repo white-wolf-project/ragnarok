@@ -387,9 +387,9 @@ print_scanning_token(struct stream_descr *stream, struct iw_event *event, struct
 			break;
 		case SIOCGIWNWID:
 			if(event->u.nwid.disabled)
-				printf("NWID:off/any\n");
+				printf("NWID: off/any\n");
 			else
-				printf("NWID:%X\n", event->u.nwid.value);
+				printf("NWID: %X\n", event->u.nwid.value);
 			break;
 		case SIOCGIWFREQ:
 		{
@@ -407,10 +407,10 @@ print_scanning_token(struct stream_descr *stream, struct iw_event *event, struct
 			/* Note : event->u.mode is unsigned, no need to check <= 0 */
 			if(event->u.mode >= IW_NUM_OPER_MODE)
 				event->u.mode = IW_NUM_OPER_MODE;
-			debug("Mode:%s\n", iw_operation_mode[event->u.mode]);
+			debug("Mode: %s\n", iw_operation_mode[event->u.mode]);
 			break;
 		case SIOCGIWNAME:
-			printf("Protocol:%-1.16s\n", event->u.name);
+			printf("Protocol: %-1.16s\n", event->u.name);
 			break;
 		case SIOCGIWESSID:
 		{
@@ -422,12 +422,12 @@ print_scanning_token(struct stream_descr *stream, struct iw_event *event, struct
 			{
 				/* Does it have an ESSID index ? */
 				if((event->u.essid.flags & IW_ENCODE_INDEX) > 1)
-					printf("ESSID:\"%s\" [%d]\n", essid, (event->u.essid.flags & IW_ENCODE_INDEX));
+					printf("ESSID: \"%s\" [%d]\n", essid, (event->u.essid.flags & IW_ENCODE_INDEX));
 				else
-					printf("ESSID:\"%s\"\n", essid);
+					printf("ESSID: \"%s\"\n", essid);
 			}
 			else
-				printf("ESSID:off/any/hidden\n");
+				printf("ESSID: off/any/hidden\n");
 		}
 		break;
 		case SIOCGIWENCODE:
@@ -437,7 +437,7 @@ print_scanning_token(struct stream_descr *stream, struct iw_event *event, struct
 				memcpy(key, event->u.data.pointer, event->u.data.length);
 			else
 				event->u.data.flags |= IW_ENCODE_NOKEY;
-			printf("Encryption key:");
+			printf("Encryption key: ");
 			if(event->u.data.flags & IW_ENCODE_DISABLED)
 				printf("off\n");
 			else
@@ -449,9 +449,9 @@ print_scanning_token(struct stream_descr *stream, struct iw_event *event, struct
 				if((event->u.data.flags & IW_ENCODE_INDEX) > 1)
 					printf(" [%d]", event->u.data.flags & IW_ENCODE_INDEX);
 				if(event->u.data.flags & IW_ENCODE_RESTRICTED)
-					printf("Security mode:restricted");
+					printf("Security mode: restricted");
 				if(event->u.data.flags & IW_ENCODE_OPEN)
-					printf("Security mode:open");
+					printf("Security mode: open");
 				printf("\n");
 			}
 		}
@@ -464,7 +464,7 @@ print_scanning_token(struct stream_descr *stream, struct iw_event *event, struct
 			unsigned int modul = event->u.param.value;
 			int i;
 			int n = 0;
-			printf("Modulations :");
+			printf("Modulations : ");
 			for(i = 0; i < IW_SIZE_MODUL_LIST; i++)
 			{
 				if((modul & iw_modul_list[i].mask) == iw_modul_list[i].mask)
@@ -495,7 +495,7 @@ print_scanning_token(struct stream_descr *stream, struct iw_event *event, struct
 			if((event->u.data.pointer) && (event->u.data.length))
 				memcpy(custom, event->u.data.pointer, event->u.data.length);
 			custom[event->u.data.length] = '\0';
-			printf("Extra:%s\n", custom);
+			printf("Extra: %s\n", custom);
 		}
 		break;
 		default:
@@ -779,7 +779,7 @@ static const unsigned int pm_type_flags[] = {
 };
 static const int pm_type_flags_size = (sizeof(pm_type_flags)/sizeof(pm_type_flags[0]));
 
-int run_iwlist(void)
+int run_iwlist(char const * interface)
 {
 	int skfd;     /* generic raw socket desc. */
 	if((skfd = iw_sockets_open()) < 0)
@@ -788,7 +788,7 @@ int run_iwlist(void)
 		return -1;
 	}
 
-	print_scanning_info(skfd, "wlo1", NULL, 0);
+	print_scanning_info(skfd, (char *)interface, NULL, 0);
 	/* Close the socket. */
 	iw_sockets_close(skfd);
 	return 0;
