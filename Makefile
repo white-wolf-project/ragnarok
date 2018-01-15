@@ -53,7 +53,7 @@ $(SERVER) : $(OBJECTS) $(SRV_OBJECTS)
 
 $(CLIENT_SRC)/%.o : $(CLIENT_SRC)/%.c
 	@echo "CC	$<"
-	$(CC) $<  $(CFLAGS) $@
+	@$(CC) $<  $(CFLAGS) $@
 
 $(SRV_SRC)/%.o : $(SRV_SRC)/%.c
 	@echo "CC 	$<"
