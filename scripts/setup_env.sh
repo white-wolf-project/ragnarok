@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #######################################################################
 #
-#  Project......: bootstrap.sh
+#  Project......: setup_env.sh
 #  Creator......: matteyeux
 #  Description..: setup dev env for Ragnarok
 #  Type.........: Public
@@ -29,8 +29,7 @@ make -C client-srv
 
 # wireless-tools are needed for iwlist.c in our project
 git clone https://github.com/white-wolf-project/wireless-tools.git
-cd wireless-tools/wireless-tools
-make && sudo make install
+make -C wireless-tools/wireless_tools install
 
 # few vim settings
 sudo echo "set nu" >> /etc/vim/vimrc 			# set line numbers

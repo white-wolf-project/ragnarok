@@ -1,4 +1,17 @@
-#!/bin/bash
+#!/usr/bin/env bash
+#######################################################################
+#
+#  Project......: travis_test.sh
+#  Creator......: matteyeux
+#  Description..: script to run tests on Travis-CI
+#  Type.........: Public
+#
+######################################################################
+# Language :
+#               bash
+# Version : 0.2
+#
+
 # install few tools
 sudo apt-get install -y make build-essential libssl-dev wget git python3  m4 autoconf libtool autotools-dev libiw-dev libxml2-dev
 # clone dependencie 
