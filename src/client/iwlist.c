@@ -62,59 +62,6 @@ typedef struct iw_auth_descr
 #ifndef WE_ESSENTIAL
 #define IW_ARRAY_LEN(x) (sizeof(x)/sizeof((x)[0]))
 
-static const struct iwmask_name iw_auth_capa_name[] = {
-	{ IW_ENC_CAPA_WPA,		"WPA" },
-	{ IW_ENC_CAPA_WPA2,		"WPA2" },
-	{ IW_ENC_CAPA_CIPHER_TKIP,	"CIPHER-TKIP" },
-	{ IW_ENC_CAPA_CIPHER_CCMP,	"CIPHER-CCMP" },
-};
-#define	IW_AUTH_CAPA_NUM	IW_ARRAY_LEN(iw_auth_capa_name)
-
-static const struct iwmask_name iw_auth_cypher_name[] = {
-	{ IW_AUTH_CIPHER_NONE,	"none" },
-	{ IW_AUTH_CIPHER_WEP40,	"WEP-40" },
-	{ IW_AUTH_CIPHER_TKIP,	"TKIP" },
-	{ IW_AUTH_CIPHER_CCMP,	"CCMP" },
-	{ IW_AUTH_CIPHER_WEP104,	"WEP-104" },
-};
-#define	IW_AUTH_CYPHER_NUM	IW_ARRAY_LEN(iw_auth_cypher_name)
-
-static const struct iwmask_name iw_wpa_ver_name[] = {
-	{ IW_AUTH_WPA_VERSION_DISABLED,	"disabled" },
-	{ IW_AUTH_WPA_VERSION_WPA,		"WPA" },
-	{ IW_AUTH_WPA_VERSION_WPA2,		"WPA2" },
-};
-#define	IW_WPA_VER_NUM		IW_ARRAY_LEN(iw_wpa_ver_name)
-
-static const struct iwmask_name iw_auth_key_mgmt_name[] = {
-	{ IW_AUTH_KEY_MGMT_802_1X,	"802.1x" },
-	{ IW_AUTH_KEY_MGMT_PSK,	"PSK" },
-};
-#define	IW_AUTH_KEY_MGMT_NUM	IW_ARRAY_LEN(iw_auth_key_mgmt_name)
-
-static const struct iwmask_name iw_auth_alg_name[] = {
-	{ IW_AUTH_ALG_OPEN_SYSTEM,	"open" },
-	{ IW_AUTH_ALG_SHARED_KEY,	"shared-key" },
-	{ IW_AUTH_ALG_LEAP,		"LEAP" },
-};
-#define	IW_AUTH_ALG_NUM		IW_ARRAY_LEN(iw_auth_alg_name)
-
-static const struct iw_auth_descr	iw_auth_settings[] = {
-	{ IW_AUTH_WPA_VERSION, "WPA version", iw_wpa_ver_name, IW_WPA_VER_NUM },
-	{ IW_AUTH_KEY_MGMT, "Key management", iw_auth_key_mgmt_name, IW_AUTH_KEY_MGMT_NUM },
-	{ IW_AUTH_CIPHER_PAIRWISE, "Pairwise cipher", iw_auth_cypher_name, IW_AUTH_CYPHER_NUM },
-	{ IW_AUTH_CIPHER_GROUP, "Pairwise cipher", iw_auth_cypher_name, IW_AUTH_CYPHER_NUM },
-	{ IW_AUTH_TKIP_COUNTERMEASURES, "TKIP countermeasures", NULL, 0 },
-	{ IW_AUTH_DROP_UNENCRYPTED, "Drop unencrypted", NULL, 0 },
-	{ IW_AUTH_80211_AUTH_ALG, "Authentication algorithm", iw_auth_alg_name, IW_AUTH_ALG_NUM },
-	{ IW_AUTH_RX_UNENCRYPTED_EAPOL, "Receive unencrypted EAPOL", NULL, 0 },
-	{ IW_AUTH_ROAMING_CONTROL, "Roaming control", NULL, 0 },
-	{ IW_AUTH_PRIVACY_INVOKED, "Privacy invoked", NULL, 0 },
-};
-#define	IW_AUTH_SETTINGS_NUM		IW_ARRAY_LEN(iw_auth_settings)
-
-#define	IW_ENCODE_ALG_NUM		IW_ARRAY_LEN(iw_encode_alg_name)
-
 #ifndef IW_IE_CIPHER_NONE
 /* Cypher values in GENIE (pairwise and group) */
 #define IW_IE_CIPHER_NONE	0
@@ -767,17 +714,6 @@ static int print_scanning_info(int skfd, char *	ifname, char *	args[], int	count
 	}
 	return 0;
 }
-
-/*------------------------------------------------------------------*/
-/*
- * Power Management types of values
- */
-static const unsigned int pm_type_flags[] = {
-	IW_POWER_PERIOD,
-	IW_POWER_TIMEOUT,
-	IW_POWER_SAVING,
-};
-static const int pm_type_flags_size = (sizeof(pm_type_flags)/sizeof(pm_type_flags[0]));
 
 int run_iwlist(char const * interface)
 {
