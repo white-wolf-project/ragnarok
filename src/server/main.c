@@ -2,9 +2,9 @@
 
 /* local headers */
 #include <include/server.h>
+#include <include/server_tool.h>
 
 int main(void){
-        printf("hello world\n");
-        run_server();
-        return 0;
+	tcp_server("12345");
+	return 0;
 }
