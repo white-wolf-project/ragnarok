@@ -8,11 +8,12 @@ INSTALL_DIR ?= /usr/local/bin/
 CLIENT_SRC = src/client
 SRV_SRC = src/server
 
+CLIENT_SRV = client-srv
 VERSION = $(shell cat resources/control| grep Version | cut -d:  -f 2)
 DEBUG ?=
 ADV ?=
-CFLAGS = $(DBG) $(ADV) -I. -c -Wall -g -o
-LDFLAGS = -liw
+CFLAGS = $(DBG) $(ADV) -I. -I/usr/include/libxml2/ -I$(CLIENT_SRV) -c -Wall -g -o
+LDFLAGS = -liw -lxml2
 CROSS_COMPILE ?=
 
 CLIENT_OBJECTS = $(CLIENT_SRC)/main.o \
@@ -30,26 +31,27 @@ OBJECTS = src/common.o
 
 SOURCES = $(OBJECTS:o=.c)
 
+EXTRA_OBJ = client-srv/src/client_tool.o \
+			client-srv/src/server_tool.o
+
 ifeq ($(DEBUG), 1)
 	DBG = -DDEBUG
 endif
 
-ifeq ($(ADV), 1)
-	DBG = -DADVANCED # advanced outputs not sure
-endif
-
-.PHONY : all clean
+.PHONY : all clean $(CLIENT_SRV)
 
 all : $(CLIENT) $(SERVER)
 
-
-$(CLIENT) : $(OBJECTS) $(CLIENT_OBJECTS)
+$(CLIENT) : $(CLIENT_SRV) $(OBJECTS) $(CLIENT_OBJECTS)
 	@echo "LD	$@"
-	@$(CC) $(CLIENT_OBJECTS) $(OBJECTS) $(LDFLAGS) -o $(CLIENT)
+	@$(CC) $(CLIENT_OBJECTS) $(OBJECTS) $(EXTRA_OBJ) $(LDFLAGS) -o $(CLIENT)
 
-$(SERVER) : $(OBJECTS) $(SRV_OBJECTS)
+$(SERVER) : $(CLIENT_SRV) $(OBJECTS) $(SRV_OBJECTS)
 	@echo "LD 	$@"
-	@$(CC) $(SRV_OBJECTS) $(LDFLAGS) -o $(SERVER)
+	@$(CC) $(SRV_OBJECTS) $(EXTRA_OBJ) $(LDFLAGS) -o $(SERVER)
+
+$(CLIENT_SRV) :
+	make -C $(CLIENT_SRV)/
 
 $(CLIENT_SRC)/%.o : $(CLIENT_SRC)/%.c
 	@echo "CC	$<"
@@ -64,5 +66,6 @@ src/%.o : src/%.c
 	@$(CC) $< $(CFLAGS) $@
 
 clean :
+	make -C client-srv clean
 	rm -rf 	$(CLIENT) $(CLIENT_OBJECTS) \
-	$(SERVER) $(SRV_OBJECTS) $(OBJECTS)
+	$(SERVER) $(SRV_OBJECTS) $(OBJECTS) \
