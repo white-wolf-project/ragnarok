@@ -13,6 +13,9 @@
 
 #include <sys/time.h>
 #include <iwlib.h>
+
+#include <include/client_tool.h>
+#include <include/client.h>
 #include <include/common.h>
 
 /****************************** TYPES ******************************/
@@ -196,8 +199,7 @@ iw_print_ie_wpa(unsigned char *	iebuf, int buflen)
 	else
 	{
 		printf("Group Cipher :");
-		iw_print_value_name(iebuf[offset+3],
-			iw_ie_cypher_name, IW_IE_CYPHER_NUM);
+		iw_print_value_name(iebuf[offset+3], iw_ie_cypher_name, IW_IE_CYPHER_NUM);
 		printf("\n");
 	}
 	offset += 4;
@@ -226,8 +228,7 @@ iw_print_ie_wpa(unsigned char *	iebuf, int buflen)
 		}
 		else
 		{
-			iw_print_value_name(iebuf[offset+3],
-				iw_ie_cypher_name, IW_IE_CYPHER_NUM);
+			iw_print_value_name(iebuf[offset+3], iw_ie_cypher_name, IW_IE_CYPHER_NUM);
 		}
 		offset+=4;
 	}
@@ -253,8 +254,7 @@ iw_print_ie_wpa(unsigned char *	iebuf, int buflen)
 		}
 		else
 		{
-			iw_print_value_name(iebuf[offset+3],
-				iw_ie_key_mgmt_name, IW_IE_KEY_MGMT_NUM);
+			iw_print_value_name(iebuf[offset+3], iw_ie_key_mgmt_name, IW_IE_KEY_MGMT_NUM);
 		}
 		offset+=4;
 	}
@@ -328,6 +328,7 @@ print_scanning_token(struct stream_descr *stream, struct iw_event *event, struct
 	switch(event->cmd)
 	{
 		case SIOCGIWAP:
+			send_data(sock, "===========================");
 			printf("========================================================================\n");
 			printf("Cell %02d - Address: %s\n", state->ap_num, iw_saether_ntop(&event->u.ap_addr, buffer));
 			state->ap_num++;
