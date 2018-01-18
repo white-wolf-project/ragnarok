@@ -21,6 +21,10 @@ sudo apt-get install -y make build-essential libssl-dev libreadline-dev libsqlit
 if [[ $(arch) != "armv71" && $(arch) != "aarch64" ]];then
 	sudo apt-get install -y gcc-arm-linux-gnueabihf
 fi
+
+# init and clone git modules
+git submodule init && git submodule update
+
 # install git depends
 git clone https://github.com/matteyeux/sysnet; cd sysnet
 ./scripts/install.sh
