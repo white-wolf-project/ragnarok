@@ -109,9 +109,9 @@ static void
 iw_print_value_name(unsigned int value, const char * names[], const unsigned int num_names)
 {
 	if(value >= num_names)
-		printf(" unknown (%d)", value);
+		send_data(sock, " unknown (%d)", value);
 	else
-		printf(" %s", names[value]);
+		send_data(sock, " %s", names[value]);
 }
 
 /*
@@ -135,40 +135,40 @@ iw_print_ie_wpa(unsigned char *	iebuf, int buflen)
 
 #ifdef DEBUG
 	/* Debugging code. In theory useless, because it's debugged ;-) */
-	printf("IE raw value %d [%02X", buflen, iebuf[0]);
+	send_data(sock, "IE raw value %d [%02X", buflen, iebuf[0]);
 	for(i = 1; i < buflen; i++)
-		printf(":%02X", iebuf[i]);
-	printf("]\n");
+		send_data(sock, ":%02X", iebuf[i]);
+	send_data(sock, "]\n");
 #endif
 
 	switch(iebuf[0])
 	{
-    case 0x30:	/* WPA2 */
-		/* Check if we have enough data */
-		if(ielen < 4)
-		{
+		case 0x30:	/* WPA2 */
+			/* Check if we have enough data */
+			if(ielen < 4)
+			{
+				return;
+			}
+
+			wpa_oui = wpa2_oui;
+			break;
+
+		case 0xdd:		/* WPA or else */
+			wpa_oui = wpa1_oui;
+
+			/* Not all IEs that start with 0xdd are WPA.
+			* So check that the OUI is valid. Note : offset==2 */
+			if((ielen < 8) || (memcmp(&iebuf[offset], wpa_oui, 3) != 0) || (iebuf[offset + 3] != 0x01))
+			{
+				return;
+			}
+
+			/* Skip the OUI type */
+			offset += 4;
+			break;
+
+			default:
 			return;
-		}
-
-		wpa_oui = wpa2_oui;
-		break;
-
-    case 0xdd:		/* WPA or else */
-		wpa_oui = wpa1_oui;
-
-		/* Not all IEs that start with 0xdd are WPA.
-		* So check that the OUI is valid. Note : offset==2 */
-		if((ielen < 8) || (memcmp(&iebuf[offset], wpa_oui, 3) != 0) || (iebuf[offset + 3] != 0x01))
-		{
-			return;
-		}
-
-		/* Skip the OUI type */
-		offset += 4;
-		break;
-
-		default:
-		return;
 	}
 
 	/* Pick version number (little endian) */
@@ -176,9 +176,9 @@ iw_print_ie_wpa(unsigned char *	iebuf, int buflen)
 	offset += 2;
 
 	if(iebuf[0] == 0xdd)
-		printf("WPA Version %d\n", ver);
+		send_data(sock, "WPA Version %d\n", ver);
 	if(iebuf[0] == 0x30)
-		printf("IEEE 802.11i/WPA2 Version %d\n", ver);
+		send_data(sock, "IEEE 802.11i/WPA2 Version %d\n", ver);
 
 	/* From here, everything is technically optional. */
 
@@ -186,21 +186,21 @@ iw_print_ie_wpa(unsigned char *	iebuf, int buflen)
 	if(ielen < (offset + 4))
 	{
 		/* We have a short IE.  So we should assume TKIP/TKIP. */
-		printf("Group Cipher : TKIP\n");
-		printf("Pairwise Cipher : TKIP\n");
+		send_data(sock, "Group Cipher : TKIP\n");
+		send_data(sock, "Pairwise Cipher : TKIP\n");
 		return;
 	}
 
 	/* Next we have our group cipher. */
 	if(memcmp(&iebuf[offset], wpa_oui, 3) != 0)
 	{
-		printf("Group Cipher : Proprietary\n");
+		send_data(sock, "Group Cipher : Proprietary\n");
 	}
 	else
 	{
-		printf("Group Cipher :");
+		send_data(sock, "Group Cipher :");
 		iw_print_value_name(iebuf[offset+3], iw_ie_cypher_name, IW_IE_CYPHER_NUM);
-		printf("\n");
+		send_data(sock, "\n");
 	}
 	offset += 4;
 
@@ -208,14 +208,14 @@ iw_print_ie_wpa(unsigned char *	iebuf, int buflen)
 	if(ielen < (offset + 2))
 	{
 		/* We don't have a pairwise cipher, or auth method. Assume TKIP. */
-		printf("Pairwise Ciphers : TKIP\n");
+		send_data(sock, "Pairwise Ciphers : TKIP\n");
 		return;
 	}
 
 	/* Otherwise, we have some number of pairwise ciphers. */
 	cnt = iebuf[offset] | (iebuf[offset + 1] << 8);
 	offset += 2;
-	printf("Pairwise Ciphers (%d) :", cnt);
+	send_data(sock, "Pairwise Ciphers (%d) :", cnt);
 
 	if(ielen < (offset + 4*cnt))
 		return;
@@ -224,7 +224,7 @@ iw_print_ie_wpa(unsigned char *	iebuf, int buflen)
 	{
 		if(memcmp(&iebuf[offset], wpa_oui, 3) != 0)
 		{
-			printf(" Proprietary");
+			send_data(sock, " Proprietary");
 		}
 		else
 		{
@@ -232,7 +232,7 @@ iw_print_ie_wpa(unsigned char *	iebuf, int buflen)
 		}
 		offset+=4;
 	}
-	printf("\n");
+	send_data(sock, "\n");
 
 	/* Check if we are done */
 	if(ielen < (offset + 2))
@@ -241,7 +241,7 @@ iw_print_ie_wpa(unsigned char *	iebuf, int buflen)
 	/* Now, we have authentication suites. */
 	cnt = iebuf[offset] | (iebuf[offset + 1] << 8);
 	offset += 2;
-	printf("Authentication Suites (%d) :", cnt);
+	send_data(sock, "Authentication Suites (%d) :", cnt);
 
 	if(ielen < (offset + 4*cnt))
 		return;
@@ -250,7 +250,7 @@ iw_print_ie_wpa(unsigned char *	iebuf, int buflen)
 	{
 		if(memcmp(&iebuf[offset], wpa_oui, 3) != 0)
 		{
-			printf(" Proprietary");
+			send_data(sock, " Proprietary");
 		}
 		else
 		{
@@ -258,7 +258,7 @@ iw_print_ie_wpa(unsigned char *	iebuf, int buflen)
 		}
 		offset+=4;
 	}
-	printf("\n");
+	send_data(sock, "\n");
 
 	/* Check if we are done */
 	if(ielen < (offset + 1))
@@ -271,7 +271,7 @@ iw_print_ie_wpa(unsigned char *	iebuf, int buflen)
 	 */
 	if(iebuf[offset] & 0x01)
 	{
-		printf("Preauthentication Supported\n");
+		send_data(sock, "Preauthentication Supported\n");
 	}
 }
 
@@ -329,15 +329,15 @@ print_scanning_token(struct stream_descr *stream, struct iw_event *event, struct
 	{
 		case SIOCGIWAP:
 			send_data(sock, "===========================");
-			printf("========================================================================\n");
-			printf("Cell %02d - Address: %s\n", state->ap_num, iw_saether_ntop(&event->u.ap_addr, buffer));
+			send_data(sock, "========================================================================\n");
+			send_data(sock, "Cell %02d - Address: %s\n", state->ap_num, iw_saether_ntop(&event->u.ap_addr, buffer));
 			state->ap_num++;
 			break;
 		case SIOCGIWNWID:
 			if(event->u.nwid.disabled)
-				printf("NWID: off/any\n");
+				send_data(sock, "NWID: off/any\n");
 			else
-				printf("NWID: %X\n", event->u.nwid.value);
+				send_data(sock, "NWID: %X\n", event->u.nwid.value);
 			break;
 		case SIOCGIWFREQ:
 		{
@@ -348,7 +348,7 @@ print_scanning_token(struct stream_descr *stream, struct iw_event *event, struct
 			if(has_range)
 				channel = iw_freq_to_channel(freq, iw_range);
 			iw_print_freq(buffer, sizeof(buffer), freq, channel, event->u.freq.flags);
-			printf("%s\n", buffer);
+			send_data(sock, "%s\n", buffer);
 		}
 			break;
 		case SIOCGIWMODE:
@@ -358,7 +358,7 @@ print_scanning_token(struct stream_descr *stream, struct iw_event *event, struct
 			debug("Mode: %s\n", iw_operation_mode[event->u.mode]);
 			break;
 		case SIOCGIWNAME:
-			printf("Protocol: %-1.16s\n", event->u.name);
+			send_data(sock, "Protocol: %-1.16s\n", event->u.name);
 			break;
 		case SIOCGIWESSID:
 		{
@@ -370,12 +370,12 @@ print_scanning_token(struct stream_descr *stream, struct iw_event *event, struct
 			{
 				/* Does it have an ESSID index ? */
 				if((event->u.essid.flags & IW_ENCODE_INDEX) > 1)
-					printf("ESSID: \"%s\" [%d]\n", essid, (event->u.essid.flags & IW_ENCODE_INDEX));
+					send_data(sock, "ESSID: \"%s\" [%d]\n", essid, (event->u.essid.flags & IW_ENCODE_INDEX));
 				else
-					printf("ESSID: \"%s\"\n", essid);
+					send_data(sock, "ESSID: \"%s\"\n", essid);
 			}
 			else
-				printf("ESSID: off/any/hidden\n");
+				send_data(sock, "ESSID: off/any/hidden\n");
 		}
 		break;
 		case SIOCGIWENCODE:
@@ -385,51 +385,48 @@ print_scanning_token(struct stream_descr *stream, struct iw_event *event, struct
 				memcpy(key, event->u.data.pointer, event->u.data.length);
 			else
 				event->u.data.flags |= IW_ENCODE_NOKEY;
-			printf("Encryption key: ");
+			send_data(sock, "Encryption key: ");
 			if(event->u.data.flags & IW_ENCODE_DISABLED)
-				printf("off\n");
+				send_data(sock, "off\n");
 			else
 			{
 				/* Display the key */
 				iw_print_key(buffer, sizeof(buffer), key, event->u.data.length, event->u.data.flags);
-				printf("%s", buffer);
+				send_data(sock, "%s", buffer);
 			/* Other info... */
 				if((event->u.data.flags & IW_ENCODE_INDEX) > 1)
-					printf(" [%d]", event->u.data.flags & IW_ENCODE_INDEX);
+					send_data(sock, " [%d]", event->u.data.flags & IW_ENCODE_INDEX);
 				if(event->u.data.flags & IW_ENCODE_RESTRICTED)
-					printf("Security mode: restricted");
+					send_data(sock, "Security mode: restricted");
 				if(event->u.data.flags & IW_ENCODE_OPEN)
-					printf("Security mode: open");
-				printf("\n");
+					send_data(sock, "Security mode: open");
+				send_data(sock, "\n");
 			}
 		}
 		break;
-	   /* case SIOCGIWRATE:
-	    printf("bitrate\n");
-	    break;*/
 		case SIOCGIWMODUL:
 		{
 			unsigned int modul = event->u.param.value;
 			int i;
 			int n = 0;
-			printf("Modulations : ");
+			send_data(sock, "Modulations : ");
 			for(i = 0; i < IW_SIZE_MODUL_LIST; i++)
 			{
 				if((modul & iw_modul_list[i].mask) == iw_modul_list[i].mask)
 				{
 					if((n++ % 8) == 7)
-						printf("\n");
+						send_data(sock, "\n");
 					else
-						printf(" ; ");
-					printf("%s", iw_modul_list[i].cmd);
+						send_data(sock, " ; ");
+					send_data(sock, "%s", iw_modul_list[i].cmd);
 				}
 			}
-			//printf("\n");
+			//send_data(sock, "\n");
 		}
 			break;
 		case IWEVQUAL:
 			iw_print_stats(buffer, sizeof(buffer), &event->u.qual, iw_range, has_range);
-			printf("%s\n", buffer);
+			send_data(sock, "%s\n", buffer);
 			break;
 #ifndef WE_ESSENTIAL
 		case IWEVGENIE:
@@ -443,7 +440,7 @@ print_scanning_token(struct stream_descr *stream, struct iw_event *event, struct
 			if((event->u.data.pointer) && (event->u.data.length))
 				memcpy(custom, event->u.data.pointer, event->u.data.length);
 			custom[event->u.data.length] = '\0';
-			printf("Extra: %s\n", custom);
+			send_data(sock, "Extra: %s\n", custom);
 		}
 		break;
 		default:
@@ -473,9 +470,9 @@ static int print_scanning_info(int skfd, char *	ifname, char *	args[], int	count
 	/* Debugging stuff */
 	if((IW_EV_LCP_PK2_LEN != IW_EV_LCP_PK_LEN) || (IW_EV_POINT_PK2_LEN != IW_EV_POINT_PK_LEN))
 	{
-		fprintf(stderr, "*** Please report to jt@hpl.hp.com your platform details\n");
-		fprintf(stderr, "*** and the following line :\n");
-		fprintf(stderr, "*** IW_EV_LCP_PK2_LEN = %zu ; IW_EV_POINT_PK2_LEN = %zu\n\n", IW_EV_LCP_PK2_LEN, IW_EV_POINT_PK2_LEN);
+		send_data(sock, "*** Please report to jt@hpl.hp.com your platform details\n");
+		send_data(sock, "*** and the following line :\n");
+		send_data(sock, "*** IW_EV_LCP_PK2_LEN = %zu ; IW_EV_POINT_PK2_LEN = %zu\n\n", IW_EV_LCP_PK2_LEN, IW_EV_POINT_PK2_LEN);
 	}
 
 	/* Get range stuff */
@@ -484,7 +481,8 @@ static int print_scanning_info(int skfd, char *	ifname, char *	args[], int	count
 	/* Check if the interface could support scanning. */
 	if((!has_range) || (range.we_version_compiled < 14))
 	{
-		fprintf(stderr, "%-8.16s  Interface doesn't support scanning.\n\n", ifname);
+		send_data(sock, "%-8.16s  Interface doesn't support scanning.\n\n", ifname);
+		//send_data(sock, "%-8.16s  Interface doesn't support scanning.\n\n", ifname);
 		return(-1);
 	}
 
@@ -499,17 +497,17 @@ static int print_scanning_info(int skfd, char *	ifname, char *	args[], int	count
 	 * Note : when we have enough options, we should use the parser
 	 * from iwconfig... */
 	while(count > 0) {
-      /* One arg is consumed (the option name) */
+		/* One arg is consumed (the option name) */
 		count--;
 
-      /*
-       * Check for Active Scan (scan with specific essid)
-       */
+		/*
+		* Check for Active Scan (scan with specific essid)
+		*/
 		if(!strncmp(args[0], "essid", 5))
 		{
 			if(count < 1)
 			{
-				fprintf(stderr, "Too few arguments for scanning option [%s]\n", args[0]);
+				send_data(sock, "Too few arguments for scanning option [%s]\n", args[0]);
 				return(-1);
 			}
 			args++;
@@ -537,7 +535,7 @@ static int print_scanning_info(int skfd, char *	ifname, char *	args[], int	count
 			}
 			else
 			{
-				fprintf(stderr, "Invalid scanning option [%s]\n", args[0]);
+				send_data(sock, "Invalid scanning option [%s]\n", args[0]);
 				return(-1);
 			}
 			/* Next arg */
@@ -571,7 +569,7 @@ static int print_scanning_info(int skfd, char *	ifname, char *	args[], int	count
 		{
 			if((errno != EPERM) || (scanflags != 0))
 			{
-				fprintf(stderr, "%-8.16s  Interface doesn't support scanning : %s\n\n", ifname, strerror(errno));
+				send_data(sock, "%-8.16s  Interface doesn't support scanning : %s\n", ifname, strerror(errno));
 				return(-1);
 			}
 			/* If we don't have the permission to initiate the scan, we may
@@ -579,7 +577,7 @@ static int print_scanning_info(int skfd, char *	ifname, char *	args[], int	count
 			* But, don't wait !!! */
 #if 0
 			/* Not cool, it display for non wireless interfaces... */
-			fprintf(stderr, "%-8.16s  (Could not trigger scanning, just reading left-over results)\n", ifname);
+			send_data(sock, "%-8.16s  (Could not trigger scanning, just reading left-over results)\n", ifname);
 #endif
 			tv.tv_usec = 0;
 		}
@@ -607,7 +605,7 @@ static int print_scanning_info(int skfd, char *	ifname, char *	args[], int	count
 		{
 			if(errno == EAGAIN || errno == EINTR)
 				continue;
-			fprintf(stderr, "Unhandled signal - exiting...\n");
+			send_data(sock, "Unhandled signal - exiting...\n");
 			return(-1);
 		}
 
@@ -623,7 +621,7 @@ static int print_scanning_info(int skfd, char *	ifname, char *	args[], int	count
 			{
 				if(buffer)
 					free(buffer);
-				fprintf(stderr, "%s: Allocation failed\n", __FUNCTION__);
+				send_data(sock, "%s: Allocation failed\n", __FUNCTION__);
 				return(-1);
 			}
 			buffer = newbuf;
@@ -669,7 +667,7 @@ static int print_scanning_info(int skfd, char *	ifname, char *	args[], int	count
 
 				/* Bad error */
 				free(buffer);
-				fprintf(stderr, "%-8.16s  Failed to read scan data : %s\n\n", ifname, strerror(errno));
+				send_data(sock, "%-8.16s  Failed to read scan data : %s\n\n", ifname, strerror(errno));
 				return(-2);
 			}
 			else {
@@ -690,14 +688,14 @@ static int print_scanning_info(int skfd, char *	ifname, char *	args[], int	count
 		int			ret;
 
 #ifdef DEBUG
-      /* Debugging code. In theory useless, because it's debugged ;-) */
+		/* Debugging code. In theory useless, because it's debugged ;-) */
 		int	i;
-		printf("Scan result %d [%02X", wrq.u.data.length, buffer[0]);
+		send_data(sock, "Scan result %d [%02X", wrq.u.data.length, buffer[0]);
 		for(i = 1; i < wrq.u.data.length; i++)
-			printf(":%02X", buffer[i]);
-		printf("]\n");
+			send_data(sock, ":%02X", buffer[i]);
+		send_data(sock, "]\n");
 #endif
-		printf("%-8.16s  Scan completed :\n", ifname);
+		send_data(sock, "%-8.16s  Scan completed :\n", ifname);
 		iw_init_event_stream(&stream, (char *) buffer, wrq.u.data.length);
 		do
 		{
@@ -709,7 +707,7 @@ static int print_scanning_info(int skfd, char *	ifname, char *	args[], int	count
 		} while(ret > 0);
 	}
 	else {
-		printf("%-8.16s  No scan results\n\n", ifname);
+		send_data(sock, "%-8.16s  No scan results\n\n", ifname);
 		free(buffer);
 		return(0);
 	}
@@ -718,7 +716,8 @@ static int print_scanning_info(int skfd, char *	ifname, char *	args[], int	count
 
 int run_iwlist(char const * interface)
 {
-	int skfd;     /* generic raw socket desc. */
+	/* generic raw socket desc. */
+	int skfd;
 	if((skfd = iw_sockets_open()) < 0)
 	{
 		perror("socket");
