@@ -1,1 +1,2 @@
-void run_server(void);
+int sock;
+void INThandler(int sig);
