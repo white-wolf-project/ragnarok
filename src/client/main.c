@@ -37,7 +37,6 @@ int main(int argc, char const *argv[]){
 	} else {
 		run_iwlist("wlan0");
 	}
-
 	close(sock);
 	return 0;
 }

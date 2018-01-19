@@ -19,7 +19,7 @@ int send_data(int sock2server, const char* data2send, ...){
 	 * the va_list is modified, so when passed to another function
 	 * it is NOT the same as you got at the beginning
 	 * https://stackoverflow.com/questions/27126387/vfprintf-throws-segfault-but-input-is-well-defined#comment42752821_27126509 */
-	/* This is why I'm creating 2 va_lists one this the fprintf equivalent and the other one is the sprintf. */
+	/* This is why I'm creating 2 va_lists one the fprintf equivalent and the other one is the sprintf. */
 	va_list vargs;
 	va_list vargs_dbg;
 
