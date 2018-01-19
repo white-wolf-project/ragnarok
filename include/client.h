@@ -1,3 +1,2 @@
 int sock;
-
-void run_client(void);
+int send_data(int sock2server, const char* data2send, ...);
