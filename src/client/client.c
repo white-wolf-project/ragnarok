@@ -34,7 +34,6 @@ int parse_config_file(const char *xmlfile){
 		xmlCleanupParser();
 		debug("%s\n", ipaddr);
 		debug("%s\n", port);
-		debug("%s\n", bin2run);
 	}
 
 	return 0;
