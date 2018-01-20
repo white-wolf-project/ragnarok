@@ -11,11 +11,14 @@
 #include <include/common.h>
 #include <include/client_tool.h>
 
+
 int main(int argc, char const *argv[]){
 
+	parse_config_file("config.xml");
+	printf("ip : %s\n", ipaddr);
+	printf("port : %s\n", port);
+
 	/* Check for IP adddr and port */
-	char *ipaddr = "127.0.0.1";
-	char *port = "12345";
 	if (init_client(0, ipaddr, port, &results) < 0){
 		exit(EXIT_FAILURE);
 	}
