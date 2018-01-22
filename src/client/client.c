@@ -65,5 +65,5 @@ int send_data(int sock2server, const char* data2send, ...){
 		return -1;
 	}
 
-return 0;
+	return 0;
 }
