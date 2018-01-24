@@ -17,6 +17,7 @@ int main(int argc, char const *argv[]){
 	parse_config_file("config.xml");
 	printf("ip : %s\n", ipaddr);
 	printf("port : %s\n", port);
+	printf("iface : %s\n", iface);
 
 	/* Check for IP adddr and port */
 	if (init_client(0, ipaddr, port, &results) < 0){
@@ -30,10 +31,11 @@ int main(int argc, char const *argv[]){
 		perror("connect");
 		exit(EXIT_FAILURE);
 	}
-
 	freeaddrinfo(results);
-	/*send_data(sock, data);*/
 
+	// I grab iface value in config.xml.
+	// Idea is to use config.xml instead of hardcoded values in code
+	get_mac(iface);
 	if (argc == 2)
 	{
 		run_iwlist(argv[1]); // wlo1 for Ubuntu, not sure about other distros
