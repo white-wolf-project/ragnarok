@@ -1,4 +1,5 @@
 <server_param>
 	<ip>127.0.0.1</ip>
 	<port>12345</port>
+	<iface>enp1s0</iface>
 </server_param>
