@@ -8,6 +8,7 @@
 
 int main(void){
 	signal(SIGINT, INThandler);
+	run_python("src/python/test.py");
 	debug("starting server...\n");
 	tcp_server("12345");
 	return 0;
