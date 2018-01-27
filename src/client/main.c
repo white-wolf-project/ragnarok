@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -14,7 +15,7 @@
 
 int main(int argc, char const *argv[]){
 
-	parse_config_file("config.xml");
+	parse_config_file("config/client.xml");
 	printf("ip : %s\n", ipaddr);
 	printf("port : %s\n", port);
 	printf("iface : %s\n", iface);
