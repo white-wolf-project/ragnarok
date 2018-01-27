@@ -36,7 +36,8 @@ OBJECTS = src/common.o
 SOURCES = $(OBJECTS:o=.c)
 
 EXTRA_OBJ = client-srv/src/client_tool.o \
-			client-srv/src/server_tool.o
+			client-srv/src/server_tool.o \
+			client-srv/src/xml.o
 
 ifeq ($(DEBUG), 1)
 	DBG = -DDEBUG
