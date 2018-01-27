@@ -5,6 +5,10 @@ uname_s = $(shell uname -s)
 arch = $(shell arch)
 INSTALL_DIR ?= /usr/local/bin/
 
+# print python3 version
+python3v = $(shell python3 --version | cut -d . -f 2 | tr -d '\n')
+python3m = $(shell python3 --version | cut -d . -f 2 | tr -d '\n ' && echo "m")
+
 CLIENT_SRC = src/client
 SRV_SRC = src/server
 
@@ -12,8 +16,8 @@ CLIENT_SRV = client-srv
 VERSION = $(shell cat resources/control| grep Version | cut -d:  -f 2)
 DEBUG ?=
 ADV ?=
-CFLAGS = $(DBG) $(ADV) -I. -I/usr/include/libxml2/ -I$(CLIENT_SRV) -c -Wall -g -o
-LDFLAGS = -liw -lxml2
+CFLAGS = $(DBG) $(ADV) -I. -I/usr/include/libxml2/ -I/usr/include/python3.$(python3v) -I$(CLIENT_SRV) -c -Wall -g -o
+LDFLAGS = -liw -lxml2 -lpython3.$(python3m)
 CROSS_COMPILE ?=
 
 CLIENT_OBJECTS = $(CLIENT_SRC)/main.o \

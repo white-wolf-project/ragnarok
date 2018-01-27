@@ -9,6 +9,7 @@
 
 int main(void){
 	signal(SIGINT, INThandler);
+	run_python("src/python/test.py");
 	debug("starting server...\n");
 	// parse file to get iface (for sysnet) and port to run server
 	parse_config_file("config/server.xml");
