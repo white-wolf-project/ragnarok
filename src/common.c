@@ -9,6 +9,14 @@
 static FILE* dbg = NULL;
 #endif
 
+void version(){
+	#ifdef DEBUG
+		fprintf(stdout, "%s, version %s-DEBUG\nCompiled on %s at %s\nCopyright 2018 - White Wolf Team\n", TOOLNAME, VERSION, __DATE__, __TIME__);
+	#else
+		fprintf(stdout, "%s, version %s\nCompiled on %s at %s\nCopyright 2018 - White Wolf Team\n", TOOLNAME, VERSION, __DATE__, __TIME__);
+	#endif
+}
+
 /*
 *	We call this function almost everywhere
 *	But it prints to stdout/stderr only

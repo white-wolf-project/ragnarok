@@ -12,7 +12,6 @@
 #include <include/common.h>
 #include <include/client_tool.h>
 
-
 int main(int argc, char const *argv[]){
 
 	parse_config_file("config/client.xml");
