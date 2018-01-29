@@ -1,3 +1,6 @@
 [submodule "client-srv"]
 	path = client-srv
 	url = git://github.com/white-wolf-project/client-srv
+[submodule "sysnet"]
+	path = sysnet
+	url = git://github.com/matteyeux/sysnet
