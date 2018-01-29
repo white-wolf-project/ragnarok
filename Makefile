@@ -13,10 +13,12 @@ CLIENT_SRC = src/client
 SRV_SRC = src/server
 
 CLIENT_SRV = client-srv
+SYSNET = sysnet
+
 VERSION = $(shell cat resources/control| grep Version | cut -d:  -f 2)
 DEBUG ?=
 ADV ?=
-CFLAGS = $(DBG) $(ADV) -I. -I/usr/include/libxml2/ -I/usr/include/python3.$(python3v) -I$(CLIENT_SRV) -c -Wall -g -o
+CFLAGS = $(DBG) $(ADV) -I. -I/usr/include/libxml2/ -I/usr/include/python3.$(python3v) -I$(CLIENT_SRV) -I$(SYSNET) -c -Wall -g -o
 LDFLAGS = -liw -lxml2 -lpython3.$(python3m)
 CROSS_COMPILE ?=
 
@@ -35,28 +37,34 @@ OBJECTS = src/common.o
 
 SOURCES = $(OBJECTS:o=.c)
 
-EXTRA_OBJ = client-srv/src/client_tool.o \
+CLI_SRV_OBJ = client-srv/src/client_tool.o \
 			client-srv/src/server_tool.o \
 			client-srv/src/xml.o
+
+SYSNET_OBJ = sysnet/src/network.o
 
 ifeq ($(DEBUG), 1)
 	DBG = -DDEBUG
 endif
 
-.PHONY : all clean $(CLIENT_SRV)
+.PHONY : all clean $(CLIENT_SRV) $(SYSNET)
 
 all : $(CLIENT) $(SERVER)
 
 $(CLIENT) : $(CLIENT_SRV) $(OBJECTS) $(CLIENT_OBJECTS)
 	@echo "LD	$@"
-	@$(CC) $(CLIENT_OBJECTS) $(OBJECTS) $(EXTRA_OBJ) $(LDFLAGS) -o $(CLIENT)
+	@$(CC) $(CLIENT_OBJECTS) $(OBJECTS) $(CLI_SRV_OBJ) $(LDFLAGS) -o $(CLIENT)
 
-$(SERVER) : $(CLIENT_SRV) $(OBJECTS) $(SRV_OBJECTS)
+
+$(SERVER) : $(CLIENT_SRV) $(SYSNET) $(OBJECTS) $(SRV_OBJECTS)
 	@echo "LD 	$@"
-	@$(CC) $(SRV_OBJECTS) $(OBJECTS) $(EXTRA_OBJ) $(LDFLAGS) -o $(SERVER)
+	@$(CC) $(SRV_OBJECTS) $(OBJECTS) $(CLI_SRV_OBJ) $(SYSNET_OBJ) $(LDFLAGS) -o $(SERVER)
 
 $(CLIENT_SRV) :
-	make -C $(CLIENT_SRV)/
+	@make -C $(CLIENT_SRV)/
+
+$(SYSNET) :
+	@make -C $(SYSNET)
 
 $(CLIENT_SRC)/%.o : $(CLIENT_SRC)/%.c
 	@echo "CC	$<"
@@ -72,5 +80,6 @@ src/%.o : src/%.c
 
 clean :
 	make -C client-srv clean
+	make -C sysnet clean
 	rm -rf 	$(CLIENT) $(CLIENT_OBJECTS) \
 	$(SERVER) $(SRV_OBJECTS) $(OBJECTS)

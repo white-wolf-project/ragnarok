@@ -18,6 +18,14 @@ sudo apt-get install -y make build-essential libssl-dev wget git python3  m4 aut
 git clone https://github.com/HewlettPackard/wireless-tools.git
 # build wireless-tools
 sudo make -C wireless-tools/wireless_tools install
+
+# Install libcpuid
+git clone https://github.com/matteyeux/libcpuid
+cd libcpuid
+./autogen.sh
+make
+sudo make install
+
 # links libs
 sudo ldconfig
 # build ragnarok
