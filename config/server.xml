@@ -1,5 +1,5 @@
 <srv_param>
 	<ip>0</ip>
-	<port>23456</port>
+	<port>12345</port>
 	<iface>enp1s0</iface>
 </srv_param>
