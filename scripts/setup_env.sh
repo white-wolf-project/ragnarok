@@ -24,7 +24,7 @@ if [[ $(arch) != "armv71" && $(arch) != "aarch64" ]];then
 fi
 
 # init and clone git modules
-git submodule init && git submodule update
+git submodule update --init
 
 # install git depends
 git clone https://github.com/matteyeux/sysnet; cd sysnet
