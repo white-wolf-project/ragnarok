@@ -25,7 +25,7 @@ cd libcpuid
 ./autogen.sh
 make
 sudo make install
-
+cd ..
 # links libs
 sudo ldconfig
 # build ragnarok
