@@ -26,14 +26,11 @@
 # init and clone git modules
 git submodule update --init
 
-# install git depends
-git clone https://github.com/matteyeux/sysnet; cd sysnet/scripts
+# install sysnet
+cd sysnet/scripts
 ./install.sh
 sudo make install
 cd ..
-
-git clone https://github.com/white-wolf-project/client-srv
-make -C client-srv
 
 # wireless-tools are needed for iwlist.c in our project
 git clone https://github.com/white-wolf-project/wireless-tools.git
