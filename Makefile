@@ -49,7 +49,7 @@ endif
 
 .PHONY : all clean $(CLIENT_SRV) $(SYSNET)
 
-all : $(CLIENT) $(SERVER)
+all : $(SERVER) $(CLIENT)
 
 $(CLIENT) : $(CLIENT_SRV) $(OBJECTS) $(CLIENT_OBJECTS)
 	@echo "LD	$@"

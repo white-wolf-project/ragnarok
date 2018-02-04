@@ -12,6 +12,24 @@
 # Version : 0.1
 #
 
+# function to install libcpuid for sysnet
+function install_libcpuid(){
+	if [[ $(arch) == "x86_64" || $(arch) == "i686" || $(arch) == "i386" ]]; then
+		git clone https://github.com/anrieff/libcpuid.git
+		cd libcpuid
+		libtoolize
+		aclocal -I m4
+		autoreconf --install
+		ls .. && ls .
+		./configure
+		make 
+		sudo make install && cd ..
+	else 
+		echo "skipping libcpuid"
+	fi
+}
+
+
 # update repos before installing
 sudo apt-get update && sudo apt-get upgrade -y
 
@@ -26,14 +44,9 @@ fi
 # init and clone git modules
 git submodule update --init
 
-# install git depends
-git clone https://github.com/matteyeux/sysnet; cd sysnet
-./scripts/install.sh
-sudo make install
-cd ..
-
-git clone https://github.com/white-wolf-project/client-srv
-make -C client-srv
+# install sysnet
+install_libcpuid
+sudo make -C sysnet install
 
 # wireless-tools are needed for iwlist.c in our project
 git clone https://github.com/white-wolf-project/wireless-tools.git
