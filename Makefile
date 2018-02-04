@@ -47,7 +47,7 @@ ifeq ($(DEBUG), 1)
 	DBG = -DDEBUG
 endif
 
-.PHONY : all clean $(CLIENT_SRV) $(SYSNET)
+.PHONY : all clean $(CLIENT_SRV) $(SYSNET) package
 
 all : $(SERVER) $(CLIENT)
 
@@ -83,3 +83,12 @@ clean :
 	make -C sysnet clean
 	rm -rf 	$(CLIENT) $(CLIENT_OBJECTS) \
 	$(SERVER) $(SRV_OBJECTS) $(OBJECTS)
+
+srv_package : $(SERVER)
+	@echo "packing..."
+	mkdir -p release
+	mkdir -p deb/etc/ragnarok/ deb/usr/local/bin/ deb/DEBIAN
+	cp resources/control deb/DEBIAN
+	cp $(SERVER) deb/usr/local/bin/ 
+	cp config/server.xml deb/etc/ragnarok
+	dpkg-deb --build deb release/$(SERVER)_$(VERSION)_$(arch).deb
