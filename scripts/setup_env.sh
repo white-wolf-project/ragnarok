@@ -12,25 +12,41 @@
 # Version : 0.1
 #
 
+# function to install libcpuid for sysnet
+function install_libcpuid(){
+	if [[ $(arch) == "x86_64" || $(arch) == "i686" || $(arch) == "i386" ]]; then
+		git clone https://github.com/anrieff/libcpuid.git
+		cd libcpuid
+		libtoolize
+		aclocal -I m4
+		autoreconf --install
+		ls .. && ls .
+		./configure
+		make 
+		sudo make install && cd ..
+	else 
+		echo "skipping libcpuid"
+	fi
+}
+
+
 # update repos before installing
-#sudo apt-get update && sudo apt-get upgrade -y
+sudo apt-get update && sudo apt-get upgrade -y
 
 # install build tools 
-#sudo apt-get install -y make build-essential libssl-dev libreadline-dev libsqlite3-dev wget git python3 \
-#libnl-3-dev apache2 nmap m4 autoconf libtool autotools-dev libiw-dev libxml2-dev vim zsh htop python3.5-dev
+sudo apt-get install -y make build-essential libssl-dev libreadline-dev libsqlite3-dev wget git python3 \
+libnl-3-dev apache2 nmap m4 autoconf libtool autotools-dev libiw-dev libxml2-dev vim zsh htop python3.5-dev
 
-#if [[ $(arch) != "armv71" && $(arch) != "aarch64" ]];then
-#	sudo apt-get install -y gcc-arm-linux-gnueabihf
-#fi
+if [[ $(arch) != "armv71" && $(arch) != "aarch64" ]];then
+	sudo apt-get install -y gcc-arm-linux-gnueabihf
+fi
 
 # init and clone git modules
 git submodule update --init
 
 # install sysnet
-cd sysnet/scripts
-./install.sh
-sudo make install
-cd ..
+install_libcpuid
+sudo make -C sysnet install
 
 # wireless-tools are needed for iwlist.c in our project
 git clone https://github.com/white-wolf-project/wireless-tools.git
