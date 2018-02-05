@@ -7,3 +7,5 @@ log
 libcpuid
 deb
 release
+client_deb/
+srv_deb/
