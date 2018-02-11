@@ -29,9 +29,15 @@ function armhf_setup(){
 	deb_links=("http://ftp.us.debian.org/debian/pool/main/w/wireless-tools/libiw-dev_30~pre9-12+b1_armhf.deb"
 			   "http://security.debian.org/debian-security/pool/updates/main/libx/libxml2/libxml2_2.9.4+dfsg1-2.2+deb9u2_armhf.deb"
 			   "http://security.debian.org/debian-security/pool/updates/main/libx/libxml2/libxml2-dev_2.9.4+dfsg1-2.2+deb9u2_armhf.deb"
+			   "http://ftp.us.debian.org/debian/pool/main/i/icu/libicu57_57.1-6+deb9u1_armhf.deb"
+			   "http://ftp.us.debian.org/debian/pool/main/x/xz-utils/liblzma5_5.2.2-1.2+b1_armhf.deb"
+			   "http://ftp.us.debian.org/debian/pool/main/z/zlib/zlib1g_1.2.8.dfsg-2+b1_armhf.deb"
+			   "http://ftp.us.debian.org/debian/pool/main/p/python3.5/libpython3.5-dev_3.5.3-1_armhf.deb"
 	)
 	deb_files=("libiw-dev_30~pre9-12+b1_armhf.deb" "libxml2_2.9.4+dfsg1-2.2+deb9u2_armhf.deb"
-			   "libxml2-dev_2.9.4+dfsg1-2.2+deb9u2_armhf.deb"
+			   "libxml2-dev_2.9.4+dfsg1-2.2+deb9u2_armhf.deb" "libicu57_57.1-6+deb9u1_armhf.deb"
+			   "liblzma5_5.2.2-1.2+b1_armhf.deb" "zlib1g_1.2.8.dfsg-2+b1_armhf.deb"
+			   "libpython3.5-dev_3.5.3-1_armhf.deb"
 	)
 
 	# download debs
@@ -60,6 +66,18 @@ function armhf_setup(){
 	sudo cp -r libxml2-dev_armhf/usr/include/libxml2 /usr/arm-linux-gnueabihf/include/
 	sudo cp -r libxml2-dev_armhf/usr/lib/arm-linux-gnueabihf/* /usr/arm-linux-gnueabihf/lib/
 	sudo cp libxml2-dev_armhf/usr/bin/xml2-config /usr/arm-linux-gnueabihf/bin
+
+	# libcu*
+	sudo cp libicu57_armhf/usr/lib/arm-linux-gnueabihf/*.57 /usr/arm-linux-gnueabihf/lib/
+
+	# liblzma
+	sudo cp liblzma5_armhf/lib/arm-linux-gnueabihf/* /usr/arm-linux-gnueabihf/lib/
+
+	# libz
+	sudo cp zlib1g_armhf/lib/arm-linux-gnueabihf/* /usr/arm-linux-gnueabihf/lib/
+
+	# libpython3.5-dev
+	sudo cp libpython3.5-dev_armhf/usr/
 }
 
 function aarch64_setup(){
