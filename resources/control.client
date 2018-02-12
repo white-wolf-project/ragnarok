@@ -5,5 +5,5 @@ Priority: optional
 Architecture: all
 Depends: bash
 Maintainer: White Wolf Team
-Description: A tool.
+Description: A tool to grab info about wifi AP in the area.
 Homepage: github.com/white-wolf-project

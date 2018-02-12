@@ -15,10 +15,11 @@ SRV_SRC = src/server
 CLIENT_SRV = client-srv
 SYSNET = sysnet
 
-VERSION = $(shell cat resources/control| grep Version | cut -d:  -f 2)
+# I assume client and srv have the same version
+VERSION = $(shell cat resources/control.srv| grep Version | cut -d:  -f 2)
 DEBUG ?=
-ADV ?=
-CFLAGS = $(DBG) $(ADV) -I. -I/usr/include/libxml2/ -I/usr/include/python3.$(python3v) -I$(CLIENT_SRV) -I$(SYSNET) -c -Wall -g -o
+BUILD ?= DEVELOPMENT
+CFLAGS = $(DBG) -I. -I/usr/include/libxml2/ -I/usr/include/python3.$(python3v) -I$(CLIENT_SRV) -I$(SYSNET) -c -Wall -g
 LDFLAGS = -liw -lxml2 -lpython3.$(python3m)
 CROSS_COMPILE ?=
 
@@ -47,7 +48,15 @@ ifeq ($(DEBUG), 1)
 	DBG = -DDEBUG
 endif
 
-.PHONY : all clean $(CLIENT_SRV) $(SYSNET)
+ifeq ($(BUILD), RELEASE)
+	CFLAGS += -DRELEASE
+endif
+
+ifeq ($(BUILD), DEVELOPMENT)
+	CFLAGS += -DDEVELOPMENT
+endif
+
+.PHONY : all clean $(CLIENT_SRV) $(SYSNET) package mrproper srv_package client_package
 
 all : $(SERVER) $(CLIENT)
 
@@ -68,18 +77,43 @@ $(SYSNET) :
 
 $(CLIENT_SRC)/%.o : $(CLIENT_SRC)/%.c
 	@echo "CC	$<"
-	@$(CC) $<  $(CFLAGS) $@
+	@$(CC) $<  $(CFLAGS) -o $@
 
 $(SRV_SRC)/%.o : $(SRV_SRC)/%.c
 	@echo "CC 	$<"
-	@$(CC) $< $(CFLAGS) $@
+	@$(CC) $< $(CFLAGS) -o $@
 
 src/%.o : src/%.c
 	@echo "CC 	$<"
-	@$(CC) $< $(CFLAGS) $@
+	$(CC) $< $(CFLAGS) -o $@
 
+# build debs to install on the boxes
+package : srv_package client_package
+
+srv_package : $(SERVER)
+	@echo "packing..."
+	mkdir -p release
+	mkdir -p srv_deb/etc/ragnarok/ srv_deb/usr/local/bin/ srv_deb/DEBIAN
+	cp resources/control.srv srv_deb/DEBIAN/control
+	cp $(SERVER) srv_deb/usr/local/bin/
+	cp config/server.xml srv_deb/etc/ragnarok
+	dpkg-deb --build srv_deb release/$(SERVER)_$(VERSION)_$(arch).deb
+
+client_package : $(CLIENT)
+	mkdir -p release
+	mkdir -p client_deb/etc/ragnarok/ client_deb/usr/local/bin/ client_deb/DEBIAN
+	cp resources/control.client client_deb/DEBIAN/control
+	cp $(CLIENT) client_deb/usr/local/bin/
+	cp config/client.xml client_deb/etc/ragnarok/
+	dpkg-deb --build client_deb release/$(CLIENT)_$(VERSION)_$(arch).deb
+
+# clean files
 clean :
 	make -C client-srv clean
 	make -C sysnet clean
 	rm -rf 	$(CLIENT) $(CLIENT_OBJECTS) \
 	$(SERVER) $(SRV_OBJECTS) $(OBJECTS)
+
+# clean more files
+mrproper : clean
+	rm -rf libcpuid srv_deb client_deb release wireless-tools
