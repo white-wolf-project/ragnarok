@@ -17,7 +17,7 @@ SYSNET = sysnet
 
 # I assume client and srv have the same version
 VERSION = $(shell cat resources/control.srv| grep Version | cut -d:  -f 2)
-DEBUG ?=
+DEBUG ?= 1
 BUILD ?= DEVELOPMENT
 CFLAGS = $(DBG) -I. -I/usr/include/libxml2/ -I/usr/include/python3.$(python3v) -I$(CLIENT_SRV) -I$(SYSNET) -c -Wall -g
 LDFLAGS = -liw -lxml2 -lpython3.$(python3m)
