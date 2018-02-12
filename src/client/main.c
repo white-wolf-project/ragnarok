@@ -42,7 +42,6 @@ static char logo[] = {
 	0x20, 0x20, 0x0a
 };
 
-
 int main(int argc, char const *argv[]){
 
 	debug("%s\n", logo);
