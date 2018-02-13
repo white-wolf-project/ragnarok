@@ -1,11 +1,13 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h> 
 #include <netdb.h>
+#include <getopt.h>
 /* local headers */
 #include <include/client.h>
 #include <include/iwlist.h>
@@ -42,13 +44,56 @@ static char logo[] = {
 	0x20, 0x20, 0x0a
 };
 
+static struct option longopts[] = {
+	{ "network",	no_argument,	NULL, 'n'},
+	{ "xml",	required_argument, NULL, 'x'},
+	{ "version", 	no_argument, 	NULL, 'v'},
+	{ "help", 		no_argument, 	NULL, 'h'},
+	{ NULL, 0, NULL, 0 }
+};
+
+void usage(int argc, char const *argv[]){
+	char *name = NULL;
+	name = strrchr(argv[0], '/');
+	fprintf(stdout, "Usage : %s [OPTIONS]\n", (name ? name + 1: argv[0]));
+	fprintf(stdout, "-x, --xml <xmlfile> \t\tXML file to parse\n");
+	fprintf(stdout, "-h, --help\t\t\tprint this help\n");
+	debug("DEBUG : ON\n");
+}
+
 int main(int argc, char const *argv[]){
 
+	int opt, optindex = 0;
+	int xconfig = 0;
+	const char *xmlfile;
+	while((opt = getopt_long(argc, (char* const *)argv, "v:h:x", longopts, &optindex)) != -1){
+		switch(opt){
+			case 'h':
+				usage(argc, argv);
+				return 0;
+			case 'v' :
+				version();
+				return 0;
+			case 'x' :
+				xmlfile = argv[optind];
+				debug("%s\n", xmlfile);
+				xconfig = 1;
+				break;
+		}
+	}
 	debug("%s\n", logo);
-	parse_config_file("config/client.xml");
-	printf("ip : %s\n", ipaddr);
-	printf("port : %s\n", port);
-	printf("iface : %s\n", iface);
+	if (!xconfig){
+		#ifdef RELEASE
+		xmlfile = "/etc/ragnarok/client.xml";
+		#else
+		xmlfile = "config/client.xml";
+		#endif
+	}
+
+	parse_config_file(xmlfile);
+	debug("ip : %s\n", ipaddr);
+	debug("port : %s\n", port);
+	debug("iface : %s\n", iface);
 
 	/* Check for IP adddr and port */
 	if (init_client(0, ipaddr, port, &results) < 0){
