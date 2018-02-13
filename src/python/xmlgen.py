@@ -7,25 +7,25 @@ from lxml import etree
 
 ragnarok = etree.Element("ragnarok")
 
-appareil = etree.SubElement(ragnarok, "appareil")
-appareil.set("id", "")
-ESSID = etree.SubElement(appareil, "ESSID")
-ESSID.text = ""
-MAC = etree.SubElement(appareil, "MAC")
-MAC.text = ""
-timestamp = etree.SubElement(appareil, "timestamp")
+device = etree.SubElement(ragnarok, "device")
+device.set("id", "")
+essid = etree.SubElement(device, "essid")
+essid.text = ""
+mac = etree.SubElement(device, "mac")
+mac.text = ""
+timestamp = etree.SubElement(device, "timestamp")
 timestamp.text = ""
 
-info_AP = etree.SubElement(ragnarok, "info_AP")
-MAC = etree.SubElement(info_AP, "MAC")
-MAC.text = ""
-id_encryption = etree.SubElement(info_AP, "id_encryption")
+info_ap = etree.SubElement(ragnarok, "info_ap")
+mac = etree.SubElement(info_ap, "mac")
+mac.text = ""
+id_encryption = etree.SubElement(info_ap, "id_encryption")
 id_encryption.text = ""
-channel = etree.SubElement(info_AP, "channel")
+channel = etree.SubElement(info_ap, "channel")
 channel.text = ""
-beacon = etree.SubElement(info_AP, "beacon")
+beacon = etree.SubElement(info_ap, "beacon")
 beacon.text = ""
-id_quality = etree.SubElement(info_AP, "id_quality")
+id_quality = etree.SubElement(info_ap, "id_quality")
 id_quality.text = ""
 
 encryption = etree.SubElement(ragnarok, "encryption")
@@ -43,14 +43,14 @@ timestamp.text = ""
 quality = etree.SubElement(ragnarok, "quality")
 id_quality = etree.SubElement(quality, "id_quality")
 id_quality.text = ""
-Qual_rpi0 = etree.SubElement(quality,"Qual_rpi0")
-Qual_rpi0.text = ""
-Qual_rpi1 = etree.SubElement(quality,"Qual_rpi1")
-Qual_rpi1.text = ""
-Qual_rpi2 = etree.SubElement(quality,"Qual_rpi2")
-Qual_rpi2.text = ""
+qual_rpi0 = etree.SubElement(quality,"qual_rpi0")
+qual_rpi0.text = ""
+qual_rpi1 = etree.SubElement(quality,"qual_rpi1")
+qual_rpi1.text = ""
+qual_rpi2 = etree.SubElement(quality,"qual_rpi2")
+qual_rpi2.text = ""
 
 
 print(etree.tostring(ragnarok, pretty_print=True))
-#with open("log.xml", "r") as fichier:
-#	fichier.read
+#with open("log.xml", "r") as xml_file:
+#	xml_file.read
