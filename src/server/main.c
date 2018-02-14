@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <signal.h>
-
+#include <getopt.h>
+#include <string.h>
 /* local headers */
 #include <include/server.h>
 #include <include/server_tool.h>
@@ -19,7 +20,50 @@
 	#define CONFIG_PATH "config/server.xml"
 #endif
 
-int main(void){
+
+static struct option longopts[] = {
+	{ "network",	no_argument,	NULL, 'n'},
+	{ "xml",	required_argument, NULL, 'x'},
+	{ "version", 	no_argument, 	NULL, 'v'},
+	{ "help", 		no_argument, 	NULL, 'h'},
+	{ NULL, 0, NULL, 0 }
+};
+
+void usage(int argc, char const *argv[]){
+	char *name = NULL;
+	name = strrchr(argv[0], '/');
+	fprintf(stdout, "Usage : %s [OPTIONS]\n", (name ? name + 1: argv[0]));
+	fprintf(stdout, "-x, --xml <xmlfile> \t\tXML file to parse\n");
+	fprintf(stdout, "-h, --help\t\t\tprint this help\n");
+	debug("DEBUG : ON\n");
+}
+int main(int argc, char const *argv[]){
+	int opt, optindex = 0;
+	int xconfig = 0;
+	const char *xmlfile;
+	while((opt = getopt_long(argc, (char* const *)argv, "vhx", longopts, &optindex)) != -1){
+		switch(opt){
+			case 'h':
+				usage(argc, argv);
+				return 0;
+			case 'v' :
+				version();
+				return 0;
+			case 'x' :
+				xmlfile = argv[optind];
+				debug("%s\n", xmlfile);
+				xconfig = 1;
+				break;
+		}
+	}
+
+	if (!xconfig){
+		#ifdef RELEASE
+		xmlfile = "/etc/ragnarok/server.xml";
+		#else
+		xmlfile = "config/server.xml";
+		#endif
+	}
 	signal(SIGINT, INThandler);
 	debug("starting server...\n");
 
