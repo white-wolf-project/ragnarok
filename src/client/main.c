@@ -66,7 +66,7 @@ int main(int argc, char const *argv[]){
 	int opt, optindex = 0;
 	int xconfig = 0;
 	const char *xmlfile;
-	while((opt = getopt_long(argc, (char* const *)argv, "v:h:x", longopts, &optindex)) != -1){
+	while((opt = getopt_long(argc, (char* const *)argv, "vhx", longopts, &optindex)) != -1){
 		switch(opt){
 			case 'h':
 				usage(argc, argv);
