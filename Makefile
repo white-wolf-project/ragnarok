@@ -85,7 +85,7 @@ $(SRV_SRC)/%.o : $(SRV_SRC)/%.c
 
 src/%.o : src/%.c
 	@echo "CC 	$<"
-	$(CC) $< $(CFLAGS) -o $@
+	@$(CC) $< $(CFLAGS) -o $@
 
 # build debs to install on the boxes
 package : srv_package client_package
