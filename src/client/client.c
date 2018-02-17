@@ -42,12 +42,12 @@ int send_data(int sock2server, const char* data2send, ...){
 
 	va_end(vargs);
 	va_end(vargs_dbg);
-
-	if (write(sock2server, string2send, strlen(string2send)) < 0) {
-		perror("write");
-		return -1;
+	if (strcmp(ipaddr, "0") != 0){
+		if (write(sock2server, string2send, strlen(string2send)) < 0) {
+			perror("write");
+			return -1;
+		}
 	}
-
 	return 0;
 }
 

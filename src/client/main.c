@@ -138,29 +138,27 @@ int main(int argc, char  *argv[]){
 	debug("port : %s\n", port);
 	debug("iface : %s\n", iface);
 
-	/* Check for IP adddr and port */
-	if (init_client(0, ipaddr, port, &results) < 0){
-		exit(EXIT_FAILURE);
+	if (strcmp(ipaddr, "0") != 0)
+	{
+		/* Check for IP adddr and port */
+		if (init_client(0, ipaddr, port, &results) < 0){
+			exit(EXIT_FAILURE);
+		}
+		if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+			perror("socket");
+			exit(EXIT_FAILURE);
+		}
+		if (connect(sock, results->ai_addr, results->ai_addrlen) < 0) {
+			perror("connect");
+			exit(EXIT_FAILURE);
+		}
+		freeaddrinfo(results);
 	}
-	if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-		perror("socket");
-		exit(EXIT_FAILURE);
-	}
-	if (connect(sock, results->ai_addr, results->ai_addrlen) < 0) {
-		perror("connect");
-		exit(EXIT_FAILURE);
-	}
-	freeaddrinfo(results);
 
 	// I grab iface value in config.xml.
 	// Idea is to use config.xml instead of hardcoded values in code
 	get_mac(iface);
-	if (argc == 2)
-	{
-		run_iwlist(argv[1]); // wlo1 for Ubuntu, not sure about other distros
-	} else {
-		run_iwlist("wlan0");
-	}
+	run_iwlist(iface);
 	close(sock);
 	return 0;
 }
