@@ -116,7 +116,9 @@ int main(int argc, char  *argv[]){
 		#endif
 	}
 
-
+	char *get_time;
+	get_time = get_date_and_time();
+	debug("%s\n", get_time);
 
 	// parse XML file to get default server IP/port and interface to use
 	// for AP scan
@@ -160,6 +162,7 @@ int main(int argc, char  *argv[]){
 
 	// I grab iface value in config.xml.
 	// Idea is to use config.xml instead of hardcoded values in code
+
 	get_mac(iface);
 	run_iwlist(iface);
 	close(sock);

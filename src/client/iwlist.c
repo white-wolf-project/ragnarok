@@ -330,7 +330,8 @@ print_scanning_token(struct stream_descr *stream, struct iw_event *event, struct
 		case SIOCGIWAP:
 			send_data(sock, "===========================");
 			send_data(sock, "========================================================================\n");
-			get_time();
+			char *get_time =  get_date_and_time();
+			printf("%s\n", get_time);
 			send_data(sock, "Cell %02d - Address: %s\n", state->ap_num, iw_saether_ntop(&event->u.ap_addr, buffer));
 			state->ap_num++;
 			break;
