@@ -158,7 +158,6 @@ int main(int argc, char  *argv[]){
 		freeaddrinfo(results);
 	}
 
-	get_time();
 	// I grab iface value in config.xml.
 	// Idea is to use config.xml instead of hardcoded values in code
 	get_mac(iface);

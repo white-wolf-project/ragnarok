@@ -48,11 +48,11 @@ int send_data(int sock2server, const char* data2send, ...){
 		perror("fopen");
 		#endif
 	}
-	
+
 	#ifdef DEBUG
 	vfprintf(stdout, data2send, vargs_out);
 	#endif
-	
+
 	vsprintf(string2send, data2send, vargs);
 
 	va_end(vargs);
