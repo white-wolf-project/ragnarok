@@ -133,7 +133,7 @@ iw_print_ie_wpa(unsigned char *	iebuf, int buflen)
 	if(ielen > buflen)
 		ielen = buflen;
 
-#ifdef DEBUG
+#ifdef DEBUG_ADV
 	/* Debugging code. In theory useless, because it's debugged ;-) */
 	send_data(sock, "IE raw value %d [%02X", buflen, iebuf[0]);
 	for(i = 1; i < buflen; i++)
@@ -297,7 +297,7 @@ iw_print_gen_ie(unsigned char *	buffer,
 				iw_print_ie_wpa(buffer + offset, buflen);
 				break;
 			default:
-				debug("default\n");
+				debug("");
 		}
 		/* Skip over this IE to the next one in the list. */
 		offset += buffer[offset+1] + 2;
@@ -687,7 +687,7 @@ static int print_scanning_info(int skfd, char *	ifname, char *	args[], int	count
 		struct iwscan_state	state = { .ap_num = 1, .val_index = 0 };
 		int			ret;
 
-#ifdef DEBUG
+#ifdef DEBUG_ADV
 		/* Debugging code. In theory useless, because it's debugged ;-) */
 		int	i;
 		send_data(sock, "Scan result %d [%02X", wrq.u.data.length, buffer[0]);
