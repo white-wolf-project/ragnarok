@@ -47,24 +47,21 @@ int main(int argc, char *argv[]){
 				return 0;
 			case 'x' :
 				xmlfile = argv[optind];
-				debug("%s\n", xmlfile);
 				xconfig = 1;
 				break;
 			case 'p' :
 				newport = argv[optind];
-				debug("%s", newport);
 				is_port = 1;
 				break;
 			case 'f' :
 				newiface = argv[optind];
-				debug("%s", newiface);
 				is_iface = 1;
 				break;
 		}
 	}
 
 	/*
-		if you don't specify an config file
+		if you don't specify a config file
 		then set default XML for RELEASE or DEV
 	*/
 	if (!xconfig){
