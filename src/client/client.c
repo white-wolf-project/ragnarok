@@ -1,17 +1,19 @@
 #include <stdio.h>
 #include <unistd.h>
+#include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
 #include <errno.h>
 #include <net/if.h>
 #include <sys/ioctl.h>
+#include <time.h>
 /* local headers */
 #include <include/client.h>
 #include <include/xml.h>
 #include <include/common.h>
 #define STRING_LEN 2048
 
-static FILE* info = NULL;
+int sock;
 
 int send_data(int sock2server, const char* data2send, ...){
 
@@ -28,20 +30,33 @@ int send_data(int sock2server, const char* data2send, ...){
 	*/
 
 	va_list vargs;
-	va_list vargs_dbg;
-
+	va_list vargs_out;
+	va_list vargs_log;
 	va_start(vargs, data2send);
 
-	/* copy vargs -> vargs_dbg */
-	va_copy(vargs_dbg, vargs);
+	/* copy vargs -> vargs_out (stdout) & vargs_log (client.log)*/
+	va_copy(vargs_out, vargs);
+	va_copy(vargs_log, vargs);
 
+	FILE *fp = fopen("client.log" ,"a+");
+	if (fp != NULL)
+	{
+		vfprintf(fp, data2send, vargs_log);
+		fclose(fp);
+	} else {
+		#ifdef DEBUG_ADV
+		perror("fopen");
+		#endif
+	}
+	
 	#ifdef DEBUG
-	vfprintf((info) ? info : stderr, data2send, vargs_dbg);
+	vfprintf(stdout, data2send, vargs_out);
 	#endif
+	
 	vsprintf(string2send, data2send, vargs);
 
 	va_end(vargs);
-	va_end(vargs_dbg);
+	va_end(vargs_out);
 	if (strcmp(ipaddr, "0") != 0){
 		if (write(sock2server, string2send, strlen(string2send)) < 0) {
 			perror("write");
@@ -73,3 +88,12 @@ int get_mac(char *interface){
 	return 0;
 }
 
+
+void get_time(void)
+{
+	time_t local_time;
+	struct tm * tm;
+	time(& local_time);
+	tm = localtime(& local_time);
+	send_data(sock, "local time = %02d/%02d/%02d - %02d:%02d:%02d \n", tm->tm_mday, tm->tm_mon + 1, tm->tm_year % 100, tm->tm_hour, tm->tm_min, tm->tm_sec);
+}

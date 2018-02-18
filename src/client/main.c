@@ -74,6 +74,7 @@ int main(int argc, char  *argv[]){
 	int xconfig = 0;
 	int is_ip = 0, is_port = 0, is_iface = 0;
 	char *newip, *newport, *newiface;
+
 	const char *xmlfile;
 	while((opt = getopt_long(argc, (char**)argv, "ipfvhx", longopts, &optindex)) != -1){
 		switch(opt){
@@ -115,6 +116,8 @@ int main(int argc, char  *argv[]){
 		#endif
 	}
 
+
+
 	// parse XML file to get default server IP/port and interface to use
 	// for AP scan
 	if (parse_config_file(xmlfile) != 0)
@@ -155,6 +158,7 @@ int main(int argc, char  *argv[]){
 		freeaddrinfo(results);
 	}
 
+	get_time();
 	// I grab iface value in config.xml.
 	// Idea is to use config.xml instead of hardcoded values in code
 	get_mac(iface);
