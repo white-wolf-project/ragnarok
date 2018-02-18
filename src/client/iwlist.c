@@ -297,7 +297,7 @@ iw_print_gen_ie(unsigned char *	buffer,
 				iw_print_ie_wpa(buffer + offset, buflen);
 				break;
 			default:
-				debug("default\n");
+				debug("");
 		}
 		/* Skip over this IE to the next one in the list. */
 		offset += buffer[offset+1] + 2;
