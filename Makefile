@@ -48,6 +48,11 @@ ifeq ($(DEBUG), 1)
 	DBG = -DDEBUG
 endif
 
+ifeq ($(DEBUG), 2)
+	DBG = -DDEBUG_ADV
+endif
+
+# Useful to locate config files
 ifeq ($(BUILD), RELEASE)
 	CFLAGS += -DRELEASE
 endif
