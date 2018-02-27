@@ -6,6 +6,7 @@
 #include <include/server.h>
 #include <include/common.h>
 
+int sock;
 void INThandler(int sig)
 {
 	signal(sig, SIG_IGN);

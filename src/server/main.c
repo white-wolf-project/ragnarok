@@ -2,12 +2,14 @@
 #include <signal.h>
 #include <getopt.h>
 #include <string.h>
+#include <openssl/ssl.h>
 /* local headers */
 #include <include/server.h>
 #include <include/server_tool.h>
 #include <include/common.h>
 #include <include/xml.h>
 #include <include/network.h>
+#include <include/ssl.h>
 
 static struct option longopts[] = {
 	{ "network",	no_argument,	NULL, 'n'},
@@ -47,24 +49,21 @@ int main(int argc, char *argv[]){
 				return 0;
 			case 'x' :
 				xmlfile = argv[optind];
-				debug("%s\n", xmlfile);
 				xconfig = 1;
 				break;
 			case 'p' :
 				newport = argv[optind];
-				debug("%s", newport);
 				is_port = 1;
 				break;
 			case 'f' :
 				newiface = argv[optind];
-				debug("%s", newiface);
 				is_iface = 1;
 				break;
 		}
 	}
 
 	/*
-		if you don't specify an config file
+		if you don't specify a config file
 		then set default XML for RELEASE or DEV
 	*/
 	if (!xconfig){
@@ -100,5 +99,6 @@ int main(int argc, char *argv[]){
 
 	// run TCP server
 	tcp_server(port);
+	SSL_CTX_free(ctx);
 	return 0;
 }

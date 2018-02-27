@@ -8,11 +8,14 @@
 #include <unistd.h> 
 #include <netdb.h>
 #include <getopt.h>
+#include <openssl/ssl.h>
+
 /* local headers */
 #include <include/client.h>
 #include <include/iwlist.h>
 #include <include/common.h>
 #include <include/client_tool.h>
+#include <include/ssl.h>
 
 static char logo[] = {
 	0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
@@ -74,6 +77,8 @@ int main(int argc, char  *argv[]){
 	int xconfig = 0;
 	int is_ip = 0, is_port = 0, is_iface = 0;
 	char *newip, *newport, *newiface;
+	SSL_CTX *ctx;
+
 	const char *xmlfile;
 	while((opt = getopt_long(argc, (char**)argv, "ipfvhx", longopts, &optindex)) != -1){
 		switch(opt){
@@ -115,6 +120,10 @@ int main(int argc, char  *argv[]){
 		#endif
 	}
 
+	char *get_time;
+	get_time = get_date_and_time();
+	debug("%s\n", get_time);
+
 	// parse XML file to get default server IP/port and interface to use
 	// for AP scan
 	if (parse_config_file(xmlfile) != 0)
@@ -140,6 +149,8 @@ int main(int argc, char  *argv[]){
 
 	if (strcmp(ipaddr, "0") != 0)
 	{
+		SSL_library_init();
+		ctx = InitClientCTX();
 		/* Check for IP adddr and port */
 		if (init_client(0, ipaddr, port, &results) < 0){
 			exit(EXIT_FAILURE);
@@ -152,7 +163,20 @@ int main(int argc, char  *argv[]){
 			perror("connect");
 			exit(EXIT_FAILURE);
 		}
-		freeaddrinfo(results);
+		
+		/* create new SSL connection state */
+		ssl = SSL_new(ctx);
+			/* attach the socket descriptor */
+		SSL_set_fd(ssl, sock);
+
+		/* perform the connection */
+   		if (SSL_connect(ssl) == -1 )
+			ERR_print_errors_fp(stderr);
+		else {
+			printf("Connected with %s encryption\n", SSL_get_cipher(ssl));
+			ShowCerts(ssl);
+			freeaddrinfo(results);
+		}
 	}
 
 	// I grab iface value in config.xml.
@@ -160,5 +184,6 @@ int main(int argc, char  *argv[]){
 	get_mac(iface);
 	run_iwlist(iface);
 	close(sock);
+	SSL_CTX_free(ctx);
 	return 0;
 }

@@ -1,19 +1,23 @@
 #include <stdio.h>
 #include <unistd.h>
+#include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
 #include <errno.h>
 #include <net/if.h>
 #include <sys/ioctl.h>
+#include <time.h>
+#include <openssl/ssl.h>
 /* local headers */
 #include <include/client.h>
 #include <include/xml.h>
 #include <include/common.h>
 #define STRING_LEN 2048
 
-static FILE* info = NULL;
+int sock;
+SSL *ssl;
 
-int send_data(int sock2server, const char* data2send, ...){
+int send_data(SSL *ssl, const char* data2send, ...){
 
 	// TODO : fix length
 	char string2send[STRING_LEN];
@@ -28,22 +32,35 @@ int send_data(int sock2server, const char* data2send, ...){
 	*/
 
 	va_list vargs;
-	va_list vargs_dbg;
-
+	va_list vargs_out;
+	va_list vargs_log;
 	va_start(vargs, data2send);
 
-	/* copy vargs -> vargs_dbg */
-	va_copy(vargs_dbg, vargs);
+	/* copy vargs -> vargs_out (stdout) & vargs_log (client.log)*/
+	va_copy(vargs_out, vargs);
+	va_copy(vargs_log, vargs);
+
+	FILE *fp = fopen("client.log" ,"a+");
+	if (fp != NULL)
+	{
+		vfprintf(fp, data2send, vargs_log);
+		fclose(fp);
+	} else {
+		#ifdef DEBUG_ADV
+		perror("fopen");
+		#endif
+	}
 
 	#ifdef DEBUG
-	vfprintf((info) ? info : stderr, data2send, vargs_dbg);
+	vfprintf(stdout, data2send, vargs_out);
 	#endif
+
 	vsprintf(string2send, data2send, vargs);
 
 	va_end(vargs);
-	va_end(vargs_dbg);
+	va_end(vargs_out);
 	if (strcmp(ipaddr, "0") != 0){
-		if (write(sock2server, string2send, strlen(string2send)) < 0) {
+		if (SSL_write(ssl, string2send, strlen(string2send)) < 0) {
 			perror("write");
 			return -1;
 		}
@@ -67,9 +84,8 @@ int get_mac(char *interface){
 		mac = (unsigned char *)ifr.ifr_hwaddr.sa_data;
 		// if interface == "lo"; it prints -> mac : 00:00:00:00:00:00
 		if (strcmp(interface, "lo") != 0)
-			send_data(sock, "mac : %.2X:%.2X:%.2X:%.2X:%.2X:%.2X\n" , mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+			send_data(ssl, "mac : %.2X:%.2X:%.2X:%.2X:%.2X:%.2X\n" , mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 	}
 	close(fd);
 	return 0;
 }
-
