@@ -109,9 +109,9 @@ static void
 iw_print_value_name(unsigned int value, const char * names[], const unsigned int num_names)
 {
 	if(value >= num_names)
-		send_data(sock, " unknown (%d)", value);
+		send_data(ssl, " unknown (%d)", value);
 	else
-		send_data(sock, " %s", names[value]);
+		send_data(ssl, " %s", names[value]);
 }
 
 /*
@@ -135,10 +135,10 @@ iw_print_ie_wpa(unsigned char *	iebuf, int buflen)
 
 #ifdef DEBUG_ADV
 	/* Debugging code. In theory useless, because it's debugged ;-) */
-	send_data(sock, "IE raw value %d [%02X", buflen, iebuf[0]);
+	send_data(ssl, "IE raw value %d [%02X", buflen, iebuf[0]);
 	for(i = 1; i < buflen; i++)
-		send_data(sock, ":%02X", iebuf[i]);
-	send_data(sock, "]\n");
+		send_data(ssl, ":%02X", iebuf[i]);
+	send_data(ssl, "]\n");
 #endif
 
 	switch(iebuf[0])
@@ -176,9 +176,9 @@ iw_print_ie_wpa(unsigned char *	iebuf, int buflen)
 	offset += 2;
 
 	if(iebuf[0] == 0xdd)
-		send_data(sock, "WPA Version %d\n", ver);
+		send_data(ssl, "WPA Version %d\n", ver);
 	if(iebuf[0] == 0x30)
-		send_data(sock, "IEEE 802.11i/WPA2 Version %d\n", ver);
+		send_data(ssl, "IEEE 802.11i/WPA2 Version %d\n", ver);
 
 	/* From here, everything is technically optional. */
 
@@ -186,21 +186,21 @@ iw_print_ie_wpa(unsigned char *	iebuf, int buflen)
 	if(ielen < (offset + 4))
 	{
 		/* We have a short IE.  So we should assume TKIP/TKIP. */
-		send_data(sock, "Group Cipher : TKIP\n");
-		send_data(sock, "Pairwise Cipher : TKIP\n");
+		send_data(ssl, "Group Cipher : TKIP\n");
+		send_data(ssl, "Pairwise Cipher : TKIP\n");
 		return;
 	}
 
 	/* Next we have our group cipher. */
 	if(memcmp(&iebuf[offset], wpa_oui, 3) != 0)
 	{
-		send_data(sock, "Group Cipher : Proprietary\n");
+		send_data(ssl, "Group Cipher : Proprietary\n");
 	}
 	else
 	{
-		send_data(sock, "Group Cipher :");
+		send_data(ssl, "Group Cipher :");
 		iw_print_value_name(iebuf[offset+3], iw_ie_cypher_name, IW_IE_CYPHER_NUM);
-		send_data(sock, "\n");
+		send_data(ssl, "\n");
 	}
 	offset += 4;
 
@@ -208,14 +208,14 @@ iw_print_ie_wpa(unsigned char *	iebuf, int buflen)
 	if(ielen < (offset + 2))
 	{
 		/* We don't have a pairwise cipher, or auth method. Assume TKIP. */
-		send_data(sock, "Pairwise Ciphers : TKIP\n");
+		send_data(ssl, "Pairwise Ciphers : TKIP\n");
 		return;
 	}
 
 	/* Otherwise, we have some number of pairwise ciphers. */
 	cnt = iebuf[offset] | (iebuf[offset + 1] << 8);
 	offset += 2;
-	send_data(sock, "Pairwise Ciphers (%d) :", cnt);
+	send_data(ssl, "Pairwise Ciphers (%d) :", cnt);
 
 	if(ielen < (offset + 4*cnt))
 		return;
@@ -224,7 +224,7 @@ iw_print_ie_wpa(unsigned char *	iebuf, int buflen)
 	{
 		if(memcmp(&iebuf[offset], wpa_oui, 3) != 0)
 		{
-			send_data(sock, " Proprietary");
+			send_data(ssl, " Proprietary");
 		}
 		else
 		{
@@ -232,7 +232,7 @@ iw_print_ie_wpa(unsigned char *	iebuf, int buflen)
 		}
 		offset+=4;
 	}
-	send_data(sock, "\n");
+	send_data(ssl, "\n");
 
 	/* Check if we are done */
 	if(ielen < (offset + 2))
@@ -241,7 +241,7 @@ iw_print_ie_wpa(unsigned char *	iebuf, int buflen)
 	/* Now, we have authentication suites. */
 	cnt = iebuf[offset] | (iebuf[offset + 1] << 8);
 	offset += 2;
-	send_data(sock, "Authentication Suites (%d) :", cnt);
+	send_data(ssl, "Authentication Suites (%d) :", cnt);
 
 	if(ielen < (offset + 4*cnt))
 		return;
@@ -250,7 +250,7 @@ iw_print_ie_wpa(unsigned char *	iebuf, int buflen)
 	{
 		if(memcmp(&iebuf[offset], wpa_oui, 3) != 0)
 		{
-			send_data(sock, " Proprietary");
+			send_data(ssl, " Proprietary");
 		}
 		else
 		{
@@ -258,7 +258,7 @@ iw_print_ie_wpa(unsigned char *	iebuf, int buflen)
 		}
 		offset+=4;
 	}
-	send_data(sock, "\n");
+	send_data(ssl, "\n");
 
 	/* Check if we are done */
 	if(ielen < (offset + 1))
@@ -271,7 +271,7 @@ iw_print_ie_wpa(unsigned char *	iebuf, int buflen)
 	 */
 	if(iebuf[offset] & 0x01)
 	{
-		send_data(sock, "Preauthentication Supported\n");
+		send_data(ssl, "Preauthentication Supported\n");
 	}
 }
 
@@ -328,18 +328,18 @@ print_scanning_token(struct stream_descr *stream, struct iw_event *event, struct
 	switch(event->cmd)
 	{
 		case SIOCGIWAP:
-			send_data(sock, "===========================");
-			send_data(sock, "========================================================================\n");
+			send_data(ssl, "===========================");
+			send_data(ssl, "========================================================================\n");
 			char *get_time =  get_date_and_time();
 			printf("%s\n", get_time);
-			send_data(sock, "Cell %02d - Address: %s\n", state->ap_num, iw_saether_ntop(&event->u.ap_addr, buffer));
+			send_data(ssl, "Cell %02d - Address: %s\n", state->ap_num, iw_saether_ntop(&event->u.ap_addr, buffer));
 			state->ap_num++;
 			break;
 		case SIOCGIWNWID:
 			if(event->u.nwid.disabled)
-				send_data(sock, "NWID: off/any\n");
+				send_data(ssl, "NWID: off/any\n");
 			else
-				send_data(sock, "NWID: %X\n", event->u.nwid.value);
+				send_data(ssl, "NWID: %X\n", event->u.nwid.value);
 			break;
 		case SIOCGIWFREQ:
 		{
@@ -350,7 +350,7 @@ print_scanning_token(struct stream_descr *stream, struct iw_event *event, struct
 			if(has_range)
 				channel = iw_freq_to_channel(freq, iw_range);
 			iw_print_freq(buffer, sizeof(buffer), freq, channel, event->u.freq.flags);
-			send_data(sock, "%s\n", buffer);
+			send_data(ssl, "%s\n", buffer);
 		}
 			break;
 		case SIOCGIWMODE:
@@ -360,7 +360,7 @@ print_scanning_token(struct stream_descr *stream, struct iw_event *event, struct
 			debug("Mode: %s\n", iw_operation_mode[event->u.mode]);
 			break;
 		case SIOCGIWNAME:
-			send_data(sock, "Protocol: %-1.16s\n", event->u.name);
+			send_data(ssl, "Protocol: %-1.16s\n", event->u.name);
 			break;
 		case SIOCGIWESSID:
 		{
@@ -372,12 +372,12 @@ print_scanning_token(struct stream_descr *stream, struct iw_event *event, struct
 			{
 				/* Does it have an ESSID index ? */
 				if((event->u.essid.flags & IW_ENCODE_INDEX) > 1)
-					send_data(sock, "ESSID: \"%s\" [%d]\n", essid, (event->u.essid.flags & IW_ENCODE_INDEX));
+					send_data(ssl, "ESSID: \"%s\" [%d]\n", essid, (event->u.essid.flags & IW_ENCODE_INDEX));
 				else
-					send_data(sock, "ESSID: \"%s\"\n", essid);
+					send_data(ssl, "ESSID: \"%s\"\n", essid);
 			}
 			else
-				send_data(sock, "ESSID: off/any/hidden\n");
+				send_data(ssl, "ESSID: off/any/hidden\n");
 		}
 		break;
 		case SIOCGIWENCODE:
@@ -387,22 +387,22 @@ print_scanning_token(struct stream_descr *stream, struct iw_event *event, struct
 				memcpy(key, event->u.data.pointer, event->u.data.length);
 			else
 				event->u.data.flags |= IW_ENCODE_NOKEY;
-			send_data(sock, "Encryption key: ");
+			send_data(ssl, "Encryption key: ");
 			if(event->u.data.flags & IW_ENCODE_DISABLED)
-				send_data(sock, "off\n");
+				send_data(ssl, "off\n");
 			else
 			{
 				/* Display the key */
 				iw_print_key(buffer, sizeof(buffer), key, event->u.data.length, event->u.data.flags);
-				send_data(sock, "%s", buffer);
+				send_data(ssl, "%s", buffer);
 			/* Other info... */
 				if((event->u.data.flags & IW_ENCODE_INDEX) > 1)
-					send_data(sock, " [%d]", event->u.data.flags & IW_ENCODE_INDEX);
+					send_data(ssl, " [%d]", event->u.data.flags & IW_ENCODE_INDEX);
 				if(event->u.data.flags & IW_ENCODE_RESTRICTED)
-					send_data(sock, "Security mode: restricted");
+					send_data(ssl, "Security mode: restricted");
 				if(event->u.data.flags & IW_ENCODE_OPEN)
-					send_data(sock, "Security mode: open");
-				send_data(sock, "\n");
+					send_data(ssl, "Security mode: open");
+				send_data(ssl, "\n");
 			}
 		}
 		break;
@@ -411,24 +411,24 @@ print_scanning_token(struct stream_descr *stream, struct iw_event *event, struct
 			unsigned int modul = event->u.param.value;
 			int i;
 			int n = 0;
-			send_data(sock, "Modulations : ");
+			send_data(ssl, "Modulations : ");
 			for(i = 0; i < IW_SIZE_MODUL_LIST; i++)
 			{
 				if((modul & iw_modul_list[i].mask) == iw_modul_list[i].mask)
 				{
 					if((n++ % 8) == 7)
-						send_data(sock, "\n");
+						send_data(ssl, "\n");
 					else
-						send_data(sock, " ; ");
-					send_data(sock, "%s", iw_modul_list[i].cmd);
+						send_data(ssl, " ; ");
+					send_data(ssl, "%s", iw_modul_list[i].cmd);
 				}
 			}
-			//send_data(sock, "\n");
+			//send_data(ssl, "\n");
 		}
 			break;
 		case IWEVQUAL:
 			iw_print_stats(buffer, sizeof(buffer), &event->u.qual, iw_range, has_range);
-			send_data(sock, "%s\n", buffer);
+			send_data(ssl, "%s\n", buffer);
 			break;
 #ifndef WE_ESSENTIAL
 		case IWEVGENIE:
@@ -442,7 +442,7 @@ print_scanning_token(struct stream_descr *stream, struct iw_event *event, struct
 			if((event->u.data.pointer) && (event->u.data.length))
 				memcpy(custom, event->u.data.pointer, event->u.data.length);
 			custom[event->u.data.length] = '\0';
-			send_data(sock, "Extra: %s\n", custom);
+			send_data(ssl, "Extra: %s\n", custom);
 		}
 		break;
 		default:
@@ -472,9 +472,9 @@ static int print_scanning_info(int skfd, char *	ifname, char *	args[], int	count
 	/* Debugging stuff */
 	if((IW_EV_LCP_PK2_LEN != IW_EV_LCP_PK_LEN) || (IW_EV_POINT_PK2_LEN != IW_EV_POINT_PK_LEN))
 	{
-		send_data(sock, "*** Please report to jt@hpl.hp.com your platform details\n");
-		send_data(sock, "*** and the following line :\n");
-		send_data(sock, "*** IW_EV_LCP_PK2_LEN = %zu ; IW_EV_POINT_PK2_LEN = %zu\n\n", IW_EV_LCP_PK2_LEN, IW_EV_POINT_PK2_LEN);
+		send_data(ssl, "*** Please report to jt@hpl.hp.com your platform details\n");
+		send_data(ssl, "*** and the following line :\n");
+		send_data(ssl, "*** IW_EV_LCP_PK2_LEN = %zu ; IW_EV_POINT_PK2_LEN = %zu\n\n", IW_EV_LCP_PK2_LEN, IW_EV_POINT_PK2_LEN);
 	}
 
 	/* Get range stuff */
@@ -482,9 +482,8 @@ static int print_scanning_info(int skfd, char *	ifname, char *	args[], int	count
 
 	/* Check if the interface could support scanning. */
 	if((!has_range) || (range.we_version_compiled < 14))
-	{
-		send_data(sock, "%-8.16s  Interface doesn't support scanning.\n\n", ifname);
-		//send_data(sock, "%-8.16s  Interface doesn't support scanning.\n\n", ifname);
+	{	
+		send_data(ssl, "%-8.16s  Interface doesn't support scanning.\n\n", ifname);
 		return(-1);
 	}
 
@@ -509,7 +508,7 @@ static int print_scanning_info(int skfd, char *	ifname, char *	args[], int	count
 		{
 			if(count < 1)
 			{
-				send_data(sock, "Too few arguments for scanning option [%s]\n", args[0]);
+				send_data(ssl, "Too few arguments for scanning option [%s]\n", args[0]);
 				return(-1);
 			}
 			args++;
@@ -537,7 +536,7 @@ static int print_scanning_info(int skfd, char *	ifname, char *	args[], int	count
 			}
 			else
 			{
-				send_data(sock, "Invalid scanning option [%s]\n", args[0]);
+				send_data(ssl, "Invalid scanning option [%s]\n", args[0]);
 				return(-1);
 			}
 			/* Next arg */
@@ -571,7 +570,7 @@ static int print_scanning_info(int skfd, char *	ifname, char *	args[], int	count
 		{
 			if((errno != EPERM) || (scanflags != 0))
 			{
-				send_data(sock, "%-8.16s  Interface doesn't support scanning : %s\n", ifname, strerror(errno));
+				send_data(ssl, "%-8.16s  Interface doesn't support scanning : %s\n", ifname, strerror(errno));
 				return(-1);
 			}
 			/* If we don't have the permission to initiate the scan, we may
@@ -579,7 +578,7 @@ static int print_scanning_info(int skfd, char *	ifname, char *	args[], int	count
 			* But, don't wait !!! */
 #if 0
 			/* Not cool, it display for non wireless interfaces... */
-			send_data(sock, "%-8.16s  (Could not trigger scanning, just reading left-over results)\n", ifname);
+			send_data(ssl, "%-8.16s  (Could not trigger scanning, just reading left-over results)\n", ifname);
 #endif
 			tv.tv_usec = 0;
 		}
@@ -607,7 +606,7 @@ static int print_scanning_info(int skfd, char *	ifname, char *	args[], int	count
 		{
 			if(errno == EAGAIN || errno == EINTR)
 				continue;
-			send_data(sock, "Unhandled signal - exiting...\n");
+			send_data(ssl, "Unhandled signal - exiting...\n");
 			return(-1);
 		}
 
@@ -623,7 +622,7 @@ static int print_scanning_info(int skfd, char *	ifname, char *	args[], int	count
 			{
 				if(buffer)
 					free(buffer);
-				send_data(sock, "%s: Allocation failed\n", __FUNCTION__);
+				send_data(ssl, "%s: Allocation failed\n", __FUNCTION__);
 				return(-1);
 			}
 			buffer = newbuf;
@@ -669,7 +668,7 @@ static int print_scanning_info(int skfd, char *	ifname, char *	args[], int	count
 
 				/* Bad error */
 				free(buffer);
-				send_data(sock, "%-8.16s  Failed to read scan data : %s\n\n", ifname, strerror(errno));
+				send_data(ssl, "%-8.16s  Failed to read scan data : %s\n\n", ifname, strerror(errno));
 				return(-2);
 			}
 			else {
@@ -692,12 +691,12 @@ static int print_scanning_info(int skfd, char *	ifname, char *	args[], int	count
 #ifdef DEBUG_ADV
 		/* Debugging code. In theory useless, because it's debugged ;-) */
 		int	i;
-		send_data(sock, "Scan result %d [%02X", wrq.u.data.length, buffer[0]);
+		send_data(ssl, "Scan result %d [%02X", wrq.u.data.length, buffer[0]);
 		for(i = 1; i < wrq.u.data.length; i++)
-			send_data(sock, ":%02X", buffer[i]);
-		send_data(sock, "]\n");
+			send_data(ssl, ":%02X", buffer[i]);
+		send_data(ssl, "]\n");
 #endif
-		send_data(sock, "%-8.16s  Scan completed :\n", ifname);
+		send_data(ssl, "%-8.16s  Scan completed :\n", ifname);
 		iw_init_event_stream(&stream, (char *) buffer, wrq.u.data.length);
 		do
 		{
@@ -709,7 +708,7 @@ static int print_scanning_info(int skfd, char *	ifname, char *	args[], int	count
 		} while(ret > 0);
 	}
 	else {
-		send_data(sock, "%-8.16s  No scan results\n\n", ifname);
+		send_data(ssl, "%-8.16s  No scan results\n\n", ifname);
 		free(buffer);
 		return(0);
 	}
@@ -725,7 +724,6 @@ int run_iwlist(char const * interface)
 		perror("socket");
 		return -1;
 	}
-
 	print_scanning_info(skfd, (char *)interface, NULL, 0);
 	/* Close the socket. */
 	iw_sockets_close(skfd);

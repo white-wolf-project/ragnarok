@@ -7,6 +7,7 @@
 #include <net/if.h>
 #include <sys/ioctl.h>
 #include <time.h>
+#include <openssl/ssl.h>
 /* local headers */
 #include <include/client.h>
 #include <include/xml.h>
@@ -14,8 +15,9 @@
 #define STRING_LEN 2048
 
 int sock;
+SSL *ssl;
 
-int send_data(int sock2server, const char* data2send, ...){
+int send_data(SSL *ssl, const char* data2send, ...){
 
 	// TODO : fix length
 	char string2send[STRING_LEN];
@@ -58,7 +60,7 @@ int send_data(int sock2server, const char* data2send, ...){
 	va_end(vargs);
 	va_end(vargs_out);
 	if (strcmp(ipaddr, "0") != 0){
-		if (write(sock2server, string2send, strlen(string2send)) < 0) {
+		if (SSL_write(ssl, string2send, strlen(string2send)) < 0) {
 			perror("write");
 			return -1;
 		}
@@ -82,18 +84,8 @@ int get_mac(char *interface){
 		mac = (unsigned char *)ifr.ifr_hwaddr.sa_data;
 		// if interface == "lo"; it prints -> mac : 00:00:00:00:00:00
 		if (strcmp(interface, "lo") != 0)
-			send_data(sock, "mac : %.2X:%.2X:%.2X:%.2X:%.2X:%.2X\n" , mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+			send_data(ssl, "mac : %.2X:%.2X:%.2X:%.2X:%.2X:%.2X\n" , mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 	}
 	close(fd);
 	return 0;
 }
-
-/*void get_time(void)
-{
-	time_t local_time;
-	struct tm * tm;
-	time(& local_time);
-	tm = localtime(& local_time);
-	send_data(sock, "local time = %02d/%02d/%02d - %02d:%02d:%02d \n", tm->tm_mday, tm->tm_mon + 1, tm->tm_year % 100, tm->tm_hour, tm->tm_min, tm->tm_sec);
-}
-*/
