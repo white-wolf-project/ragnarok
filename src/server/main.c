@@ -2,12 +2,14 @@
 #include <signal.h>
 #include <getopt.h>
 #include <string.h>
+#include <openssl/ssl.h>
 /* local headers */
 #include <include/server.h>
 #include <include/server_tool.h>
 #include <include/common.h>
 #include <include/xml.h>
 #include <include/network.h>
+#include <include/ssl.h>
 
 static struct option longopts[] = {
 	{ "network",	no_argument,	NULL, 'n'},
@@ -97,5 +99,6 @@ int main(int argc, char *argv[]){
 
 	// run TCP server
 	tcp_server(port);
+	SSL_CTX_free(ctx);
 	return 0;
 }
