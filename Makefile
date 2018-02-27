@@ -20,7 +20,7 @@ VERSION = $(shell cat resources/control.srv| grep Version | cut -d:  -f 2)
 DEBUG ?= 1
 BUILD ?= DEVELOPMENT
 CFLAGS = $(DBG) -I. -I/usr/include/libxml2/ -I/usr/include/python3.$(python3v) -I$(CLIENT_SRV) -I$(SYSNET) -c -Wall -g
-LDFLAGS = -liw -lxml2 -lpython3.$(python3m)
+LDFLAGS = -liw -lxml2 -lpython3.$(python3m) -lssl -lcrypto
 CROSS_COMPILE ?=
 
 CLIENT_OBJECTS = $(CLIENT_SRC)/main.o \
@@ -39,8 +39,9 @@ OBJECTS = src/common.o
 SOURCES = $(OBJECTS:o=.c)
 
 CLI_SRV_OBJ = client-srv/src/client_tool.o \
-			client-srv/src/server_tool.o \
-			client-srv/src/xml.o
+			  client-srv/src/server_tool.o \
+			  client-srv/src/xml.o \
+			  client-srv/src/ssl.o
 
 SYSNET_OBJ = sysnet/src/network.o
 
