@@ -116,7 +116,7 @@ int main(int argc, char  *argv[]){
 		#endif
 	}
 
-
+	debug("%s\n", get_date_and_time());
 
 	// parse XML file to get default server IP/port and interface to use
 	// for AP scan

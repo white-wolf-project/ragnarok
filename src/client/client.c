@@ -87,13 +87,3 @@ int get_mac(char *interface){
 	close(fd);
 	return 0;
 }
-
-
-void get_time(void)
-{
-	time_t local_time;
-	struct tm * tm;
-	time(& local_time);
-	tm = localtime(& local_time);
-	send_data(sock, "local time = %02d/%02d/%02d - %02d:%02d:%02d \n", tm->tm_mday, tm->tm_mon + 1, tm->tm_year % 100, tm->tm_hour, tm->tm_min, tm->tm_sec);
-}

@@ -63,3 +63,24 @@ int run_python(const char *pyscript){
 	Py_Finalize();
 	return 0;
 }
+
+
+/*
+*	function to get date and time
+*	type is char * it returns a pointer:
+*	curr_time
+*	TODO : find a better to print use date
+*	and time for server
+*/
+
+char *get_date_and_time(void)
+{
+	time_t local_time;
+	struct tm * tm;
+	char *curr_time;
+	curr_time = malloc(sizeof(char) *30);
+	time(& local_time);
+	tm = localtime(& local_time);
+	sprintf(curr_time, "%02d/%02d/%02d-%02d:%02d:%02d\n", tm->tm_mday, tm->tm_mon + 1, tm->tm_year % 100, tm->tm_hour, tm->tm_min, tm->tm_sec);
+	return (char *)curr_time;
+}
