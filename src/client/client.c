@@ -66,24 +66,30 @@ int send_data(int sock2server, const char* data2send, ...){
 	return 0;
 }
 
-int get_mac(char *interface){
+/*
+*	function to get mac address of a network interface
+*	type is char * it returns a pointer:
+*	mac
+*	TODO : implement in sysnet - then call from sysnet git module
+*/
+
+char *get_mac_addr(char *interface){
 	int fd;
 	struct ifreq ifr;
-	unsigned char *mac = NULL;
+	char *mac;
+	mac = malloc(sizeof(char) *30);
+	unsigned char *mac_digit = NULL;
 
 	memset(&ifr, 0, sizeof(ifr));
-
 	fd = socket(AF_INET, SOCK_DGRAM, 0);
 
 	ifr.ifr_addr.sa_family = AF_INET;
 	strncpy(ifr.ifr_name , interface , IFNAMSIZ-1);
-
 	if (0 == ioctl(fd, SIOCGIFHWADDR, &ifr)) {
-		mac = (unsigned char *)ifr.ifr_hwaddr.sa_data;
+		mac_digit = (unsigned char *)ifr.ifr_hwaddr.sa_data;
 		// if interface == "lo"; it prints -> mac : 00:00:00:00:00:00
 		if (strcmp(interface, "lo") != 0)
-			send_data(sock, "mac : %.2X:%.2X:%.2X:%.2X:%.2X:%.2X\n" , mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+			sprintf(mac, "%.2X:%.2X:%.2X:%.2X:%.2X:%.2X\n" , mac_digit[0], mac_digit[1], mac_digit[2], mac_digit[3], mac_digit[4], mac_digit[5]);
 	}
-	close(fd);
-	return 0;
+	return (char *)mac;
 }

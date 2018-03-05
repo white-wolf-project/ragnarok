@@ -74,6 +74,7 @@ int main(int argc, char  *argv[]){
 	int xconfig = 0;
 	int is_ip = 0, is_port = 0, is_iface = 0;
 	char *newip, *newport, *newiface;
+	char *mac_addr;
 
 	const char *xmlfile;
 	while((opt = getopt_long(argc, (char**)argv, "ipfvhx", longopts, &optindex)) != -1){
@@ -160,7 +161,8 @@ int main(int argc, char  *argv[]){
 
 	// I grab iface value in config.xml.
 	// Idea is to use config.xml instead of hardcoded values in code
-	get_mac(iface);
+	mac_addr = get_mac_addr(iface);
+	send_data(sock, "MAC : %s\n", mac_addr);
 	run_iwlist(iface);
 	close(sock);
 	return 0;
