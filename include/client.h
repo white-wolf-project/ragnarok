@@ -1,4 +1,4 @@
-int sock;
+extern int sock;
 char *ipaddr;
 char *port;
 int parse_config_file(const char *xmlfile);

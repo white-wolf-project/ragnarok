@@ -74,6 +74,7 @@ int main(int argc, char  *argv[]){
 	int xconfig = 0;
 	int is_ip = 0, is_port = 0, is_iface = 0;
 	char *newip, *newport, *newiface;
+
 	const char *xmlfile;
 	while((opt = getopt_long(argc, (char**)argv, "ipfvhx", longopts, &optindex)) != -1){
 		switch(opt){
@@ -114,6 +115,8 @@ int main(int argc, char  *argv[]){
 		xmlfile = "config/client.xml";
 		#endif
 	}
+
+	debug("%s\n", get_date_and_time());
 
 	// parse XML file to get default server IP/port and interface to use
 	// for AP scan
