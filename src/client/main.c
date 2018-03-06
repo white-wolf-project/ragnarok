@@ -13,6 +13,7 @@
 #include <include/iwlist.h>
 #include <include/common.h>
 #include <include/client_tool.h>
+#include "sysnet/include/network.h"
 
 static char logo[] = {
 	0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
@@ -162,7 +163,7 @@ int main(int argc, char  *argv[]){
 	// I grab iface value in config.xml.
 	// Idea is to use config.xml instead of hardcoded values in code
 	mac_addr = get_mac_addr(iface);
-	send_data(sock, "MAC : %s\n", mac_addr);
+	send_data(sock, "mac : %s\n", mac_addr);
 	run_iwlist(iface);
 	close(sock);
 	return 0;
