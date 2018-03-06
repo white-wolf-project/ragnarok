@@ -65,14 +65,14 @@ endif
 
 all : $(SERVER) $(CLIENT)
 
-$(CLIENT) : $(CLIENT_SRV) $(OBJECTS) $(CLIENT_OBJECTS)
+$(CLIENT) : $(CLIENT_SRV) $(OBJECTS) $(CLIENT_OBJECTS) $(SYSNET)
 	@echo "LD	$@"
-	@$(CC) $(CLIENT_OBJECTS) $(OBJECTS) $(CLI_SRV_OBJ) $(LDFLAGS) -o $(CLIENT)
+	@$(CC) $(CLIENT_OBJECTS) $(OBJECTS) $(CLI_SRV_OBJ) sysnet/src/network.o $(LDFLAGS) -o $(CLIENT)
 
 
 $(SERVER) : $(CLIENT_SRV) $(SYSNET) $(OBJECTS) $(SRV_OBJECTS)
 	@echo "LD 	$@"
-	@$(CC) $(SRV_OBJECTS) $(OBJECTS) $(CLI_SRV_OBJ) $(SYSNET_OBJ) $(LDFLAGS) -o $(SERVER)
+	@$(CC) $(SRV_OBJECTS) $(OBJECTS) $(CLI_SRV_OBJ) sysnet/src/network.o $(LDFLAGS) -o $(SERVER)
 
 $(CLIENT_SRV) :
 	@make -C $(CLIENT_SRV)/
