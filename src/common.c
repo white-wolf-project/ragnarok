@@ -84,3 +84,30 @@ char *get_date_and_time(void)
 	sprintf(curr_time, "%02d/%02d/%02d-%02d:%02d:%02d\n", tm->tm_mday, tm->tm_mon + 1, tm->tm_year % 100, tm->tm_hour, tm->tm_min, tm->tm_sec);
 	return (char *)curr_time;
 }
+/*
+*	function to find text between 2 strings
+*	returns found text
+*	str = default string
+* 	p1 = first pattern
+*	p2 = scnd pattern to search between
+*	https://stackoverflow.com/a/24696896/9299410
+*/
+char *get_txt(const char *str, const char *p1, const char *p2){
+	char *target = NULL;
+	char *start, *end;
+
+	if ((start = strstr(str, p1))) {
+		start += strlen(p1);
+		if ((end = strstr(start, p2)))
+		{
+			target = (char *)malloc(end - start + 1);
+			memcpy(target, start, end - start);
+			target[end - start] = '\0';
+		}
+	}
+
+	if (target)
+		return (char *)target;
+	else 
+		return NULL;
+}
