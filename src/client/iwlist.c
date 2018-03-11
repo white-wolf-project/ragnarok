@@ -190,6 +190,10 @@ iw_print_ie_wpa(unsigned char *	iebuf, int buflen)
 		sprintf(wpa_stuff, "IEEE 802.11i/WPA2 Version %d", ver);
 		send_data(sock, "%s\n", wpa_stuff);
 	}
+
+	info_ap_child = xmlNewChild(info_ap, NULL, BAD_CAST "encryption", NULL);
+	xmlNodeAddContent(info_ap_child, BAD_CAST wpa_stuff);
+	xmlNewProp(info_ap_child, BAD_CAST "on", BAD_CAST "yes");
 	/* From here, everything is technically optional. */
 	#ifdef DEBUG_ADV
 	/* Check if we are done */
@@ -330,11 +334,14 @@ iw_print_gen_ie(unsigned char *	buffer,
 /*
  * Print one element from the scanning results
  */
+// global var for xml
+char info_ap_nb[12];
+
 static inline void
 print_scanning_token(struct stream_descr *stream, struct iw_event *event, struct iwscan_state *state, struct iw_range *iw_range, int has_range)
 {
 	char buffer[128];
-	char *channel_out, *frequency_out, *quality_out, *signal_out;
+	char *channel_out, *frequency_out, *quality_out, *signal_out, *lastbeacon_out;
 	/* Now, let's decode the event */
 	switch(event->cmd)
 	{
@@ -343,8 +350,18 @@ print_scanning_token(struct stream_descr *stream, struct iw_event *event, struct
 			send_data(sock, "========================================================================\n");
 			char *get_time = get_date_and_time();
 			fprintf(stdout, "%s\n", get_time);
+
+			sprintf(info_ap_nb, "info_AP_%02d", state->ap_num);
+			info_ap = xmlNewChild(root, NULL, BAD_CAST info_ap_nb, NULL);
+
 			send_data(sock, "AP  %02d\n", state->ap_num);
+			/*info_ap_child = xmlNewChild(info_ap, NULL, BAD_CAST "AP", NULL);
+			xmlNodeAddContent(info_ap_child, BAD_CAST state->ap_num);*/
+
 			send_data(sock, "MAC : %s\n", iw_saether_ntop(&event->u.ap_addr, buffer));
+			info_ap_child = xmlNewChild(info_ap, NULL, BAD_CAST "mac", NULL);
+			xmlNodeAddContent(info_ap_child, BAD_CAST iw_saether_ntop(&event->u.ap_addr, buffer));
+
 			state->ap_num++;
 			break;
 		case SIOCGIWNWID:
@@ -373,10 +390,15 @@ print_scanning_token(struct stream_descr *stream, struct iw_event *event, struct
 				send_data(sock, "channel : %s\n", channel_out);
 				/*end of crappy code */
 
+				info_ap_child = xmlNewChild(info_ap, NULL, BAD_CAST "channel", NULL);
+				xmlNodeAddContent(info_ap_child, BAD_CAST channel_out);
+
 			} /* Assume it is Frequency*/
 			else if (buffer[0] == 'F'){
 				frequency_out = get_txt(buffer, ":", " ");
 				send_data(sock, "frequency : %s\n", frequency_out);
+				info_ap_child = xmlNewChild(info_ap, NULL, BAD_CAST "frequency", NULL);
+				xmlNodeAddContent(info_ap_child, BAD_CAST frequency_out);
 			}
 			else {
 				break;
@@ -410,6 +432,8 @@ print_scanning_token(struct stream_descr *stream, struct iw_event *event, struct
 			}
 			else
 				send_data(sock, "ESSID: off/any/hidden\n");
+			info_ap_child = xmlNewChild(info_ap, NULL, BAD_CAST "essid", NULL);
+			xmlNodeAddContent(info_ap_child, BAD_CAST essid);
 		}
 		break;
 		case SIOCGIWENCODE:
@@ -420,14 +444,18 @@ print_scanning_token(struct stream_descr *stream, struct iw_event *event, struct
 			else
 				event->u.data.flags |= IW_ENCODE_NOKEY;
 			send_data(sock, "Encryption key: ");
-			if(event->u.data.flags & IW_ENCODE_DISABLED)
+			if(event->u.data.flags & IW_ENCODE_DISABLED) {
 				send_data(sock, "off\n");
+				info_ap_child = xmlNewChild(info_ap, NULL, BAD_CAST "encryption", NULL);
+				xmlNodeAddContent(info_ap_child, BAD_CAST "");
+				xmlNewProp(info_ap_child, BAD_CAST "on", BAD_CAST "no");
+			}
 			else
 			{
 				/* Display the key */
 				iw_print_key(buffer, sizeof(buffer), key, event->u.data.length, event->u.data.flags);
 				send_data(sock, " %s", buffer); // should output "on"
-			/* Other info... */
+				/* Other info... */
 				if((event->u.data.flags & IW_ENCODE_INDEX) > 1)
 					send_data(sock, " [%d]", event->u.data.flags & IW_ENCODE_INDEX);
 				if(event->u.data.flags & IW_ENCODE_RESTRICTED)
@@ -465,7 +493,13 @@ print_scanning_token(struct stream_descr *stream, struct iw_event *event, struct
 			signal_out = get_txt(buffer, "level=", " dBm");
 
 			send_data(sock, "Quality : %s\n", quality_out);
+			info_ap_child = xmlNewChild(info_ap, NULL, BAD_CAST "quality", NULL);
+			xmlNodeAddContent(info_ap_child, BAD_CAST quality_out);
+
 			send_data(sock, "Signal : %s dBm\n", signal_out);
+			info_ap_child = xmlNewChild(info_ap, NULL, BAD_CAST "signal", NULL);
+			xmlNodeAddContent(info_ap_child, BAD_CAST signal_out);
+
 			break;
 #ifndef WE_ESSENTIAL
 		case IWEVGENIE:
@@ -482,7 +516,10 @@ print_scanning_token(struct stream_descr *stream, struct iw_event *event, struct
 
 			/* don't print TSF stuff, useless for what we want */
 			if (custom[0] != 't'){
-				send_data(sock, "last beacon: %s ms\n", get_txt(custom, ": ", "ms"));
+				lastbeacon_out = get_txt(custom, ": ", "ms");
+				send_data(sock, "last beacon: %s ms\n", lastbeacon_out);
+				info_ap_child = xmlNewChild(info_ap, NULL, BAD_CAST "last_beacon", NULL);
+				xmlNodeAddContent(info_ap_child, BAD_CAST lastbeacon_out);
 			}
 		}
 		break;
@@ -526,7 +563,6 @@ static int print_scanning_info(int skfd, char *	ifname, char *	args[], int	count
 	if((!has_range) || (range.we_version_compiled < 14))
 	{
 		send_data(sock, "%-8.16s  Interface doesn't support scanning.\n\n", ifname);
-		//send_data(sock, "%-8.16s  Interface doesn't support scanning.\n\n", ifname);
 		return(-1);
 	}
 
