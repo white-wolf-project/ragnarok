@@ -7,7 +7,7 @@
 #define SRV_TOOLNAME "ragnarok-srv"
 
 extern xmlDocPtr doc;
-extern xmlNodePtr root, device_AP_name, info_ap;
+extern xmlNodePtr root, device_AP_name, info_ap, info_ap_nb;
 extern xmlNodePtr device_AP_name_child, info_ap_child;
 
 void version();
