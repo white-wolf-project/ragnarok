@@ -127,7 +127,10 @@ void init_xml(char *docname){
 }
 
 void end_xml(char *docname){
-	xmlSaveFormatFileEnc("-", doc, "UTF-8", 1);
+	/* 	this commented line can output the XML file to stdout
+	* 	I keep it for debugging purposes
+	*/
+	// xmlSaveFormatFileEnc("-", doc, "UTF-8", 1);
 	xmlSaveFormatFileEnc(docname, doc, "UTF-8", 1);
 	xmlFreeDoc(doc);
 }
