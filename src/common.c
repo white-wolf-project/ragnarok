@@ -2,6 +2,8 @@
 #include <stdarg.h>
 #include <Python.h>
 #include <stdbool.h>
+#include <libxml/parser.h>
+#include <libxml/tree.h>
 
 #include <include/common.h>
 
@@ -81,6 +83,55 @@ char *get_date_and_time(void)
 	curr_time = malloc(sizeof(char) *30);
 	time(& local_time);
 	tm = localtime(& local_time);
-	sprintf(curr_time, "%02d/%02d/%02d-%02d:%02d:%02d\n", tm->tm_mday, tm->tm_mon + 1, tm->tm_year % 100, tm->tm_hour, tm->tm_min, tm->tm_sec);
+	sprintf(curr_time, "%02d/%02d/%02d-%02d:%02d:%02d", tm->tm_mday, tm->tm_mon + 1, tm->tm_year % 100, tm->tm_hour, tm->tm_min, tm->tm_sec);
 	return (char *)curr_time;
+}
+/*
+*	function to find text between 2 strings
+*	returns found text
+*	str = default string
+* 	p1 = first pattern
+*	p2 = scnd pattern to search between
+*	https://stackoverflow.com/a/24696896/9299410
+*/
+char *get_txt(const char *str, const char *p1, const char *p2){
+	char *target = NULL;
+	char *start, *end;
+
+	if ((start = strstr(str, p1))) {
+		start += strlen(p1);
+		if ((end = strstr(start, p2)))
+		{
+			target = (char *)malloc(end - start + 1);
+			memcpy(target, start, end - start);
+			target[end - start] = '\0';
+		}
+	}
+
+	if (target)
+		return (char *)target;
+	else 
+		return NULL;
+}
+
+xmlDocPtr doc = NULL;
+xmlNodePtr root = NULL, device_AP_name = NULL, info_ap = NULL, info_ap_nb = NULL;
+xmlNodePtr device_AP_name_child = NULL, info_ap_child = NULL;
+
+void init_xml(char *docname){
+	doc = xmlNewDoc(BAD_CAST "1.0");
+	root = xmlNewNode(NULL, BAD_CAST docname);
+	xmlDocSetRootElement(doc, root);
+	/* create two childs we will deal with */
+	device_AP_name = xmlNewChild(root, NULL, BAD_CAST "rpi_info", NULL);
+	info_ap = xmlNewChild(root, NULL, BAD_CAST "info_AP", NULL);
+}
+
+void end_xml(char *docname){
+	/* 	this commented line can output the XML file to stdout
+	* 	I keep it for debugging purposes
+	*/
+	// xmlSaveFormatFileEnc("-", doc, "UTF-8", 1);
+	xmlSaveFormatFileEnc(docname, doc, "UTF-8", 1);
+	xmlFreeDoc(doc);
 }

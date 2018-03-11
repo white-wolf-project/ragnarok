@@ -88,22 +88,18 @@ int main(int argc, char  *argv[]){
 				return 0;
 			case 'x' :
 				xmlfile = argv[optind];
-				debug("%s\n", xmlfile);
 				xconfig = 1;
 				break;
 			case 'i':
 				newip = argv[optind];
-				debug("%s\n", newip);
 				is_ip = 1;
 				break;
 			case 'p':
 				newport = argv[optind];
-				debug("%s\n", newport);
 				is_port = 1;
 				break;
 			case 'f':
 				newiface = argv[optind];
-				debug("%s\n", newiface);
 				is_iface = 1;
 				break;
 
@@ -164,7 +160,16 @@ int main(int argc, char  *argv[]){
 	// Idea is to use config.xml instead of hardcoded values in code
 	mac_addr = get_mac_addr(iface);
 	send_data(sock, "mac : %s\n", mac_addr);
+	init_xml("ragnarok.xml");
+
+	device_AP_name_child = xmlNewChild(device_AP_name, NULL, BAD_CAST "mac", NULL);
+	xmlNodeAddContent(device_AP_name_child, BAD_CAST mac_addr);
+
+	device_AP_name_child = xmlNewChild(device_AP_name, NULL, BAD_CAST "time", NULL);
+	xmlNodeAddContent(device_AP_name_child, BAD_CAST get_date_and_time());
+
 	run_iwlist(iface);
+	end_xml("ragnarok.xml");
 	close(sock);
 	return 0;
 }

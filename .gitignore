@@ -4,6 +4,7 @@ ragnarok
 ragnarok-srv
 wireless-tools
 *.log
+*.xml
 libcpuid
 deb
 release
