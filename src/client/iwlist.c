@@ -488,7 +488,7 @@ print_scanning_token(struct stream_descr *stream, struct iw_event *event, struct
 		case IWEVQUAL:
 			iw_print_stats(buffer, sizeof(buffer), &event->u.qual, iw_range, has_range);
 
-			quality_out = get_txt(buffer, "Quality=", "S");
+			quality_out = get_txt(buffer, "Quality=", "  S");
 			signal_out = get_txt(buffer, "level=", " dBm");
 
 			send_data(sock, "Quality : %s\n", quality_out);
