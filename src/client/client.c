@@ -78,12 +78,14 @@ int read_and_send_data(const char *xmlfile){
 		return 1;
 	}
 
+	send_data(sock, "-xml-\r");
 	while (fgets(buf, sizeof(buf), fp) != NULL)
 	{
 		/* eat the newline fgets() stores */
 		buf[strlen(buf) - 1] = '\0';
 		send_data(sock, "%s\n", buf);
 	}
+	send_data(sock, "-end_xml-\r");
 	fclose(fp);
 	return 0;
 }
