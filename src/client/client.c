@@ -12,6 +12,7 @@
 #include <include/xml.h>
 #include <include/common.h>
 #define STRING_LEN 2048
+#define BUFSIZE 1024 /* read 1024 bytes at a time */
 
 int sock;
 
@@ -63,5 +64,26 @@ int send_data(int sock2server, const char* data2send, ...){
 			return -1;
 		}
 	}
+	return 0;
+}
+
+int read_and_send_data(const char *xmlfile){
+
+	FILE* fp;
+	char buf[BUFSIZE];
+
+	if ((fp = fopen(xmlfile, "r")) == NULL)
+	{ /* Open source file. */
+		perror("fopen");
+		return 1;
+	}
+
+	while (fgets(buf, sizeof(buf), fp) != NULL)
+	{
+		/* eat the newline fgets() stores */
+		buf[strlen(buf) - 1] = '\0';
+		send_data(sock, "%s\n", buf);
+	}
+	fclose(fp);
 	return 0;
 }
