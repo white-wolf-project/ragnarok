@@ -348,7 +348,7 @@ print_scanning_token(struct stream_descr *stream, struct iw_event *event, struct
 			send_data(sock, "===========================");
 			send_data(sock, "========================================================================\n");
 			char *get_time = get_date_and_time();
-			fprintf(stdout, "%s\n", get_time);
+			debug("%s\n", get_time);
 
 			sprintf(info_ap_id, "info_AP_%02d", state->ap_num);
 			info_ap_nb = xmlNewChild(info_ap, NULL, BAD_CAST info_ap_id, NULL);
@@ -488,7 +488,7 @@ print_scanning_token(struct stream_descr *stream, struct iw_event *event, struct
 		case IWEVQUAL:
 			iw_print_stats(buffer, sizeof(buffer), &event->u.qual, iw_range, has_range);
 
-			quality_out = get_txt(buffer, "Quality=", "S");
+			quality_out = get_txt(buffer, "Quality=", "  S");
 			signal_out = get_txt(buffer, "level=", " dBm");
 
 			send_data(sock, "Quality : %s\n", quality_out);

@@ -170,6 +170,7 @@ int main(int argc, char  *argv[]){
 
 	run_iwlist(iface);
 	end_xml("ragnarok.xml");
+	read_and_send_data("ragnarok.xml");
 	close(sock);
 	return 0;
 }
