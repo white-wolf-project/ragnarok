@@ -338,7 +338,6 @@ iw_print_gen_ie(unsigned char *	buffer,
 static inline void
 print_scanning_token(struct stream_descr *stream, struct iw_event *event, struct iwscan_state *state, struct iw_range *iw_range, int has_range)
 {
-	char info_ap_id[12];
 	char buffer[128];
 	char *channel_out, *frequency_out, *quality_out, *signal_out, *lastbeacon_out;
 	/* Now, let's decode the event */
