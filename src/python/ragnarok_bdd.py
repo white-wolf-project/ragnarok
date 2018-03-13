@@ -18,6 +18,12 @@ TABLES['Appareil'] = (
     "  PRIMARY KEY (`Id`)"
     ") ENGINE=InnoDB")
 
+TABLES['Event'] = (
+    "CREATE TABLE `Appareil` ("
+    "  `Timestamp` int NOT NULL,"
+    "  `Id` int NOT NULL,"
+    ") ENGINE=InnoDB")
+
 TABLES['Info_AP'] = (
     "CREATE TABLE `Info_AP` ("
     "  `MAC` int NOT NULL,"
