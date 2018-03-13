@@ -115,7 +115,7 @@ char *get_txt(const char *str, const char *p1, const char *p2){
 }
 
 xmlDocPtr doc = NULL;
-xmlNodePtr root = NULL, device_AP_name = NULL, info_ap = NULL, info_ap_nb = NULL;
+xmlNodePtr root = NULL, device_AP_name = NULL, info_ap = NULL;
 xmlNodePtr device_AP_name_child = NULL, info_ap_child = NULL;
 
 void init_xml(char *docname){
@@ -124,7 +124,6 @@ void init_xml(char *docname){
 	xmlDocSetRootElement(doc, root);
 	/* create two childs we will deal with */
 	device_AP_name = xmlNewChild(root, NULL, BAD_CAST "rpi_info", NULL);
-	info_ap = xmlNewChild(root, NULL, BAD_CAST "info_AP", NULL);
 }
 
 void end_xml(char *docname){
