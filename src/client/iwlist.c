@@ -191,7 +191,7 @@ iw_print_ie_wpa(unsigned char *	iebuf, int buflen)
 		send_data(sock, "%s\n", wpa_stuff);
 	}
 
-	info_ap_child = xmlNewChild(info_ap_nb, NULL, BAD_CAST "encryption", NULL);
+	info_ap_child = xmlNewChild(info_ap, NULL, BAD_CAST "encryption", NULL);
 	xmlNodeAddContent(info_ap_child, BAD_CAST wpa_stuff);
 	xmlNewProp(info_ap_child, BAD_CAST "on", BAD_CAST "yes");
 	/* From here, everything is technically optional. */
@@ -350,15 +350,11 @@ print_scanning_token(struct stream_descr *stream, struct iw_event *event, struct
 			char *get_time = get_date_and_time();
 			debug("%s\n", get_time);
 
-			sprintf(info_ap_id, "info_AP_%02d", state->ap_num);
-			info_ap_nb = xmlNewChild(info_ap, NULL, BAD_CAST info_ap_id, NULL);
-
 			send_data(sock, "AP  %02d\n", state->ap_num);
-			/*info_ap_child = xmlNewChild(info_ap_nb, NULL, BAD_CAST "AP", NULL);
-			xmlNodeAddContent(info_ap_child, BAD_CAST state->ap_num);*/
+			info_ap = xmlNewChild(root, NULL, BAD_CAST "info_AP", NULL);
 
 			send_data(sock, "MAC : %s\n", iw_saether_ntop(&event->u.ap_addr, buffer));
-			info_ap_child = xmlNewChild(info_ap_nb, NULL, BAD_CAST "mac", NULL);
+			info_ap_child = xmlNewChild(info_ap, NULL, BAD_CAST "mac", NULL);
 			xmlNodeAddContent(info_ap_child, BAD_CAST iw_saether_ntop(&event->u.ap_addr, buffer));
 
 			state->ap_num++;
@@ -389,14 +385,14 @@ print_scanning_token(struct stream_descr *stream, struct iw_event *event, struct
 				send_data(sock, "channel : %s\n", channel_out);
 				/*end of crappy code */
 
-				info_ap_child = xmlNewChild(info_ap_nb, NULL, BAD_CAST "channel", NULL);
+				info_ap_child = xmlNewChild(info_ap, NULL, BAD_CAST "channel", NULL);
 				xmlNodeAddContent(info_ap_child, BAD_CAST channel_out);
 
 			} /* Assume it is Frequency*/
 			else if (buffer[0] == 'F'){
 				frequency_out = get_txt(buffer, ":", " ");
 				send_data(sock, "frequency : %s\n", frequency_out);
-				info_ap_child = xmlNewChild(info_ap_nb, NULL, BAD_CAST "frequency", NULL);
+				info_ap_child = xmlNewChild(info_ap, NULL, BAD_CAST "frequency", NULL);
 				xmlNodeAddContent(info_ap_child, BAD_CAST frequency_out);
 			}
 			else {
@@ -431,7 +427,7 @@ print_scanning_token(struct stream_descr *stream, struct iw_event *event, struct
 			}
 			else
 				send_data(sock, "ESSID: off/any/hidden\n");
-			info_ap_child = xmlNewChild(info_ap_nb, NULL, BAD_CAST "essid", NULL);
+			info_ap_child = xmlNewChild(info_ap, NULL, BAD_CAST "essid", NULL);
 			xmlNodeAddContent(info_ap_child, BAD_CAST essid);
 		}
 		break;
@@ -445,7 +441,7 @@ print_scanning_token(struct stream_descr *stream, struct iw_event *event, struct
 			send_data(sock, "Encryption key: ");
 			if(event->u.data.flags & IW_ENCODE_DISABLED) {
 				send_data(sock, "off\n");
-				info_ap_child = xmlNewChild(info_ap_nb, NULL, BAD_CAST "encryption", NULL);
+				info_ap_child = xmlNewChild(info_ap, NULL, BAD_CAST "encryption", NULL);
 				xmlNodeAddContent(info_ap_child, BAD_CAST "");
 				xmlNewProp(info_ap_child, BAD_CAST "on", BAD_CAST "no");
 			}
@@ -492,11 +488,11 @@ print_scanning_token(struct stream_descr *stream, struct iw_event *event, struct
 			signal_out = get_txt(buffer, "level=", " dBm");
 
 			send_data(sock, "Quality : %s\n", quality_out);
-			info_ap_child = xmlNewChild(info_ap_nb, NULL, BAD_CAST "quality", NULL);
+			info_ap_child = xmlNewChild(info_ap, NULL, BAD_CAST "quality", NULL);
 			xmlNodeAddContent(info_ap_child, BAD_CAST quality_out);
 
 			send_data(sock, "Signal : %s dBm\n", signal_out);
-			info_ap_child = xmlNewChild(info_ap_nb, NULL, BAD_CAST "signal", NULL);
+			info_ap_child = xmlNewChild(info_ap, NULL, BAD_CAST "signal", NULL);
 			xmlNodeAddContent(info_ap_child, BAD_CAST signal_out);
 
 			break;
@@ -517,7 +513,7 @@ print_scanning_token(struct stream_descr *stream, struct iw_event *event, struct
 			if (custom[0] != 't'){
 				lastbeacon_out = get_txt(custom, ": ", "ms");
 				send_data(sock, "last beacon: %s ms\n", lastbeacon_out);
-				info_ap_child = xmlNewChild(info_ap_nb, NULL, BAD_CAST "last_beacon", NULL);
+				info_ap_child = xmlNewChild(info_ap, NULL, BAD_CAST "last_beacon", NULL);
 				xmlNodeAddContent(info_ap_child, BAD_CAST lastbeacon_out);
 			}
 		}
