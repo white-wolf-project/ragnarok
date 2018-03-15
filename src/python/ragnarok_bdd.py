@@ -9,29 +9,19 @@ DB_NAME = 'ragnarok_bdd'
 
 TABLES = {}
 
-TABLES['Appareil'] = (
-    "CREATE TABLE `Appareil` ("
-    "  `ESSID` varchar(25) NOT NULL,"
-    "  `MAC` varchar(25) NOT NULL,"
-    "  `Timestamp` int NOT NULL,"
-    "  `Id` int NOT NULL,AUTO_INCREMENT,"
-    "  PRIMARY KEY (`Id`)"
-    ") ENGINE=InnoDB")
-
-TABLES['Event'] = (
-    "CREATE TABLE `Appareil` ("
-    "  `Timestamp` int NOT NULL,"
-    "  `Id` int NOT NULL,"
-    ") ENGINE=InnoDB")
 
 TABLES['Info_AP'] = (
     "CREATE TABLE `Info_AP` ("
-    "  `MAC` int NOT NULL,"
+    "  `Mac` int NOT NULL,"
+    "  `ESSID` varchar(25) NOT NULL,"
+    "  `Time` int NOT NULL,"
     "  `Id_encryption` int NOT NULL,AUTO_INCREMENT,"
     "  `Channel` varchar(25) NOT NULL,"
     "  `Beacon` int NOT NULL,"
+    "  `Signal` int NOT NULL,"
+    "  `Frequency` int NOT NULL,"
    	"  `Id_quality` int NOT NULL,"
-    "  PRIMARY KEY (`MAC`)"
+    "  PRIMARY KEY (`Mac`)"
     ") ENGINE=InnoDB")
 
 TABLES['Encryption'] = (
@@ -41,11 +31,19 @@ TABLES['Encryption'] = (
     "  PRIMARY KEY (`Id_encryption`)"
     ") ENGINE=InnoDB")
 
-TABLES['Time'] = (
-    "CREATE TABLE `Time` ("
-    "  `Timestamp` int NOT NULL,"
+# TABLES['Time'] = (
+#     "CREATE TABLE `Time` ("
+#     "  `Timestamp` int NOT NULL,"
+#     "  `Time` varchar(25) NOT NULL,"
+#     "  PRIMARY KEY (`Timestamp`)"
+#     ") ENGINE=InnoDB")
+
+TABLES['Device_info'] = (
+    "CREATE TABLE `Device_info` ("
     "  `Time` varchar(25) NOT NULL,"
-    "  PRIMARY KEY (`Timestamp`)"
+    "  `Mac` int NOT NULL,"
+    "  `IP` int NOT NULL,"
+    "  PRIMARY KEY (`Mac`)"
     ") ENGINE=InnoDB")
 
 TABLES['Quality'] = (
