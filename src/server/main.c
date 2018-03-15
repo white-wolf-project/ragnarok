@@ -66,30 +66,34 @@ int main(int argc, char *argv[]){
 				break;
 			case 'r' :
 				restart_srv = 1;
-				printf("restart\n");
 				break;
 			case 's' :
-				printf("stop server\n");
 				stop_srv = 1;
-				//kill(pid, signal);
 				break;
 		}
 	}
-	srv_pid = get_srv_pid("server.pid");
+
 	if (stop_srv){
+		srv_pid = get_srv_pid("server.pid");
+		/* No need to kill something that does exist*/
+		if (srv_pid == -1)
+			return 0;
+		remove("server.pid");
 		kill(srv_pid, SIGINT);
+		debug("[i] server stopped\n");
 		return 0;
 	}
 
-	if (restart_srv)
-	{
-		kill(srv_pid, SIGINT);
+	if (restart_srv && file_exists("server.pid")) {
+		fprintf(stdout, "[i] restarting server\n");
+		srv_pid = get_srv_pid("server.pid");
 		remove("server.pid");
+		kill(srv_pid, SIGINT);
 	}
 
 	/*
 		if you don't specify a config file
-		then set default XML for RELEASE or DEV
+		then set default XML for RELEASE or DEV/DEBUG
 	*/
 	if (!xconfig){
 		#ifdef RELEASE
@@ -100,7 +104,7 @@ int main(int argc, char *argv[]){
 	}
 
 
-	// parse XML file to get iface (for sysnet) and port to run server
+	/* parse XML file to get iface (for sysnet) and port to run server */
 	if (parse_config_file(xmlfile) != 0)
 		return -1;
 
@@ -114,16 +118,14 @@ int main(int argc, char *argv[]){
 	}
 
 	signal(SIGINT, INThandler);
-	debug("starting server...\n");
+	debug("[+] starting server...\n");
 
-	printf("\t");
-
-	// call network_info from sysnet to get IP of the server
+	/* call network_info from sysnet to get IP of the server */
 	network_info(iface, 4);
-	fprintf(stdout, "\n\tserver port : %s\n", port);
+	fprintf(stdout, "[i] server port : %s\n", port);
 
-	// run TCP server
-	init_deamon();
+	/* init damrun TCP server */
+	init_daemon();
 	tcp_server(port);
 	return 0;
 }

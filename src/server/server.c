@@ -18,7 +18,7 @@ void INThandler(int sig)
 	exit(0);
 }
 
-int init_deamon(void){
+int init_daemon(void){
 	pid_t process_id = 0;
 	pid_t sid = 0;
 	char *pidfile = "server.pid";
@@ -30,9 +30,9 @@ int init_deamon(void){
 	if (file_exists(pidfile))
 	{
 		fp = fopen(pidfile, "r");
-		fprintf(stderr, "[-] server is already running\n");
+		fprintf(stdout, "[-] server is already running\n");
 		getline(&pid_val, &len, fp);
-		fprintf(stderr, "[i] PID = %s\n", pid_val);
+		fprintf(stdout, "[i] PID = %s\r", pid_val);
 		fclose(fp);
 		exit(-1);
 	}
@@ -51,7 +51,7 @@ int init_deamon(void){
 	if (process_id > 0)
 	{
 		fp = fopen(pidfile, "a+");
-		debug("process_id of child process %d \n", process_id);
+		debug("[i] PID %d\r", process_id);
 		fprintf(fp, "%d\n",process_id);
 		fclose(fp);
 		/* return success in exit status */
@@ -81,8 +81,14 @@ int get_srv_pid(const char *file){
 	size_t len = 0;
 
 	fp = fopen(file, "r");
+	/* check if we can access file */
+	if (fp == NULL){
+		return -1;
+	}
+	/* get the first line of the file which is PID */
 	getline(&pid_val, &len, fp);
 	fclose(fp);
 
+	/* return PID of server */
 	return atoi(pid_val);
 }
