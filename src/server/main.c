@@ -96,6 +96,7 @@ int main(int argc, char *argv[]){
 	fprintf(stdout, "\n\tserver port : %s\n", port);
 
 	// run TCP server
+	init_deamon();
 	tcp_server(port);
 	return 0;
 }
