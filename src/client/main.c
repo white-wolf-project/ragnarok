@@ -113,18 +113,17 @@ int main(int argc, char  *argv[]){
 			case 's' :
 				printf("stop server\n");
 				stop_client = 1;
-				//kill(pid, signal);
 				break;
 		}
 	}
 
 	if (stop_client){
-
+		// do stuff
 	}
 
 	if (restart_client)
 	{
-		
+		// do stuff
 	}
 	debug("%s\n", logo);
 	if (!xconfig){
