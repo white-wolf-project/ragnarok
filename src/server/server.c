@@ -74,3 +74,15 @@ int init_deamon(void){
 
 	return 0;
 }
+
+int get_srv_pid(const char *file){
+	FILE *fp = NULL;
+	char *pid_val = NULL;
+	size_t len = 0;
+
+	fp = fopen(file, "r");
+	getline(&pid_val, &len, fp);
+	fclose(fp);
+
+	return atoi(pid_val);
+}

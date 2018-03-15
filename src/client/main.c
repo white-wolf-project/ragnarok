@@ -8,6 +8,7 @@
 #include <unistd.h> 
 #include <netdb.h>
 #include <getopt.h>
+
 /* local headers */
 #include <include/client.h>
 #include <include/iwlist.h>
@@ -46,13 +47,15 @@ static char logo[] = {
 };
 
 static struct option longopts[] = {
-	{ "network",	no_argument,	NULL, 'n'},
-	{ "ip", 		required_argument, 	NULL, 'i'},
-	{ "port", 		required_argument, 	NULL, 'p'},
+	{ "network",	no_argument,		NULL, 'n'},
+	{ "ip", 		required_argument,	NULL, 'i'},
+	{ "port", 		required_argument,	NULL, 'p'},
 	{ "interface",	required_argument,	NULL, 'f'},
-	{ "xml",	required_argument, NULL, 'x'},
-	{ "version", 	no_argument, 	NULL, 'v'},
-	{ "help", 		no_argument, 	NULL, 'h'},
+	{ "xml",		required_argument,	NULL, 'x'},
+	{ "restart",	no_argument,		NULL, 'r'},
+	{ "stop",		no_argument,		NULL, 's'},
+	{ "version", 	no_argument,		NULL, 'v'},
+	{ "help", 		no_argument,		NULL, 'h'},
 	{ NULL, 0, NULL, 0 }
 };
 
@@ -74,11 +77,12 @@ int main(int argc, char  *argv[]){
 	int opt, optindex = 0;
 	int xconfig = 0;
 	int is_ip = 0, is_port = 0, is_iface = 0;
+	int stop_client = 0, restart_client = 0;
 	char *newip, *newport, *newiface;
 	char *mac_addr;
 
 	const char *xmlfile;
-	while((opt = getopt_long(argc, (char**)argv, "ipfvhx", longopts, &optindex)) != -1){
+	while((opt = getopt_long(argc, (char**)argv, "ipfvhxrs", longopts, &optindex)) != -1){
 		switch(opt){
 			case 'h':
 				usage(argc, argv);
@@ -102,8 +106,25 @@ int main(int argc, char  *argv[]){
 				newiface = argv[optind];
 				is_iface = 1;
 				break;
-
+			case 'r' :
+				restart_client = 1;
+				printf("restart\n");
+				break;
+			case 's' :
+				printf("stop server\n");
+				stop_client = 1;
+				//kill(pid, signal);
+				break;
 		}
+	}
+
+	if (stop_client){
+
+	}
+
+	if (restart_client)
+	{
+		
 	}
 	debug("%s\n", logo);
 	if (!xconfig){
