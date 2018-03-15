@@ -4,7 +4,8 @@
 #include <stdbool.h>
 #include <libxml/parser.h>
 #include <libxml/tree.h>
-
+#include <include/client_tool.h>
+#include "sysnet/include/network.h"
 #include <include/common.h>
 
 #ifdef DEBUG
@@ -124,6 +125,12 @@ void init_xml(char *docname){
 	xmlDocSetRootElement(doc, root);
 	/* create two childs we will deal with */
 	device_AP_name = xmlNewChild(root, NULL, BAD_CAST "rpi_info", NULL);
+
+	device_AP_name_child = xmlNewChild(device_AP_name, NULL, BAD_CAST "mac", NULL);
+	xmlNodeAddContent(device_AP_name_child, BAD_CAST get_mac_addr(iface));
+
+	device_AP_name_child = xmlNewChild(device_AP_name, NULL, BAD_CAST "time", NULL);
+	xmlNodeAddContent(device_AP_name_child, BAD_CAST get_date_and_time());
 }
 
 void end_xml(char *docname){

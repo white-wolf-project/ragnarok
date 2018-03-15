@@ -155,22 +155,19 @@ int main(int argc, char  *argv[]){
 		}
 		freeaddrinfo(results);
 	}
-
+	//start deamon
 	// I grab iface value in config.xml.
 	// Idea is to use config.xml instead of hardcoded values in code
 	mac_addr = get_mac_addr(iface);
 	send_data(sock, "mac : %s\n", mac_addr);
+
 	init_xml("ragnarok.xml");
 
-	device_AP_name_child = xmlNewChild(device_AP_name, NULL, BAD_CAST "mac", NULL);
-	xmlNodeAddContent(device_AP_name_child, BAD_CAST mac_addr);
-
-	device_AP_name_child = xmlNewChild(device_AP_name, NULL, BAD_CAST "time", NULL);
-	xmlNodeAddContent(device_AP_name_child, BAD_CAST get_date_and_time());
-
 	run_iwlist(iface);
+
 	end_xml("ragnarok.xml");
 	read_and_send_data("ragnarok.xml");
 	close(sock);
+	// end deamon
 	return 0;
 }
