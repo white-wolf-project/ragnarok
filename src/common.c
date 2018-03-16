@@ -141,3 +141,22 @@ void end_xml(char *docname){
 	xmlSaveFormatFileEnc(docname, doc, "UTF-8", 1);
 	xmlFreeDoc(doc);
 }
+
+
+int get_instance_pid(const char *file){
+	FILE *fp = NULL;
+	char *pid_val = NULL;
+	size_t len = 0;
+
+	fp = fopen(file, "r");
+	/* check if we can access file */
+	if (fp == NULL){
+		return -1;
+	}
+	/* get the first line of the file which is PID */
+	getline(&pid_val, &len, fp);
+	fclose(fp);
+
+	/* return PID of server */
+	return atoi(pid_val);
+}

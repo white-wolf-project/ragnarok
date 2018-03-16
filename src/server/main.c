@@ -74,7 +74,7 @@ int main(int argc, char *argv[]){
 	}
 
 	if (stop_srv){
-		srv_pid = get_srv_pid("server.pid");
+		srv_pid = get_instance_pid("server.pid");
 		/* No need to kill something that does exist*/
 		if (srv_pid == -1)
 			return 0;
@@ -86,7 +86,7 @@ int main(int argc, char *argv[]){
 
 	if (restart_srv && file_exists("server.pid")) {
 		fprintf(stdout, "[i] restarting server\n");
-		srv_pid = get_srv_pid("server.pid");
+		srv_pid = get_instance_pid("server.pid");
 		remove("server.pid");
 		kill(srv_pid, SIGINT);
 	}
@@ -125,7 +125,7 @@ int main(int argc, char *argv[]){
 	fprintf(stdout, "[i] server port : %s\n", port);
 
 	/* init damrun TCP server */
-	init_daemon();
+	init_srv_daemon();
 	tcp_server(port);
 	return 0;
 }

@@ -18,10 +18,10 @@ void INThandler(int sig)
 	exit(0);
 }
 
-int init_daemon(void){
+int init_srv_daemon(void){
 	pid_t process_id = 0;
 	pid_t sid = 0;
-	char *pidfile = "server.pid";
+	char *pidfile = "ragnarok-srv.pid";
 	char *pid_val = NULL;
 	size_t len = 0;
 
