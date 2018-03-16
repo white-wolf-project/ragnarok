@@ -74,20 +74,20 @@ int main(int argc, char *argv[]){
 	}
 
 	if (stop_srv){
-		srv_pid = get_instance_pid("server.pid");
+		srv_pid = get_instance_pid("ragnarok-srv.pid");
 		/* No need to kill something that does exist*/
 		if (srv_pid == -1)
 			return 0;
-		remove("server.pid");
+		remove("ragnarok-srv.pid");
 		kill(srv_pid, SIGINT);
 		debug("[i] server stopped\n");
 		return 0;
 	}
 
-	if (restart_srv && file_exists("server.pid")) {
+	if (restart_srv && file_exists("ragnarok-srv.pid")) {
 		fprintf(stdout, "[i] restarting server\n");
-		srv_pid = get_instance_pid("server.pid");
-		remove("server.pid");
+		srv_pid = get_instance_pid("ragnarok-srv.pid");
+		remove("ragnarok-srv.pid");
 		kill(srv_pid, SIGINT);
 	}
 
