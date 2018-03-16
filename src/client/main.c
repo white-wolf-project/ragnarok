@@ -8,7 +8,8 @@
 #include <unistd.h> 
 #include <netdb.h>
 #include <getopt.h>
-
+#include <signal.h>
+#include <time.h>
 /* local headers */
 #include <include/client.h>
 #include <include/iwlist.h>
@@ -67,6 +68,8 @@ void usage(int argc, char  *argv[]){
 	fprintf(stdout, " -p, --port\t\t\t specify server port\n");
 	fprintf(stdout, " -f, --interface\t\t specify interface to scan with\n");
 	fprintf(stdout, " -x, --xml <xmlfile> \t\t XML file to parse\n");
+	fprintf(stdout, " -r, --restart\t\t\t restart daemon\n");
+	fprintf(stdout, " -s, --stop\t\t\t stop daemon\n");
 	fprintf(stdout, " -v, --version\t\t\t print version\n");
 	fprintf(stdout, " -h, --help\t\t\t print this help\n");
 	debug("DEBUG : ON\n");
@@ -78,6 +81,7 @@ int main(int argc, char  *argv[]){
 	int xconfig = 0;
 	int is_ip = 0, is_port = 0, is_iface = 0;
 	int stop_client = 0, restart_client = 0;
+	int client_pid = 0;
 	char *newip, *newport, *newiface;
 	char *mac_addr;
 
@@ -118,13 +122,25 @@ int main(int argc, char  *argv[]){
 	}
 
 	if (stop_client){
-		// do stuff
+		client_pid = get_instance_pid("ragnarok.pid");
+		/* No need to kill something that does exist*/
+		if (client_pid == -1)
+			return 0;
+		remove("ragnarok.pid");
+		close(sock);
+		kill(client_pid, SIGINT);
+		debug("[i] ragnarok stopped\n");
+		return 0;
 	}
 
-	if (restart_client)
-	{
-		// do stuff
+	if (restart_client && file_exists("ragnarok.pid")) {
+		fprintf(stdout, "[i] restarting ragnarok\n");
+		client_pid = get_instance_pid("ragnarok.pid");
+		remove("ragnarok.pid");
+		close(sock);
+		kill(client_pid, SIGINT);
 	}
+
 	debug("%s\n", logo);
 	if (!xconfig){
 		#ifdef RELEASE
@@ -175,19 +191,20 @@ int main(int argc, char  *argv[]){
 		}
 		freeaddrinfo(results);
 	}
-	//start deamon
+
 	// I grab iface value in config.xml.
 	// Idea is to use config.xml instead of hardcoded values in code
 	mac_addr = get_mac_addr(iface);
 	send_data(sock, "mac : %s\n", mac_addr);
 
-	init_xml("ragnarok.xml");
-
-	run_iwlist(iface);
-
-	end_xml("ragnarok.xml");
-	read_and_send_data("ragnarok.xml");
+	init_client_daemon();
+	while(1){
+		init_xml("ragnarok.xml");
+		run_iwlist(iface);
+		end_xml("ragnarok.xml");
+		read_and_send_data("ragnarok.xml");
+		sleep(10);
+	}
 	close(sock);
-	// end deamon
 	return 0;
 }
