@@ -53,7 +53,6 @@ static struct option longopts[] = {
 	{ "port", 		required_argument,	NULL, 'p'},
 	{ "interface",	required_argument,	NULL, 'f'},
 	{ "xml",		required_argument,	NULL, 'x'},
-	{ "restart",	no_argument,		NULL, 'r'},
 	{ "stop",		no_argument,		NULL, 's'},
 	{ "version", 	no_argument,		NULL, 'v'},
 	{ "help", 		no_argument,		NULL, 'h'},
@@ -68,8 +67,7 @@ void usage(int argc, char  *argv[]){
 	fprintf(stdout, " -p, --port\t\t\t specify server port\n");
 	fprintf(stdout, " -f, --interface\t\t specify interface to scan with\n");
 	fprintf(stdout, " -x, --xml <xmlfile> \t\t XML file to parse\n");
-	fprintf(stdout, " -r, --restart\t\t\t restart daemon\n");
-	fprintf(stdout, " -s, --stop\t\t\t stop daemon\n");
+	fprintf(stdout, " -s, --stop\t\t\t stop server\n");
 	fprintf(stdout, " -v, --version\t\t\t print version\n");
 	fprintf(stdout, " -h, --help\t\t\t print this help\n");
 	debug("DEBUG : ON\n");
@@ -80,13 +78,13 @@ int main(int argc, char  *argv[]){
 	int opt, optindex = 0;
 	int xconfig = 0;
 	int is_ip = 0, is_port = 0, is_iface = 0;
-	int stop_client = 0, restart_client = 0;
+	int stop_client = 0;
 	int client_pid = 0;
 	char *newip, *newport, *newiface;
 	char *mac_addr;
 
 	const char *xmlfile;
-	while((opt = getopt_long(argc, (char**)argv, "ipfvhxrs", longopts, &optindex)) != -1){
+	while((opt = getopt_long(argc, (char**)argv, "ipfvhxs", longopts, &optindex)) != -1){
 		switch(opt){
 			case 'h':
 				usage(argc, argv);
@@ -110,10 +108,6 @@ int main(int argc, char  *argv[]){
 				newiface = argv[optind];
 				is_iface = 1;
 				break;
-			case 'r' :
-				restart_client = 1;
-				printf("restart\n");
-				break;
 			case 's' :
 				printf("stop server\n");
 				stop_client = 1;
@@ -131,14 +125,6 @@ int main(int argc, char  *argv[]){
 		kill(client_pid, SIGINT);
 		debug("[i] ragnarok stopped\n");
 		return 0;
-	}
-
-	if (restart_client && file_exists("ragnarok.pid")) {
-		fprintf(stdout, "[i] restarting ragnarok\n");
-		client_pid = get_instance_pid("ragnarok.pid");
-		remove("ragnarok.pid");
-		close(sock);
-		kill(client_pid, SIGINT);
 	}
 
 	debug("%s\n", logo);
