@@ -15,7 +15,6 @@ static struct option longopts[] = {
 	{ "port", 		required_argument, 	NULL, 'p'},
 	{ "interface",	required_argument,	NULL, 'f'},
 	{ "xml",	required_argument, NULL, 'x'},
-	{ "restart",	no_argument,		NULL, 'r'},
 	{ "stop",		no_argument,		NULL, 's'},
 	{ "version", 	no_argument, 	NULL, 'v'},
 	{ "help", 		no_argument, 	NULL, 'h'},
@@ -29,7 +28,6 @@ void usage(int argc, char  *argv[]){
 	fprintf(stdout, " -p, --port\t\t\t specify port to bind\n");
 	fprintf(stdout, " -f, --interface\t\t specify interface to grab info\n");
 	fprintf(stdout, " -x, --xml <xmlfile> \t\t XML file to parse\n");
-	fprintf(stdout, " -r, --restart\t\t\t restart daemon\n");
 	fprintf(stdout, " -s, --stop\t\t\t stop daemon\n");
 	fprintf(stdout, " -v, --version\t\t\t print version\n");
 	fprintf(stdout, " -h, --help\t\t\t print this help\n");
@@ -40,11 +38,11 @@ int main(int argc, char *argv[]){
 	int opt, optindex = 0;
 	int xconfig = 0;
 	int is_port = 0, is_iface = 0;
-	int stop_srv = 0, restart_srv = 0;
+	int stop_srv = 0;
 	int srv_pid = 0;
 	char *newport, *newiface;
 	const char *xmlfile;
-	while((opt = getopt_long(argc, (char**)argv, "pfvhxrs", longopts, &optindex)) != -1){
+	while((opt = getopt_long(argc, (char**)argv, "pfvhxs", longopts, &optindex)) != -1){
 		switch(opt){
 			case 'h':
 				usage(argc, argv);
@@ -64,9 +62,6 @@ int main(int argc, char *argv[]){
 				newiface = argv[optind];
 				is_iface = 1;
 				break;
-			case 'r' :
-				restart_srv = 1;
-				break;
 			case 's' :
 				stop_srv = 1;
 				break;
@@ -82,13 +77,6 @@ int main(int argc, char *argv[]){
 		kill(srv_pid, SIGINT);
 		debug("[i] server stopped\n");
 		return 0;
-	}
-
-	if (restart_srv && file_exists("ragnarok-srv.pid")) {
-		fprintf(stdout, "[i] restarting server\n");
-		srv_pid = get_instance_pid("ragnarok-srv.pid");
-		remove("ragnarok-srv.pid");
-		kill(srv_pid, SIGINT);
 	}
 
 	/*
