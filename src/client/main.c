@@ -8,6 +8,8 @@
 #include <unistd.h> 
 #include <netdb.h>
 #include <getopt.h>
+#include <signal.h>
+#include <time.h>
 /* local headers */
 #include <include/client.h>
 #include <include/iwlist.h>
@@ -46,13 +48,14 @@ static char logo[] = {
 };
 
 static struct option longopts[] = {
-	{ "network",	no_argument,	NULL, 'n'},
-	{ "ip", 		required_argument, 	NULL, 'i'},
-	{ "port", 		required_argument, 	NULL, 'p'},
+	{ "network",	no_argument,		NULL, 'n'},
+	{ "ip", 		required_argument,	NULL, 'i'},
+	{ "port", 		required_argument,	NULL, 'p'},
 	{ "interface",	required_argument,	NULL, 'f'},
-	{ "xml",	required_argument, NULL, 'x'},
-	{ "version", 	no_argument, 	NULL, 'v'},
-	{ "help", 		no_argument, 	NULL, 'h'},
+	{ "xml",		required_argument,	NULL, 'x'},
+	{ "stop",		no_argument,		NULL, 's'},
+	{ "version", 	no_argument,		NULL, 'v'},
+	{ "help", 		no_argument,		NULL, 'h'},
 	{ NULL, 0, NULL, 0 }
 };
 
@@ -64,6 +67,7 @@ void usage(int argc, char  *argv[]){
 	fprintf(stdout, " -p, --port\t\t\t specify server port\n");
 	fprintf(stdout, " -f, --interface\t\t specify interface to scan with\n");
 	fprintf(stdout, " -x, --xml <xmlfile> \t\t XML file to parse\n");
+	fprintf(stdout, " -s, --stop\t\t\t stop server\n");
 	fprintf(stdout, " -v, --version\t\t\t print version\n");
 	fprintf(stdout, " -h, --help\t\t\t print this help\n");
 	debug("DEBUG : ON\n");
@@ -74,11 +78,13 @@ int main(int argc, char  *argv[]){
 	int opt, optindex = 0;
 	int xconfig = 0;
 	int is_ip = 0, is_port = 0, is_iface = 0;
+	int stop_client = 0;
+	int client_pid = 0;
 	char *newip, *newport, *newiface;
 	char *mac_addr;
 
 	const char *xmlfile;
-	while((opt = getopt_long(argc, (char**)argv, "ipfvhx", longopts, &optindex)) != -1){
+	while((opt = getopt_long(argc, (char**)argv, "ipfvhxs", longopts, &optindex)) != -1){
 		switch(opt){
 			case 'h':
 				usage(argc, argv);
@@ -102,9 +108,25 @@ int main(int argc, char  *argv[]){
 				newiface = argv[optind];
 				is_iface = 1;
 				break;
-
+			case 's' :
+				printf("stop server\n");
+				stop_client = 1;
+				break;
 		}
 	}
+
+	if (stop_client){
+		client_pid = get_instance_pid("ragnarok.pid");
+		/* No need to kill something that does exist*/
+		if (client_pid == -1)
+			return 0;
+		remove("ragnarok.pid");
+		close(sock);
+		kill(client_pid, SIGINT);
+		debug("[i] ragnarok stopped\n");
+		return 0;
+	}
+
 	debug("%s\n", logo);
 	if (!xconfig){
 		#ifdef RELEASE
@@ -160,17 +182,15 @@ int main(int argc, char  *argv[]){
 	// Idea is to use config.xml instead of hardcoded values in code
 	mac_addr = get_mac_addr(iface);
 	send_data(sock, "mac : %s\n", mac_addr);
-	init_xml("ragnarok.xml");
 
-	device_AP_name_child = xmlNewChild(device_AP_name, NULL, BAD_CAST "mac", NULL);
-	xmlNodeAddContent(device_AP_name_child, BAD_CAST mac_addr);
-
-	device_AP_name_child = xmlNewChild(device_AP_name, NULL, BAD_CAST "time", NULL);
-	xmlNodeAddContent(device_AP_name_child, BAD_CAST get_date_and_time());
-
-	run_iwlist(iface);
-	end_xml("ragnarok.xml");
-	read_and_send_data("ragnarok.xml");
+	init_client_daemon();
+	while(1){
+		init_xml("ragnarok.xml");
+		run_iwlist(iface);
+		end_xml("ragnarok.xml");
+		read_and_send_data("ragnarok.xml");
+		sleep(10);
+	}
 	close(sock);
 	return 0;
 }
