@@ -52,6 +52,7 @@ static struct option longopts[] = {
 	{ "ip", 		required_argument,	NULL, 'i'},
 	{ "port", 		required_argument,	NULL, 'p'},
 	{ "interface",	required_argument,	NULL, 'f'},
+	{ "wireless",	required_argument,	NULL, 'w'},
 	{ "xml",		required_argument,	NULL, 'x'},
 	{ "stop",		no_argument,		NULL, 's'},
 	{ "version", 	no_argument,		NULL, 'v'},
@@ -65,7 +66,8 @@ void usage(int argc, char  *argv[]){
 	fprintf(stdout, "Usage : %s [OPTIONS]\n", (name ? name + 1: argv[0]));
 	fprintf(stdout, " -i, --ip\t\t\t specify server IP\n");
 	fprintf(stdout, " -p, --port\t\t\t specify server port\n");
-	fprintf(stdout, " -f, --interface\t\t specify interface to scan with\n");
+	fprintf(stdout, " -f, --interface <interface>\t specify ethernet interface\n");
+	fprintf(stdout, " -w, --wireless <interface> \t specify wireless interface to scan with\n");
 	fprintf(stdout, " -x, --xml <xmlfile> \t\t XML file to parse\n");
 	fprintf(stdout, " -s, --stop\t\t\t stop server\n");
 	fprintf(stdout, " -v, --version\t\t\t print version\n");
@@ -77,14 +79,13 @@ int main(int argc, char  *argv[]){
 
 	int opt, optindex = 0;
 	int xconfig = 0;
-	int is_ip = 0, is_port = 0, is_iface = 0;
-	int stop_client = 0;
-	int client_pid = 0;
-	char *newip, *newport, *newiface;
-	char *mac_addr;
-
+	int is_ip = 0, is_port = 0, is_wired_iface = 0, is_wireless_iface = 0;
+	int stop_client = 0, client_pid = 0;
+	char *newip, *newport, *wired_iface, *newwireless;
+	char *mac_addr, *wireless;
 	const char *xmlfile;
-	while((opt = getopt_long(argc, (char**)argv, "ipfvhxs", longopts, &optindex)) != -1){
+
+	while((opt = getopt_long(argc, (char**)argv, "ipfwvhxs", longopts, &optindex)) != -1){
 		switch(opt){
 			case 'h':
 				usage(argc, argv);
@@ -105,8 +106,12 @@ int main(int argc, char  *argv[]){
 				is_port = 1;
 				break;
 			case 'f':
-				newiface = argv[optind];
-				is_iface = 1;
+				wired_iface = argv[optind];
+				is_wired_iface = 1;
+				break;
+			case 'w' :
+				newwireless = argv[optind];
+				is_wireless_iface = 1;
 				break;
 			case 's' :
 				printf("stop server\n");
@@ -138,8 +143,8 @@ int main(int argc, char  *argv[]){
 
 	debug("%s\n", get_date_and_time());
 
-	// parse XML file to get default server IP/port and interface to use
-	// for AP scan
+	// parse XML file to get default server IP/port and
+	// interface to use for AP scan
 	if (parse_config_file(xmlfile) != 0)
 		return -1;
 
@@ -152,14 +157,22 @@ int main(int argc, char  *argv[]){
 		port = newport;
 	}
 
-	if (is_iface)
+	if (is_wired_iface)
 	{
-		iface = newiface;
+		iface = wired_iface;
+	}
+
+	if (is_wireless_iface)
+	{
+		wireless = newwireless;
+	} else {
+		wireless = get_wireless();
 	}
 
 	debug("ip : %s\n", ipaddr);
 	debug("port : %s\n", port);
 	debug("iface : %s\n", iface);
+	debug("wireless : %s\n", wireless);
 
 	if (strcmp(ipaddr, "0") != 0)
 	{
@@ -180,13 +193,12 @@ int main(int argc, char  *argv[]){
 
 	// I grab iface value in config.xml.
 	// Idea is to use config.xml instead of hardcoded values in code
-	mac_addr = get_mac_addr(iface);
+	mac_addr = get_mac_addr(wireless);
 	send_data(sock, "mac : %s\n", mac_addr);
-
 	init_client_daemon();
 	while(1){
 		init_xml("ragnarok.xml");
-		run_iwlist(iface);
+		run_iwlist(get_wireless());
 		end_xml("ragnarok.xml");
 		read_and_send_data("ragnarok.xml");
 		sleep(10);
