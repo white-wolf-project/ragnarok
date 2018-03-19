@@ -6,6 +6,8 @@
 #include <errno.h>
 #include <net/if.h>
 #include <sys/ioctl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <time.h>
 /* local headers */
 #include <include/client.h>
@@ -87,5 +89,62 @@ int read_and_send_data(const char *xmlfile){
 	}
 	send_data(sock, "-end_xml-\r");
 	fclose(fp);
+	return 0;
+}
+
+int init_client_daemon(void){
+	pid_t process_id = 0;
+	pid_t sid = 0;
+	char *pidfile = "ragnarok.pid";
+	char *pid_val = NULL;
+	size_t len = 0;
+
+	FILE *fp = NULL;
+
+	if (file_exists(pidfile))
+	{
+		fp = fopen(pidfile, "r");
+		fprintf(stdout, "[-] ragnarok is already running\n");
+		getline(&pid_val, &len, fp);
+		fprintf(stdout, "[i] PID = %s\r", pid_val);
+		fclose(fp);
+		exit(-1);
+	}
+
+	/* create child process */
+	process_id = fork();
+
+	/* check if fork() failed */
+	if (process_id < 0)
+	{
+		perror("fork");
+		exit(1);
+	}
+
+	/* PARENT PROCESS. Let's kill it. */
+	if (process_id > 0)
+	{
+		fp = fopen(pidfile, "a+");
+		debug("[i] PID %d\r", process_id);
+		fprintf(fp, "%d\n",process_id);
+		fclose(fp);
+		/* return success in exit status */
+		exit(0);
+	}
+	/* unmask the file mode */
+	umask(0);
+
+	/* set new session */
+	sid = setsid();
+	if(sid < 0)
+	{
+		exit(1);
+	}
+
+	/* Close stdin. stdout and stderr */
+	close(STDIN_FILENO);
+	close(STDOUT_FILENO);
+	close(STDERR_FILENO);
+
 	return 0;
 }

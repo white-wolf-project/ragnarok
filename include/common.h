@@ -19,3 +19,5 @@ char *get_txt(const char *str, const char *p1, const char *p2);
 
 void init_xml(char *docname);
 void end_xml(char *docname);
+
+int get_instance_pid(const char *file);

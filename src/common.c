@@ -4,7 +4,8 @@
 #include <stdbool.h>
 #include <libxml/parser.h>
 #include <libxml/tree.h>
-
+#include <include/client_tool.h>
+#include "sysnet/include/network.h"
 #include <include/common.h>
 
 #ifdef DEBUG
@@ -124,6 +125,12 @@ void init_xml(char *docname){
 	xmlDocSetRootElement(doc, root);
 	/* create two childs we will deal with */
 	device_AP_name = xmlNewChild(root, NULL, BAD_CAST "rpi_info", NULL);
+
+	device_AP_name_child = xmlNewChild(device_AP_name, NULL, BAD_CAST "mac", NULL);
+	xmlNodeAddContent(device_AP_name_child, BAD_CAST get_mac_addr(iface));
+
+	device_AP_name_child = xmlNewChild(device_AP_name, NULL, BAD_CAST "time", NULL);
+	xmlNodeAddContent(device_AP_name_child, BAD_CAST get_date_and_time());
 }
 
 void end_xml(char *docname){
@@ -133,4 +140,23 @@ void end_xml(char *docname){
 	// xmlSaveFormatFileEnc("-", doc, "UTF-8", 1);
 	xmlSaveFormatFileEnc(docname, doc, "UTF-8", 1);
 	xmlFreeDoc(doc);
+}
+
+
+int get_instance_pid(const char *file){
+	FILE *fp = NULL;
+	char *pid_val = NULL;
+	size_t len = 0;
+
+	fp = fopen(file, "r");
+	/* check if we can access file */
+	if (fp == NULL){
+		return -1;
+	}
+	/* get the first line of the file which is PID */
+	getline(&pid_val, &len, fp);
+	fclose(fp);
+
+	/* return PID of server */
+	return atoi(pid_val);
 }

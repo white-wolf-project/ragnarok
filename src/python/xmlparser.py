@@ -3,27 +3,27 @@ import sqlite3
 
 
 def insert_info_ap(db_conn, mac, essid, time, Id_encryption, Channel, Beacon, Signal, Frequency, id_quality): 
-    curs = db_conn.cursor() 
-    curs.execute("insert into Info_AP (Mac, ESSID, Time, Id_encryption, Channel, Beacon, Signal, Frequency, Id_quality) values (?, ?, ?, ?, ?, ?, ?, ?, ?)", 
-                 (mac, essid, time, Id_encryption, Channel, Beacon, Signal, Frequency, id_quality)) 
-    db_conn.commit()
+	curs = db_conn.cursor() 
+	curs.execute("insert into Info_AP (Mac, ESSID, Time, Id_encryption, Channel, Beacon, Signal, Frequency, Id_quality) values (?, ?, ?, ?, ?, ?, ?, ?, ?)", 
+				(mac, essid, time, Id_encryption, Channel, Beacon, Signal, Frequency, id_quality)) 
+	db_conn.commit()
 
 def insert_encryption(db_conn, Id_encryption, Encryption_name):
 	curs = db_conn.cursor() 
-    curs.execute("insert into Encryption (Id_encryption, Encryption_name) values (?, ?)",
-    			 (Id_encryption, Encryption_name))
+	curs.execute("insert into Encryption (Id_encryption, Encryption_name) values (?, ?)",
+				(Id_encryption, Encryption_name))
 	db_conn.commit()
 
 def insert_device_info(db_conn, time, mac, ip):
 	curs = db_conn.cursor() 
-    curs.execute("insert into Devide_info (Time, Mac, Ip) values (?, ?, ?)",
-    			(time, mac, ip))
+	curs.execute("insert into Devide_info (Time, Mac, Ip) values (?, ?, ?)",
+				(time, mac, ip))
 	db_conn.commit()
 
 def insert_quality(db_conn, Id_quality, Qual_Rpi1, Qual_Rpi2, Qual_Rpi3)
 	curs = db_conn.cursor() 
-    curs.execute("insert into Quality (Id_quality, Qual_Rpi1, Qual_Rpi2, Qual_Rpi3) values (?, ?, ?, ?)",
-    			(Id_quality, Qual_Rpi1, Qual_Rpi2, Qual_Rpi3))
+	curs.execute("insert into Quality (Id_quality, Qual_Rpi1, Qual_Rpi2, Qual_Rpi3) values (?, ?, ?, ?)",
+				(Id_quality, Qual_Rpi1, Qual_Rpi2, Qual_Rpi3))
 	db_conn.commit()
 
 # def person_data_from_element(element): 
