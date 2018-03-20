@@ -114,7 +114,6 @@ int main(int argc, char  *argv[]){
 				is_wireless_iface = 1;
 				break;
 			case 's' :
-				printf("stop server\n");
 				stop_client = 1;
 				break;
 		}
