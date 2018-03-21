@@ -168,6 +168,12 @@ int main(int argc, char  *argv[]){
 		wireless = get_wireless();
 	}
 
+	if (wireless == NULL)
+	{
+		fprintf(stderr, "No wireless interface found\n");
+		return -1;
+	}
+
 	debug("ip : %s\n", ipaddr);
 	debug("port : %s\n", port);
 	debug("iface : %s\n", iface);
