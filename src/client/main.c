@@ -173,7 +173,6 @@ int main(int argc, char  *argv[]){
 		fprintf(stderr, "[e] no wireless interface found\n");
 		return -1;
 	}
-
 	debug("ip : %s\n", ipaddr);
 	debug("port : %s\n", port);
 	debug("iface : %s\n", iface);
