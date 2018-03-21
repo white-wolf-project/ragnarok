@@ -170,7 +170,7 @@ int main(int argc, char  *argv[]){
 
 	if (wireless == NULL)
 	{
-		fprintf(stderr, "No wireless interface found\n");
+		fprintf(stderr, "[e] no wireless interface found\n");
 		return -1;
 	}
 
