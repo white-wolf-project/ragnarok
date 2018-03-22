@@ -1,3 +1,10 @@
+/**
+ * @file client.c
+ * @author Mathieu Hautebas
+ * @date 22 March 2018
+ * @brief File containing Functions for the client.
+ *
+ */
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -13,24 +20,44 @@
 #include <include/client.h>
 #include <include/xml.h>
 #include <include/common.h>
+
 #define STRING_LEN 2048
 #define BUFSIZE 1024 /* read 1024 bytes at a time */
 
 int sock;
 
+/**
+ * @brief
+ * Function to send data to server.
+ * example usage :
+ * init socket :
+ * @verbatim int sock; @endverbatim
+ * call this function like this :
+ * @code
+ * int number = 12;
+ * send_data(sock, "number is : %d", number);
+ * @endcode
+ * When you use va_arg() "function" on the va_list obtained
+ * from va_start(),
+ * the va_list is modified, when passed to another function
+ * it is NOT the same as you got at the beginning
+ * That's why I'm creating two va_lists first one is the fprintf equivalent and the other one is sprintf.
+ * Then I copy vargs to vargs_out and vargs_log like this :
+ * @verbatim copy vargs -> vargs_out (stdout) & vargs_log (client.log) @endverbatim
+ * @code
+ * va_copy(vargs_out, vargs);
+ * va_copy(vargs_log, vargs);
+ * @endcode
+ * @param sock2server the socket we will use to deal with the server.
+ * @param data2send : the date we will send.
+ * @param ... : other params like printf()
+ * @return returns 0 if everything's done well or a number != 0 if any issue.
+ * @see https://stackoverflow.com/questions/27126387/vfprintf-throws-segfault-but-input-is-well-defined#comment42752821_27126509
+ */
 int send_data(int sock2server, const char* data2send, ...){
 
 	// TODO : fix length
 	char string2send[STRING_LEN];
-
-	/*
-	* When you use va_arg() "function" on the va_list obtained
-	* from va_start(),
-	* the va_list is modified, so when passed to another function
-	* it is NOT the same as you got at the beginning
-	* https://stackoverflow.com/questions/27126387/vfprintf-throws-segfault-but-input-is-well-defined#comment42752821_27126509
-	* This is why I'm creating 2 va_lists first one is the fprintf equivalent and the other one is sprintf.
-	*/
 
 	va_list vargs;
 	va_list vargs_out;
@@ -69,6 +96,13 @@ int send_data(int sock2server, const char* data2send, ...){
 	return 0;
 }
 
+/**
+ * @brief
+ * Read data in XML file then send it to the server using send_data() function.
+ * This function is used in main()
+ * @param xmlfile : path or name of file.
+ * @return returns 0 if everything's done well or a number != 0 if any issue.
+ */
 int read_and_send_data(const char *xmlfile){
 
 	FILE* fp;
@@ -92,6 +126,32 @@ int read_and_send_data(const char *xmlfile){
 	return 0;
 }
 
+/**
+ * @brief
+ * init deamon for the client
+ * First we check if the pidfile exists. If it exists, it means client is already running.
+ * Print pid of process the quit.
+ * @code
+ * if (file_exists(pidfile))
+ * {
+ *		fp = fopen(pidfile, "r");
+ *		fprintf(stdout, "[-] ragnarok is already running\n");
+ *		getline(&pid_val, &len, fp);
+ *		fprintf(stdout, "[i] PID = %s\r", pid_val);
+ *		fclose(fp);
+ *		exit(-1);
+ * }
+ * @endcode
+ * We create a normal process and a child process. We kill parent process and set a new session.
+ * Close stdin, stdout and stderr for ragnarok
+ * @code
+ * close(STDIN_FILENO);
+ * close(STDOUT_FILENO);
+ * close(STDERR_FILENO);
+ * @endcode
+ * @return returns 0 if everything's done well or a number != 0 if any issue or just exit().
+ * @see https://www.thegeekstuff.com/2012/02/c-daemon-process/
+ */
 int init_client_daemon(void){
 	pid_t process_id = 0;
 	pid_t sid = 0;

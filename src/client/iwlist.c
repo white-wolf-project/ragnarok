@@ -1,3 +1,18 @@
+/**
+ * @file iwlist.c
+ * @author Mathieu Hautebas
+ * @date 22 March 2018
+ * @brief Modified file from HP wireless-tools's - iwlist.c.
+ * I modified stuff to get it working with ragnarok and ragnarok-srv with our own functions.
+ * Initial header is at the top of the file behind the Doxygen header with the same license.
+ * Doc is directly in the file for the moment.
+ * Without this lib we could't get this project done.
+ * You guys rock ! Thank you so much.
+ * @see https://hewlettpackard.github.io/wireless-tools/Tools.html
+ * @see https://github.com/HewlettPackard/wireless-tools
+ *
+ */
+
 /*
  *	Wireless Tools
  *
@@ -11,9 +26,10 @@
  *     Copyright (c) 1997-2007 Jean Tourrilhes <jt@hpl.hp.com>
  */
 
+
 #include <sys/time.h>
 #include <iwlib.h>
-
+/* local headers */
 #include <include/client_tool.h>
 #include <include/client.h>
 #include <include/common.h>

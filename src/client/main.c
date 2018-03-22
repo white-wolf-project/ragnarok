@@ -1,3 +1,10 @@
+/**
+ * @file main.c
+ * @author Mathieu Hautebas
+ * @date 22 March 2018
+ * @brief file containing the main function, usage function and the logo.
+ *
+ */
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -60,6 +67,15 @@ static struct option longopts[] = {
 	{ NULL, 0, NULL, 0 }
 };
 
+/**
+ * @brief
+ * We call this function almost everywhere.
+ * But it prints to stdout/stderr only
+ * when you build the project in DEBUG mode (we use #ifdef DEBUG ... #endif)
+ * @param argc : number of args
+ * @param argv : args
+ * @return void, no return
+ */
 void usage(int argc, char  *argv[]){
 	char *name = NULL;
 	name = strrchr(argv[0], '/');
@@ -75,6 +91,13 @@ void usage(int argc, char  *argv[]){
 	debug("DEBUG : ON\n");
 }
 
+/**
+ * @brief
+ * main function where everything starts
+ * @param argc : number of args
+ * @param argv : args
+ * @return 0 if everything's ok, or a number != 0
+ */
 int main(int argc, char  *argv[]){
 
 	int opt, optindex = 0;
@@ -173,6 +196,7 @@ int main(int argc, char  *argv[]){
 		fprintf(stderr, "[e] no wireless interface found\n");
 		return -1;
 	}
+
 	debug("ip : %s\n", ipaddr);
 	debug("port : %s\n", port);
 	debug("iface : %s\n", iface);
