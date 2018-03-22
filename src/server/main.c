@@ -1,3 +1,10 @@
+/**
+ * @file main.c
+ * @author Mathieu Hautebas
+ * @date 22 March 2018
+ * @brief file containing the main function and usage function.
+ *
+ */
 #include <stdio.h>
 #include <signal.h>
 #include <getopt.h>

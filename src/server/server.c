@@ -1,3 +1,10 @@
+/**
+ * @file server.c
+ * @author Mathieu Hautebas
+ * @date 22 March 2018
+ * @brief file containing functions for the server.
+ *
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
@@ -6,10 +13,18 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+/* local headers */
 #include <include/server.h>
 #include <include/common.h>
 
 int sock;
+
+/**
+ * @brief
+ * Catch ctrl+c to close sock and exit correctly
+ * Since it's a deamon this function is useless. I keep it for the moment
+ * @return void, no return just exit() the program
+ */
 void INThandler(int sig)
 {
 	signal(sig, SIG_IGN);
@@ -18,6 +33,32 @@ void INThandler(int sig)
 	exit(0);
 }
 
+/**
+ * @brief
+ * init deamon for the server
+ * First we check if the pidfile exists. If it exists, it means client is already running.
+ * Print pid of process the quit.
+ * @code
+ * if (file_exists(pidfile))
+ * {
+ *		fp = fopen(pidfile, "r");
+ *		fprintf(stdout, "[-] ragnarok is already running\n");
+ *		getline(&pid_val, &len, fp);
+ *		fprintf(stdout, "[i] PID = %s\r", pid_val);
+ *		fclose(fp);
+ *		exit(-1);
+ * }
+ * @endcode
+ * We create a normal process and a child process. We kill parent process and set a new session.
+ * Close stdin, stdout and stderr for ragnarok
+ * @code
+ * close(STDIN_FILENO);
+ * close(STDOUT_FILENO);
+ * close(STDERR_FILENO);
+ * @endcode
+ * @return returns 0 if everything's done well or a number != 0 if any issue or just exit().
+ * @see https://www.thegeekstuff.com/2012/02/c-daemon-process/
+ */
 int init_srv_daemon(void){
 	pid_t process_id = 0;
 	pid_t sid = 0;
@@ -73,22 +114,4 @@ int init_srv_daemon(void){
 	close(STDERR_FILENO);
 
 	return 0;
-}
-
-int get_srv_pid(const char *file){
-	FILE *fp = NULL;
-	char *pid_val = NULL;
-	size_t len = 0;
-
-	fp = fopen(file, "r");
-	/* check if we can access file */
-	if (fp == NULL){
-		return -1;
-	}
-	/* get the first line of the file which is PID */
-	getline(&pid_val, &len, fp);
-	fclose(fp);
-
-	/* return PID of server */
-	return atoi(pid_val);
 }
