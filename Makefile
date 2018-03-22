@@ -117,7 +117,8 @@ clean :
 	make -C client-srv clean
 	make -C sysnet clean
 	rm -rf 	$(CLIENT) $(CLIENT_OBJECTS) \
-	$(SERVER) $(SRV_OBJECTS) $(OBJECTS)
+	$(SERVER) $(SRV_OBJECTS) $(OBJECTS) \
+	scripts/check_wireless
 
 # clean more files
 mrproper : clean

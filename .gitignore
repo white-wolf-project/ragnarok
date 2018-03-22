@@ -3,6 +3,7 @@ a.out
 ragnarok
 ragnarok-srv
 wireless-tools
+check_wireless
 *.log
 *.xml
 *.pid
