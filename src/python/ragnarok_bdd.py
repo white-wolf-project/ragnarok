@@ -12,10 +12,10 @@ TABLES = {}
 
 TABLES['Info_AP'] = (
 	"CREATE TABLE `Info_AP` ("
-	"  `Mac` int NOT NULL,"
+	"  `Mac` varchar(25) NOT NULL,"
 	"  `ESSID` varchar(25) NOT NULL,"
 	"  `Time` int NOT NULL,"
-	"  `Id_encryption` int NOT NULL,AUTO_INCREMENT,"
+	"  `Id_encryption` int NOT NULL ,"
 	"  `Channel` varchar(25) NOT NULL,"
 	"  `Beacon` int NOT NULL,"
 	"  `Signal` int NOT NULL,"
@@ -26,7 +26,7 @@ TABLES['Info_AP'] = (
 
 TABLES['Encryption'] = (
 	"CREATE TABLE `Encryption` ("
-	"  `Id_encryption` int NOT NULL,AUTO_INCREMENT,"
+	"  `Id_encryption` int NOT NULL AUTO_INCREMENT,"
 	"  `Encryption_name` varchar(50) NOT NULL,"
 	"  PRIMARY KEY (`Id_encryption`)"
 	") ENGINE=InnoDB")
@@ -41,14 +41,14 @@ TABLES['Encryption'] = (
 TABLES['Device_info'] = (
 	"CREATE TABLE `Device_info` ("
 	"  `Time` varchar(25) NOT NULL,"
-	"  `Mac` int NOT NULL,"
-	"  `IP` int NOT NULL,"
+	"  `Mac` varchar(17) NOT NULL,"
+	"  `IP` varchar(15) NOT NULL,"
 	"  PRIMARY KEY (`Mac`)"
 	") ENGINE=InnoDB")
 
 TABLES['Quality'] = (
 	"CREATE TABLE `Quality` ("
-	"  `Id_quality` int NOT NULL,AUTO_INCREMENT,"
+	"  `Id_quality` int NOT NULL AUTO_INCREMENT,"
 	"  `Qual_Rpi1` int NOT NULL,"
 	"  `Qual_Rpi2` int NOT NULL,"
 	"  `Qual_Rpi3` int NOT NULL,"
@@ -65,8 +65,8 @@ def create_database(cursor):
 		exit(1)
 
 def create_tables(cursor):
-
-	for name, ddl in TABLES.iteritems():
+	cnx = cnx = mysql.connector.connect(user='root', password='root',                                                   host='localhost')
+	for name, ddl in TABLES.items():
 		try:
 			print("Creating table {}: ".format(name))
 			cursor.execute(ddl)
@@ -78,13 +78,12 @@ def create_tables(cursor):
 		else:
 			print("OK")
 
-		cursor.close()
+	cursor.close()
 	cnx.close()
 
 def init_bdd():
 	
-	cnx = mysql.connector.connect(user='root', password='root',
-								  host='localhost')
+	cnx = mysql.connector.connect(user='root', password='root',						      host='localhost')
 	cursor = cnx.cursor()
 
 	create_database(cursor)
