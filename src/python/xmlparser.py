@@ -1,30 +1,37 @@
-import xml.etree.ElementTree
-import sqlite3
+
+
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+import mysql.connector
+import xml.etree.ElementTree 
+
+conn = mysql.connector.connect(host="localhost",user="root",password="root", database="ragnarok_bdd")
 
 
 def insert_info_ap(db_conn, mac, essid, time, Id_encryption, Channel, Beacon, Signal, Frequency, id_quality): 
 	curs = db_conn.cursor() 
-	curs.execute("insert into Info_AP (Mac, ESSID, Time, Id_encryption, Channel, Beacon, Signal, Frequency, Id_quality) values (?, ?, ?, ?, ?, ?, ?, ?, ?)", 
+	curs.execute("""INSERT INTO Info_AP (Mac, ESSID, Time, Id_encryption, Channel, Beacon, Signal, Frequency, Id_quality) values (?, ?, ?, ?, ?, ?, ?, ?, ?)""", 
 				(mac, essid, time, Id_encryption, Channel, Beacon, Signal, Frequency, id_quality)) 
-	db_conn.commit()
+	
 
 def insert_encryption(db_conn, Id_encryption, Encryption_name):
 	curs = db_conn.cursor() 
-	curs.execute("insert into Encryption (Id_encryption, Encryption_name) values (?, ?)",
+	curs.execute("""INSERT INTO Encryption (Id_encryption, Encryption_name) values (?, ?)""",
 				(Id_encryption, Encryption_name))
-	db_conn.commit()
+
 
 def insert_device_info(db_conn, time, mac, ip):
 	curs = db_conn.cursor() 
-	curs.execute("insert into Devide_info (Time, Mac, Ip) values (?, ?, ?)",
+	curs.execute("""INSERT INTO  Devide_info (Time, Mac, Ip) values (?, ?, ?)""",
 				(time, mac, ip))
-	db_conn.commit()
+
 
 def insert_quality(db_conn, Id_quality, Qual_Rpi1, Qual_Rpi2, Qual_Rpi3)
 	curs = db_conn.cursor() 
-	curs.execute("insert into Quality (Id_quality, Qual_Rpi1, Qual_Rpi2, Qual_Rpi3) values (?, ?, ?, ?)",
+	curs.execute("""INSERT INTO  Quality (Id_quality, Qual_Rpi1, Qual_Rpi2, Qual_Rpi3) values (?, ?, ?, ?)""",
 				(Id_quality, Qual_Rpi1, Qual_Rpi2, Qual_Rpi3))
-	db_conn.commit()
+	
 
 # def person_data_from_element(element): 
 #     first = element.find("firstName").text 
@@ -51,7 +58,7 @@ def ap_data_from_element(info_AP):
 
 
 if __name__ == '__main__':
-	conn = sqlite3.connect("ragnarok.sqlite3")
+	conn = mysql.connector.connect(host="localhost",user="root",password="root", database="ragnarok_bdd")
 	ragnarok = xml.etree.ElementTree.parse("ragnarok.xml")
 	APs = ragnarok.findall("info_AP")
 	for element in APs:
