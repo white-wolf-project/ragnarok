@@ -21,3 +21,5 @@ void init_xml(char *docname);
 void end_xml(char *docname);
 
 int get_instance_pid(const char *file);
+char *get_wireless(void);
+char *get_ip(const char *net_interface);

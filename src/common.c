@@ -2,10 +2,14 @@
 #include <stdarg.h>
 #include <Python.h>
 #include <stdbool.h>
+#include <ifaddrs.h>
+#include <sys/types.h>
+#include <sys/ioctl.h>
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 #include <include/client_tool.h>
 #include "sysnet/include/network.h"
+#include <include/client.h>
 #include <include/common.h>
 
 #ifdef DEBUG
@@ -127,7 +131,10 @@ void init_xml(char *docname){
 	device_AP_name = xmlNewChild(root, NULL, BAD_CAST "rpi_info", NULL);
 
 	device_AP_name_child = xmlNewChild(device_AP_name, NULL, BAD_CAST "mac", NULL);
-	xmlNodeAddContent(device_AP_name_child, BAD_CAST get_mac_addr(iface));
+	xmlNodeAddContent(device_AP_name_child, BAD_CAST get_mac_addr(get_wireless()));
+
+	device_AP_name_child = xmlNewChild(device_AP_name, NULL, BAD_CAST "ip", NULL);
+	xmlNodeAddContent(device_AP_name_child, BAD_CAST get_ip(iface));
 
 	device_AP_name_child = xmlNewChild(device_AP_name, NULL, BAD_CAST "time", NULL);
 	xmlNodeAddContent(device_AP_name_child, BAD_CAST get_date_and_time());
@@ -159,4 +166,47 @@ int get_instance_pid(const char *file){
 
 	/* return PID of server */
 	return atoi(pid_val);
+}
+
+char *get_wireless(void) {
+	struct ifaddrs *ifaddr, *ifa;
+	char *wireless_iface;
+	if (getifaddrs(&ifaddr) == -1) {
+		perror("getifaddrs");
+		return NULL;
+	}
+
+	/* walk through linked list, maintaining head pointer so we can free list later */
+	for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) {
+		char protocol[IFNAMSIZ]  = {0};
+
+		if (ifa->ifa_addr == NULL || ifa->ifa_addr->sa_family != AF_PACKET)
+			continue;
+
+		if (check_wireless(ifa->ifa_name, protocol)) {
+			wireless_iface = ifa->ifa_name;
+			freeifaddrs(ifaddr);
+			return (char *)wireless_iface;
+		}
+	}
+	freeifaddrs(ifaddr);
+	return NULL;
+}
+
+char *get_ip(const char *net_interface){
+	int fd;
+	struct ifreq ifr;
+
+	fd = socket(AF_INET, SOCK_DGRAM, 0);
+
+	/* type of addr is IPv4*/
+	ifr.ifr_addr.sa_family = AF_INET;
+
+	/* copy the interface name to ifreq structure */
+	strncpy(ifr.ifr_name, net_interface, IFNAMSIZ-1);
+
+	ioctl(fd, SIOCGIFADDR, &ifr);
+
+	close(fd);
+	return (char *)inet_ntoa(( (struct sockaddr_in *)&ifr.ifr_addr )->sin_addr);
 }
