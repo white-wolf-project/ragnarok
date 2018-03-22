@@ -4,6 +4,7 @@ ragnarok
 ragnarok-srv
 wireless-tools
 check_wireless
+html
 *.log
 *.xml
 *.pid
