@@ -61,7 +61,7 @@ ifeq ($(BUILD), DEVELOPMENT)
 	CFLAGS += -DDEVELOPMENT
 endif
 
-.PHONY : all clean $(CLIENT_SRV) $(SYSNET) package mrproper srv_package client_package
+.PHONY : all clean $(CLIENT_SRV) $(SYSNET) package mrproper srv_package client_package doc
 
 all : $(SERVER) $(CLIENT)
 
@@ -112,6 +112,11 @@ client_package : $(CLIENT)
 	cp config/client.xml client_deb/etc/ragnarok/
 	dpkg-deb --build client_deb release/$(CLIENT)_$(VERSION)_$(arch).deb
 
+doc :
+	rm -rf docs
+	mkdir docs
+	doxygen resources/Doxyfile
+
 # clean files
 clean :
 	make -C client-srv clean
@@ -122,4 +127,4 @@ clean :
 
 # clean more files
 mrproper : clean
-	rm -rf libcpuid srv_deb client_deb release wireless-tools
+	rm -rf libcpuid srv_deb client_deb release wireless-tools docs
