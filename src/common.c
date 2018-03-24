@@ -1,3 +1,11 @@
+/**
+ * @file common.c
+ * @author Mathieu Hautebas
+ * @date 22 March 2018
+ * @brief File containing common code used client and server.
+ *
+ */
+
 #include <stdio.h>
 #include <stdarg.h>
 #include <Python.h>
@@ -7,15 +15,22 @@
 #include <sys/ioctl.h>
 #include <libxml/parser.h>
 #include <libxml/tree.h>
+/* local headers */
 #include <include/client_tool.h>
-#include "sysnet/include/network.h"
 #include <include/client.h>
 #include <include/common.h>
+#include "sysnet/include/network.h"
 
 #ifdef DEBUG
-static FILE* dbg = NULL;
+static FILE* dbg = NULL; // file used only in DEBUG mode.
 #endif
 
+/**
+ * @brief
+ * prints version informations :
+ * TOOLNAME, VERSION, DATE and TIME
+ * @return void, no return
+ */
 void version(){
 	#ifdef DEBUG
 		fprintf(stdout, "%s, version %s-DEBUG\nCompiled on %s at %s\nCopyright 2018 - White Wolf Team\n", TOOLNAME, VERSION, __DATE__, __TIME__);
@@ -24,12 +39,15 @@ void version(){
 	#endif
 }
 
-/*
-*	We call this function almost everywhere
-*	But it prints to stdout/stderr only
-*	when you build the project in DEBUG mode
-*	for the moment
-*/
+/**
+ * @brief
+ * We call this function almost everywhere.
+ * But it prints to stdout/stderr only
+ * when you build the project in DEBUG mode (we use #ifdef DEBUG ... #endif)
+ * @param format : Path or name of python script to run
+ * @param ... : like printf, which are params
+ * @return void, no return
+ */
 void debug(const char* format, ...) {
 	#ifdef DEBUG
 	va_list vargs;
@@ -39,12 +57,12 @@ void debug(const char* format, ...) {
 	#endif
 }
 
-/*
-*	This functions checks if a file exists
-*	returns TRUE if exists
-*	in the other case it returns FALSE.
-*	param is the name of the file
-*/
+/**
+ * @brief
+ * booleen function to check if a file exists
+ * @param file : Path or name of file
+ * @return true if file exists, or false if file is not found
+ */
 bool file_exists(const char* file){
 	if(access(file, F_OK ) != -1) {
 		return true;
@@ -53,11 +71,16 @@ bool file_exists(const char* file){
 	}
 }
 
-/*
-*	Call a Python script with this function
-*	param is the python script you want to run
-*	We use Python3
-*/
+/**
+ * @brief
+ * Function based on libpyton, use to run Python 3 scripts
+ * run like this :
+ * @code
+ * run_python("file.py");
+ * @endcode
+ * @param pyscript : Path or name of python script to run
+ * @return 0 is everything's gone well, or -2 if Python file is not found
+ */
 int run_python(const char *pyscript){
 	Py_Initialize();
 	FILE* file = fopen(pyscript, "r");
@@ -71,15 +94,17 @@ int run_python(const char *pyscript){
 	return 0;
 }
 
-
-/*
-*	function to get date and time
-*	type is char * it returns a pointer:
-*	curr_time
-*	TODO : find a better to print use date
-*	and time for server
-*/
-
+/**
+ * @brief
+ * get date and time (thank you captain obvious)
+ * This function is used in iwlist to get the time
+ * of the scan
+ * You can use it like this
+ * @code
+ * printf("%s\n", get_date_and_time());
+ * @endcode
+ * @return curr_time; with print to stdout, output is like this : "02/03/18-15:12:32"
+ */
 char *get_date_and_time(void)
 {
 	time_t local_time;
@@ -91,14 +116,25 @@ char *get_date_and_time(void)
 	sprintf(curr_time, "%02d/%02d/%02d-%02d:%02d:%02d", tm->tm_mday, tm->tm_mon + 1, tm->tm_year % 100, tm->tm_hour, tm->tm_min, tm->tm_sec);
 	return (char *)curr_time;
 }
-/*
-*	function to find text between 2 strings
-*	returns found text
-*	str = default string
-* 	p1 = first pattern
-*	p2 = scnd pattern to search between
-*	https://stackoverflow.com/a/24696896/9299410
-*/
+
+/**
+ * @brief
+ * Find text between two patterns
+ * This function is use to check when XML start and ends
+ * Then we split log and XML
+ * Simple usage : cut useless stuff
+ * @code
+ * char new_buf[12];
+ * sprintf(new_buf, "%sa", buffer);
+ * channel_out = get_txt(new_buf, "Channel:", "a");
+ * send_data(sock, "channel : %s\n", channel_out);
+ * @endcode
+ * @param str : string to find
+ * @param p1 : first pattern
+ * @param p2 : last pattern
+ * @return target which is the output we want or NULL if we did not find anything
+ * @note Used in the server part
+ */
 char *get_txt(const char *str, const char *p1, const char *p2){
 	char *target = NULL;
 	char *start, *end;
@@ -123,6 +159,19 @@ xmlDocPtr doc = NULL;
 xmlNodePtr root = NULL, device_AP_name = NULL, info_ap = NULL;
 xmlNodePtr device_AP_name_child = NULL, info_ap_child = NULL;
 
+/**
+ * @brief
+ * Start xml process.
+ * Call this function once to start XML related stuff
+ * Make sure these vars are initialized
+ * @code
+ * xmlDocPtr doc = NULL;
+ * xmlNodePtr root = NULL, device_AP_name = NULL, info_ap = NULL;
+ * xmlNodePtr device_AP_name_child = NULL, info_ap_child = NULL;
+ * @endcode
+ * @param docname : name or path to file we will write XML data
+ * @return void, no return.
+ */
 void init_xml(char *docname){
 	doc = xmlNewDoc(BAD_CAST "1.0");
 	root = xmlNewNode(NULL, BAD_CAST docname);
@@ -140,6 +189,15 @@ void init_xml(char *docname){
 	xmlNodeAddContent(device_AP_name_child, BAD_CAST get_date_and_time());
 }
 
+/**
+ * @brief
+ * End xml process.
+ * Call this function once we are done with XML related stuff
+ * @param docname : name or path to file we will write XML data
+ * @return void, no return.
+ * @note use init_xml() before this function
+ */
+
 void end_xml(char *docname){
 	/* 	this commented line can output the XML file to stdout
 	* 	I keep it for debugging purposes
@@ -149,6 +207,14 @@ void end_xml(char *docname){
 	xmlFreeDoc(doc);
 }
 
+/**
+ * @brief
+ * Get PID of client or server process located in a file.
+ * We call this function find the PID then we kill client or server process
+ * @param file name or path to the file containing the PID.
+ * @return pid_val which is a char but we use atoi() function to convert it to an integer.
+ * @note only works with one-line files
+ */
 
 int get_instance_pid(const char *file){
 	FILE *fp = NULL;
@@ -168,6 +234,21 @@ int get_instance_pid(const char *file){
 	return atoi(pid_val);
 }
 
+/**
+ * @brief
+ * Function to get wireless interface
+ * example usage :
+ * Create a pointer to char
+ * @verbatim char *my_wireless_interface; @endverbatim
+ * Here is how you call it
+ * @code
+ * my_wireless_interface = get_wireless();
+ * printf("wireless interface found : %s\n", my_wireless_interface);
+ * @endcode
+ * @return returns the first wireless interface found or NULL, if there is no interface
+ * @see https://gist.github.com/edufelipe/6108057
+ * @warning Only tested on Linux Operating System.
+ */
 char *get_wireless(void) {
 	struct ifaddrs *ifaddr, *ifa;
 	char *wireless_iface;
@@ -193,13 +274,29 @@ char *get_wireless(void) {
 	return NULL;
 }
 
+/**
+ * @brief
+ * Function to get IP address of an Interface
+ * example usage :
+ * Create a pointer to char
+ * @verbatim char *my_interface; @endverbatim
+ * Here is how you call it
+ * @code
+ * my_interface = get_ip();
+ * printf("interface IP is : %s\n", my_interface);
+ * @endcode
+ * You will have to know the network interface.
+ * @param net_interface Network interface. Type : const char *
+ * @return IP address of the network interface
+ * @see https://stackoverflow.com/questions/2283494/get-ip-address-of-an-interface-on-linux
+ */
 char *get_ip(const char *net_interface){
 	int fd;
 	struct ifreq ifr;
 
 	fd = socket(AF_INET, SOCK_DGRAM, 0);
 
-	/* type of addr is IPv4*/
+	/* type of addr is IPv4 */
 	ifr.ifr_addr.sa_family = AF_INET;
 
 	/* copy the interface name to ifreq structure */
