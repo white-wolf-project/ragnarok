@@ -5,13 +5,17 @@
 
 import mysql.connector
 import xml.etree.ElementTree 
+import os
+
+path = os.getcwd
+os.chdir("/home/eehp/Desktop")
 
 conn = mysql.connector.connect(host="localhost",user="root",password="root", database="ragnarok_bdd")
 
 
-def insert_info_ap(db_conn, mac, essid, time, Id_encryption, Channel, Beacon, Signal, Frequency, id_quality): 
+def insert_info_ap(db_conn, mac, essid, time, Id_encryption, Channel, Beacon, Signal, Frequency, id_quality, MAC_Rasb): 
 	curs = db_conn.cursor() 
-	curs.execute("""INSERT INTO Info_AP (Mac, ESSID, Time, Id_encryption, Channel, Beacon, Signal, Frequency, Id_quality) values (?, ?, ?, ?, ?, ?, ?, ?, ?)""", 
+	curs.execute("INSERT INTO Info_AP (Mac, ESSID, Time, Id_encryption, Channel, Beacon, Signal, Frequency, Id_quality, MAC_Rasb) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %S", 
 				(mac, essid, time, Id_encryption, Channel, Beacon, Signal, Frequency, id_quality)) 
 	
 
@@ -27,7 +31,7 @@ def insert_device_info(db_conn, time, mac, ip):
 				(time, mac, ip))
 
 
-def insert_quality(db_conn, Id_quality, Qual_Rpi1, Qual_Rpi2, Qual_Rpi3)
+def insert_quality(db_conn, Id_quality, Qual_Rpi1, Qual_Rpi2, Qual_Rpi3):
 	curs = db_conn.cursor() 
 	curs.execute("""INSERT INTO  Quality (Id_quality, Qual_Rpi1, Qual_Rpi2, Qual_Rpi3) values (?, ?, ?, ?)""",
 				(Id_quality, Qual_Rpi1, Qual_Rpi2, Qual_Rpi3))
@@ -59,10 +63,11 @@ def ap_data_from_element(info_AP):
 
 if __name__ == '__main__':
 	conn = mysql.connector.connect(host="localhost",user="root",password="root", database="ragnarok_bdd")
+	
 	ragnarok = xml.etree.ElementTree.parse("ragnarok.xml")
 	APs = ragnarok.findall("info_AP")
 	for element in APs:
 		mac, channel, frequency, quality, signal, essid, beacon, encryption = ap_data_from_element(element)
-		insert_info_ap(conn, mac, essid, 0, 0, channel, beacon, signal, frequency, 0 )
+		insert_info_ap(conn, 1, 1, "10:00", 1, 1, 1, 1, 1, 1, 1)
 
 
