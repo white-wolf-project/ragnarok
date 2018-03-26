@@ -13,10 +13,10 @@ os.chdir("/home/eehp/Desktop")
 conn = mysql.connector.connect(host="localhost",user="root",password="root", database="ragnarok_bdd")
 
 
-def insert_info_ap(db_conn, mac, essid, time, Id_encryption, Channel, Beacon, Signal, Frequency, id_quality, MAC_Rasb): 
+def insert_info_ap(db_conn, mac, essid, time, id_encryption, channel, beacon, signal, frequency, id_quality, MAC_Rasb): 
 	curs = db_conn.cursor() 
-	curs.execute("INSERT INTO Info_AP (Mac, ESSID, Time, Id_encryption, Channel, Beacon, Signal, Frequency, Id_quality, MAC_Rasb) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %S", 
-				(mac, essid, time, Id_encryption, Channel, Beacon, Signal, Frequency, id_quality)) 
+	curs.execute("INSERT INTO Info_AP (Mac, ESSID, Time, Id_encryption, Channel, Beacon, Signal, Frequency, Id_quality, MAC_Rasb) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s", 
+				(mac, essid, time, id_encryption, channel, beacon, signal, frequency, id_quality, MAC_Rasb)) 
 	
 
 def insert_encryption(db_conn, Id_encryption, Encryption_name):
@@ -68,6 +68,6 @@ if __name__ == '__main__':
 	APs = ragnarok.findall("info_AP")
 	for element in APs:
 		mac, channel, frequency, quality, signal, essid, beacon, encryption = ap_data_from_element(element)
-		insert_info_ap(conn, 1, 1, "10:00", 1, 1, 1, 1, 1, 1, 1)
+		insert_info_ap(conn, mac, essid, "10:00", 1, channel, beacon, signal, frequency, 1, "AA:AA:AA:AA:AA:AA")
 
 
