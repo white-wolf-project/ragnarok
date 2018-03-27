@@ -13,9 +13,9 @@ TABLES = {}
 TABLES['Info_AP'] = (
 	"CREATE TABLE `Info_AP` ("
 	"  `Mac` varchar(25) NOT NULL,"
-	"  `ESSID` varchar(25) NOT NULL,"
+	"  `ESSID` varchar(25) NULL,"
 	"  `Time` varchar(25)  NOT NULL,"
-	"  `Id_encryption` int NOT NULL ,"
+	"  `Id_encryption` int(25) NOT NULL ,"
 	"  `Channel` varchar(25) NOT NULL,"
 	"  `Beacon` varchar(25) NOT NULL,"
 	"  `Signal` varchar(25) NOT NULL,"
