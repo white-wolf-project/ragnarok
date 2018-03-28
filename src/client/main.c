@@ -229,7 +229,7 @@ int main(int argc, char  *argv[]){
 		run_iwlist(get_wireless());
 		end_xml("ragnarok.xml");
 		read_and_send_data("ragnarok.xml");
-		sleep(10);
+		sleep(20);
 	}
 	close(sock);
 	return 0;
