@@ -13,7 +13,7 @@ TABLES = {}
 TABLES['Info_AP'] = (
 	"CREATE TABLE `Info_AP` ("
 	"  `Mac` varchar(25) NOT NULL,"
-	"  `ESSID` varchar(25) NULL,"
+	"  `ESSID` varchar(50) NULL,"
 	"  `Time` varchar(25)  NOT NULL,"
 	"  `Id_encryption` int(25) NOT NULL ,"
 	"  `Channel` varchar(25) NOT NULL,"
@@ -31,13 +31,6 @@ TABLES['Encryption'] = (
 	"  `Encryption_name` varchar(50) NOT NULL,"
 	"  PRIMARY KEY (`Id_encryption`)"
 	") ENGINE=InnoDB")
-
-# TABLES['Time'] = (
-#	 "CREATE TABLE `Time` ("
-#	 "  `Timestamp` int NOT NULL,"
-#	 "  `Time` varchar(25) NOT NULL,"
-#	 "  PRIMARY KEY (`Timestamp`)"
-#	 ") ENGINE=InnoDB")
 
 TABLES['Device_info'] = (
 	"CREATE TABLE `Device_info` ("
