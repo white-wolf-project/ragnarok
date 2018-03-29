@@ -9,42 +9,40 @@ DB_NAME = 'ragnarok_bdd'
 
 TABLES = {}
 
-TABLES['Appareil'] = (
-    "CREATE TABLE `Appareil` ("
-    "  `ESSID` varchar(25) NOT NULL,"
-    "  `MAC` varchar(25) NOT NULL,"
-    "  `Timestamp` int NOT NULL,"
-    "  `Id` int NOT NULL,AUTO_INCREMENT,"
-    "  PRIMARY KEY (`Id`)"
-    ") ENGINE=InnoDB")
 
 TABLES['Info_AP'] = (
-    "CREATE TABLE `Info_AP` ("
-    "  `MAC` int NOT NULL,"
-    "  `Id_encryption` int NOT NULL,AUTO_INCREMENT,"
-    "  `Channel` varchar(25) NOT NULL,"
-    "  `Beacon` int NOT NULL,"
-   	"  `Id_quality` int NOT NULL,"
-    "  PRIMARY KEY (`MAC`)"
-    ") ENGINE=InnoDB")
+	"CREATE TABLE `Info_AP` ("
+	"  `Mac` varchar(25) NOT NULL,"
+	"  `ESSID` varchar(50) NULL,"
+	"  `Time` varchar(25)  NOT NULL,"
+	"  `Id_encryption` int(25) NOT NULL ,"
+	"  `Channel` varchar(25) NOT NULL,"
+	"  `Beacon` varchar(25) NOT NULL,"
+	"  `Signal` varchar(25) NOT NULL,"
+	"  `Frequency` varchar(25) NOT NULL,"
+   	"  `Id_quality` varchar(25) NOT NULL,"
+	"  `MAC_Rasb` varchar(25) NOT NULL,"
+	"  PRIMARY KEY (`Mac`)"
+	") ENGINE=InnoDB")
 
 TABLES['Encryption'] = (
-    "CREATE TABLE `Encryption` ("
-    "  `Id_encryption` int NOT NULL,AUTO_INCREMENT,"
-    "  `Encryption_name` varchar(50) NOT NULL,"
-    "  PRIMARY KEY (`Id_encryption`)"
-    ") ENGINE=InnoDB")
+	"CREATE TABLE `Encryption` ("
+	"  `Id_encryption` int NOT NULL AUTO_INCREMENT,"
+	"  `Encryption_name` varchar(50) NOT NULL,"
+	"  PRIMARY KEY (`Id_encryption`)"
+	") ENGINE=InnoDB")
 
-TABLES['Time'] = (
-    "CREATE TABLE `Time` ("
-    "  `Timestamp` int NOT NULL,"
-    "  `Time` varchar(25) NOT NULL,"
-    "  PRIMARY KEY (`Timestamp`)"
-    ") ENGINE=InnoDB")
+TABLES['Device_info'] = (
+	"CREATE TABLE `Device_info` ("
+	"  `Time` varchar(25) NOT NULL,"
+	"  `Mac` varchar(17) NOT NULL,"
+	"  `IP` varchar(15) NOT NULL,"
+	"  PRIMARY KEY (`Mac`)"
+	") ENGINE=InnoDB")
 
 TABLES['Quality'] = (
 	"CREATE TABLE `Quality` ("
-	"  `Id_quality` int NOT NULL,AUTO_INCREMENT,"
+	"  `Id_quality` int NOT NULL AUTO_INCREMENT,"
 	"  `Qual_Rpi1` int NOT NULL,"
 	"  `Qual_Rpi2` int NOT NULL,"
 	"  `Qual_Rpi3` int NOT NULL,"
@@ -53,59 +51,58 @@ TABLES['Quality'] = (
 
 
 def create_database(cursor):
-    try:
-        cursor.execute(
-            "CREATE DATABASE {} DEFAULT CHARACTER SET 'utf8'".format(DB_NAME))
-    except mysql.connector.Error as err:
-        print("Failed creating database: {}".format(err))
-        exit(1)
+	try:
+		cursor.execute(
+			"CREATE DATABASE {} DEFAULT CHARACTER SET 'utf8'".format(DB_NAME))
+	except mysql.connector.Error as err:
+		print("Failed creating database: {}".format(err))
+		exit(1)
 
 def create_tables(cursor):
+	cnx = cnx = mysql.connector.connect(user='root', password='root',                                                   host='localhost')
+	for name, ddl in TABLES.items():
+		try:
+			print("Creating table {}: ".format(name))
+			cursor.execute(ddl)
+		except mysql.connector.Error as err:
+			if err.errno == errorcode.ER_TABLE_EXISTS_ERROR:
+				print("already exists.")
+			else:
+				print(err.msg)
+		else:
+			print("OK")
 
-	for name, ddl in TABLES.iteritems():
-	    try:
-	        print("Creating table {}: ".format(name))
-	        cursor.execute(ddl)
-	    except mysql.connector.Error as err:
-	        if err.errno == errorcode.ER_TABLE_EXISTS_ERROR:
-	            print("already exists.")
-	        else:
-	            print(err.msg)
-	    else:
-	        print("OK")
-
-		cursor.close()
+	cursor.close()
 	cnx.close()
 
 def init_bdd():
 	
-	cnx = mysql.connector.connect(user='root', password='root',
-	                              host='127.0.0.1')
+	cnx = mysql.connector.connect(user='root', password='root',						      host='localhost')
 	cursor = cnx.cursor()
 
 	create_database(cursor)
 
 	try:
-	    cnx.database = DB_NAME  
+		cnx.database = DB_NAME  
 	except mysql.connector.Error as err:
-	    if err.errno == errorcode.ER_BAD_DB_ERROR:
-	        create_database(cursor)
-	        cnx.database = DB_NAME
-	    else:
-	        print(err)
-	        exit(1)
+		if err.errno == errorcode.ER_BAD_DB_ERROR:
+			create_database(cursor)
+			cnx.database = DB_NAME
+		else:
+			print(err)
+			exit(1)
 
 	try:
 		cnx = mysql.connector.connect(user='root', password='root',
-	                              host='127.0.0.1',
-	                              database='ragnarok')
+								  host='localhost',
+								  database='ragnarok')
 
 	except mysql.connector.Error as err:
 
-	  	if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+		if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
 			print("Something is wrong with your user name or password")
 
-	  	else:
+		else:
 			print(err)
 
 	create_tables(cursor)
