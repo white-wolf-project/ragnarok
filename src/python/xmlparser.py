@@ -25,6 +25,7 @@ def insert_device_info(db_conn, time, mac, ip):
 
 def insert_encryption(db_conn, Encryption_name):
 	curs = db_conn.cursor() 
+	# sql2= "SELECT count(*) from Encryption WHERE 'Encryption_name'=%s;"
 	sql = "INSERT INTO Encryption VALUES (NULL, '%s');" % \
 		(Encryption_name)
 	curs.execute(sql)
