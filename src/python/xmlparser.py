@@ -24,10 +24,11 @@ def insert_device_info(db_conn, time, mac, ip):
 	curs.execute(sql)
 
 def insert_encryption(db_conn, Encryption_name):
-	curs = db_conn.cursor() 
-	# sql2= "SELECT count(*) from Encryption WHERE 'Encryption_name'=%s;"
-	sql = "INSERT INTO Encryption VALUES (NULL, '%s');" % \
-		(Encryption_name)
+	curs = db_conn.cursor()
+	sql = "REPLACE INTO Encryption SET `Encryption_name`= ('%s')" % \
+			(Encryption_name)
+	sql2 = "SELECT DISTINCT"
+
 	curs.execute(sql)
 
 
@@ -60,9 +61,9 @@ if __name__ == '__main__':
 	for AP in APs:
 		mac, channel, frequency, quality, signal, essid, beacon, encryption, time, mac_rasb = ap_data_from_element(AP,RASBs)
 		insert_encryption(conn, encryption)
+		conn.commit()
 		insert_info_ap(conn, mac, essid, time, 1, channel, beacon, signal, frequency, 1, mac_rasb)
 	conn.commit()
-
 	insert_device_info(conn, time, mac_rasb, 0)
 	conn.commit()
 

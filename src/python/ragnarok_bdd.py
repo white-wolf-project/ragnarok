@@ -49,6 +49,12 @@ TABLES['Quality'] = (
 	"  PRIMARY KEY (`Id_quality`)"
 	") ENGINE=InnoDB")
 
+# TABLES['Blank'] = (
+# 	"CREATE TABLE `Blank` ("
+# 	"  `X1` varchar(100) NOT NULL,"
+# 	"  `X2` varchar(100) NOT NULL,"
+# 	"  `X3` varchar(100) NOT NULL,"
+	# ") ENGINE=InnoDB")
 
 def create_database(cursor):
 	try:
