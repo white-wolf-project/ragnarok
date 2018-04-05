@@ -573,7 +573,7 @@ static int print_scanning_info(int skfd, char *	ifname, char *	args[], int	count
 	if((!has_range) || (range.we_version_compiled < 14))
 	{
 		send_data(sock, "%-8.16s  Interface doesn't support scanning.\n\n", ifname);
-		return(-1);
+		exit(1);
 	}
 
 	/* Init timeout value -> 250ms between set and first get */
@@ -664,7 +664,7 @@ static int print_scanning_info(int skfd, char *	ifname, char *	args[], int	count
 					up_iface(ifname);
 				} else {
 					send_data(sock, "%-8.16s  Interface doesn't support scanning : %s\n", ifname, strerror(errno));
-					return(-1);
+					exit(1);
 				}
 			}
 			/* If we don't have the permission to initiate the scan, we may
