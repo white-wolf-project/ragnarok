@@ -61,6 +61,7 @@ static struct option longopts[] = {
 	{ "interface",	required_argument,	NULL, 'f'},
 	{ "wireless",	required_argument,	NULL, 'w'},
 	{ "xml",		required_argument,	NULL, 'x'},
+	{ "deamon", 	no_argument, 		NULL, 'd'},
 	{ "stop",		no_argument,		NULL, 's'},
 	{ "version", 	no_argument,		NULL, 'v'},
 	{ "help", 		no_argument,		NULL, 'h'},
@@ -85,6 +86,7 @@ void usage(int argc, char  *argv[]){
 	fprintf(stdout, " -f, --interface <interface>\t specify ethernet interface\n");
 	fprintf(stdout, " -w, --wireless <interface> \t specify wireless interface to scan with\n");
 	fprintf(stdout, " -x, --xml <xmlfile> \t\t XML file to parse\n");
+	fprintf(stdout, " -n, --no-deamon\t\t do not run as deamon\n");
 	fprintf(stdout, " -s, --stop\t\t\t stop server\n");
 	fprintf(stdout, " -v, --version\t\t\t print version\n");
 	fprintf(stdout, " -h, --help\t\t\t print this help\n");
@@ -104,11 +106,12 @@ int main(int argc, char  *argv[]){
 	int xconfig = 0;
 	int is_ip = 0, is_port = 0, is_wired_iface = 0, is_wireless_iface = 0;
 	int stop_client = 0, client_pid = 0;
+	bool is_deamon = true;
 	char *newip, *newport, *wired_iface, *newwireless;
 	char *mac_addr, *wireless;
 	const char *xmlfile;
 
-	while((opt = getopt_long(argc, (char**)argv, "ipfwvhxs", longopts, &optindex)) != -1){
+	while((opt = getopt_long(argc, (char**)argv, "ipfwvhxds", longopts, &optindex)) != -1){
 		switch(opt){
 			case 'h':
 				usage(argc, argv);
@@ -135,6 +138,9 @@ int main(int argc, char  *argv[]){
 			case 'w' :
 				newwireless = argv[optind];
 				is_wireless_iface = 1;
+				break;
+			case 'd' :
+				is_deamon = false;
 				break;
 			case 's' :
 				stop_client = 1;
@@ -223,13 +229,20 @@ int main(int argc, char  *argv[]){
 	// Idea is to use config.xml instead of hardcoded values in code
 	mac_addr = get_mac_addr(wireless);
 	send_data(sock, "mac : %s\n", mac_addr);
-	init_client_daemon();
-	while(1){
+	if (is_deamon == true){
+		init_client_daemon();
+		while(1){
+			init_xml("ragnarok.xml");
+			run_iwlist(get_wireless());
+			end_xml("ragnarok.xml");
+			read_and_send_data("ragnarok.xml");
+			sleep(20);
+		}
+	} else {
 		init_xml("ragnarok.xml");
 		run_iwlist(get_wireless());
 		end_xml("ragnarok.xml");
 		read_and_send_data("ragnarok.xml");
-		sleep(20);
 	}
 	close(sock);
 	return 0;
