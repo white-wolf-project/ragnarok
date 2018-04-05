@@ -21,5 +21,6 @@ else
 fi
 
 
-mkdir -p /etc/ragnarok/
-cp config/* /etc/ragnarok
+mkdir -p /etc/ragnarok/client /etc/ragnarok/server/
+cp config/client.xml /etc/ragnarok/client/
+cp config/server.xml /etc/ragnarok/server/
