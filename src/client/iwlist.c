@@ -659,8 +659,13 @@ static int print_scanning_info(int skfd, char *	ifname, char *	args[], int	count
 		{
 			if((errno != EPERM) || (scanflags != 0))
 			{
-				send_data(sock, "%-8.16s  Interface doesn't support scanning : %s\n", ifname, strerror(errno));
-				return(-1);
+				if (!strcmp(strerror(errno), "Network is down"))
+				{
+					up_iface(ifname);
+				} else {
+					send_data(sock, "%-8.16s  Interface doesn't support scanning : %s\n", ifname, strerror(errno));
+					return(-1);
+				}
 			}
 			/* If we don't have the permission to initiate the scan, we may
 			* still have permission to read left-over results.

@@ -128,6 +128,40 @@ int read_and_send_data(const char *xmlfile){
 
 /**
  * @brief
+ * Up network interface it's called in print_scanning_info() like this :
+ * @code
+ *	if (!strcmp(strerror(errno), "Network is down"))
+ *	{
+ *		up_iface(ifname);
+ *	} else {
+ *		send_data(sock, "%-8.16s  Interface doesn't support scanning : %s\n", ifname, strerror(errno));
+ *		return(-1);
+ *	}
+ * @endcode
+ * @return returns 0 if everything's done well or -1 if we can't create a socket.
+ * @see https://stackoverflow.com/questions/5858655/linux-programmatically-up-down-an-interface-kernel
+ */
+int up_iface(const char *interface)
+{
+	int sockfd;
+	struct ifreq ifr;
+
+	sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+
+	if (sockfd < 0)
+		return -1;
+
+	memset(&ifr, 0, sizeof ifr);
+
+	strncpy(ifr.ifr_name, interface, IFNAMSIZ);
+
+	ifr.ifr_flags |= IFF_UP;
+	ioctl(sockfd, SIOCSIFFLAGS, &ifr);
+	return 0;
+}
+
+/**
+ * @brief
  * init deamon for the client
  * First we check if the pidfile exists. If it exists, it means client is already running.
  * Print pid of process the quit.
