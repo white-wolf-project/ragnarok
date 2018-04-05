@@ -34,13 +34,15 @@ function install_libcpuid(){
 sudo apt-get update && sudo apt-get upgrade -y
 
 # install build tools 
-sudo apt-get install -y make build-essential libssl-dev libreadline-dev libsqlite3-dev wget git python3 \
+sudo apt-get install -y make build-essential libssl-dev libreadline-dev libsqlite3-dev wget git python3 python3-pip \
 libnl-3-dev apache2 nmap m4 autoconf libtool autotools-dev libiw-dev libxml2-dev vim zsh htop python3.5-dev
 
 if [[ $(arch) != "armv71" && $(arch) != "aarch64" ]];then
 	sudo apt-get install -y gcc-arm-linux-gnueabihf
 fi
 
+# install python3 mysql
+pip3 install mysql-connector-python
 # init and clone git modules
 git submodule update --init
 
