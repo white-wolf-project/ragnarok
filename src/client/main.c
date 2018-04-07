@@ -150,7 +150,7 @@ int main(int argc, char  *argv[]){
 
 	if (stop_client){
 		client_pid = get_instance_pid("ragnarok.pid");
-		/* No need to kill something that does exist*/
+		/* No need to kill something that does not exist*/
 		if (client_pid == -1)
 			return 0;
 		remove("ragnarok.pid");
@@ -199,8 +199,16 @@ int main(int argc, char  *argv[]){
 
 	if (wireless == NULL)
 	{
-		fprintf(stderr, "[e] no wireless interface found\n");
+		fprintf(stderr, "[-] no wireless interface found\n");
 		return -1;
+	} else {
+		if (is_iface_up(wireless) != true){
+			if (getuid() != 0){
+				fprintf(stderr, "[-] you need higher privileges\n");
+				return 1;
+			}
+			up_iface(wireless);
+		}
 	}
 
 	debug("ip : %s\n", ipaddr);
