@@ -25,18 +25,23 @@ def insert_device_info(db_conn, time, mac, ip):
 
 def insert_encryption(db_conn, Encryption_name):
 	curs = db_conn.cursor()
-	sql1 = "INSERT INTO Encryption VALUES ('%s',0,0);" % \
-	sql2 = "SELECT count (Encryption_name) FROM Encryption WHERE Encryption_name='%s');" % \
+	sql1 = "INSERT INTO Encryption VALUES (NULL,'%s');" % \
 		(Encryption_name)
+	sql2 = "SELECT COUNT(Encryption_name) FROM Encryption WHERE Encryption_name='%s';" % \
+		(Encryption_name)
+
+	curs.execute(sql2)
+
 	rows = curs.fetchone()
 	nbligne = rows[0]
 	print (nbligne)
+
 	if nbligne == 0:
 		curs.execute(sql1)
 	else:
 		print("Je fais rien")
 	
-	curs.execute(sql2)
+	
 
 def insert_quality(db_conn, Qual_Rpi1, Qual_Rpi2, Qual_Rpi3):
 	curs = db_conn.cursor() 
