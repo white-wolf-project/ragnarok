@@ -1,9 +1,10 @@
-extern int sock;
-char *ipaddr;
-char *port;
+#define LG_BUFFER	1024
 
-int parse_config_file(const char *xmlfile);
+struct addrinfo *results;
+
+extern int sock;
+
 int send_data(int sock2server, const char* data2send, ...);
 int read_and_send_data(const char *xmlfile);
-int up_iface(const char *interface);
+int init_client (int server, char *host, char *port, struct addrinfo **result);
 int init_client_daemon(void);

@@ -12,7 +12,6 @@
 #include <signal.h>
 /* local headers */
 #include <include/server.h>
-#include <include/server_tool.h>
 #include <include/common.h>
 #include <include/xml.h>
 #include <include/network.h>
@@ -98,7 +97,6 @@ int main(int argc, char *argv[]){
 		#endif
 	}
 
-
 	/* parse XML file to get iface (for sysnet) and port to run server */
 	if (parse_config_file(xmlfile) != 0)
 		return -1;
@@ -119,7 +117,7 @@ int main(int argc, char *argv[]){
 	network_info(iface, 4);
 	fprintf(stdout, "[i] server port : %s\n", port);
 
-	/* init damrun TCP server */
+	/* init daemon TCP server */
 	init_srv_daemon();
 	tcp_server(port);
 	return 0;
