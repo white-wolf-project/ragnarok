@@ -20,8 +20,8 @@
 /* local headers */
 #include <include/client.h>
 #include <include/iwlist.h>
+#include <include/xml.h>
 #include <include/common.h>
-#include <include/client_tool.h>
 #include "sysnet/include/network.h"
 
 static char logo[] = {

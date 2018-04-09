@@ -16,6 +16,9 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <time.h>
+#include <netdb.h>
+#include <sys/socket.h>
+#include <libxml/parser.h>
 /* local headers */
 #include <include/client.h>
 #include <include/xml.h>
@@ -26,7 +29,8 @@
 
 int sock;
 
-/**
+/*char  *ipaddr, *port, *iface;
+*//**
  * @brief
  * Function to send data to server.
  * example usage :
@@ -123,6 +127,32 @@ int read_and_send_data(const char *xmlfile){
 	}
 	send_data(sock, "-end_xml-\r");
 	fclose(fp);
+	return 0;
+}
+
+/**
+ * @brief
+ * Function to init network stuff for the client
+ * @param server
+ * @param host : pointer to char, it's the ip address of the server
+ * @param port : port of the server to deal with
+ * @param results : pointer in struct addrinfo
+ * @return returns 0 if everything's done well or a number != 0 if any issue or just exit().
+ */
+int init_client (int server, char *host, char *port, struct addrinfo **results)
+{
+	int err;
+	struct addrinfo  hints;
+
+	memset(&hints, 0, sizeof(hints));
+	hints.ai_family = AF_INET;
+	hints.ai_socktype = SOCK_STREAM;
+	if (server)
+		hints.ai_flags = AI_PASSIVE;
+	if ((err = getaddrinfo(host, port, &hints, results)) != 0) {
+		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(err));
+		return -1;
+	}
 	return 0;
 }
 
