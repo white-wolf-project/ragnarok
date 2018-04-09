@@ -12,14 +12,13 @@ python3m = $(shell python3 --version | cut -d . -f 2 | tr -d '\n ' && echo "m")
 CLIENT_SRC = src/client
 SRV_SRC = src/server
 
-CLIENT_SRV = client-srv
 SYSNET = sysnet
 
 # I assume client and srv have the same version
 VERSION = $(shell cat resources/control.srv| grep Version | cut -d:  -f 2)
 DEBUG ?= 1
 BUILD ?= DEVELOPMENT
-CFLAGS = $(DBG) -I. -I/usr/include/libxml2/ -I/usr/include/python3.$(python3v) -I$(CLIENT_SRV) -I$(SYSNET) -c -Wall -g
+CFLAGS = $(DBG) -I. -I/usr/include/libxml2/ -I/usr/include/python3.$(python3v) -I$(SYSNET) -c -Wall -g
 LDFLAGS = -liw -lxml2 -lpython3.$(python3m)
 CROSS_COMPILE ?=
 
@@ -34,13 +33,9 @@ SRV_OBJECTS = $(SRV_SRC)/main.o \
 
 SRV_SOURCES = $(SRV_OBJECTS:o=.c)	
 
-OBJECTS = src/common.o
+OBJECTS = src/common.o src/xml.o
 
 SOURCES = $(OBJECTS:o=.c)
-
-CLI_SRV_OBJ = client-srv/src/client_tool.o \
-			client-srv/src/server_tool.o \
-			client-srv/src/xml.o
 
 SYSNET_OBJ = sysnet/src/network.o
 
@@ -61,21 +56,19 @@ ifeq ($(BUILD), DEVELOPMENT)
 	CFLAGS += -DDEVELOPMENT
 endif
 
-.PHONY : all clean $(CLIENT_SRV) $(SYSNET) package mrproper srv_package client_package doc
+.PHONY : all clean $(SYSNET) package mrproper srv_package client_package doc
 
 all : $(SERVER) $(CLIENT)
 
-$(CLIENT) : $(CLIENT_SRV) $(OBJECTS) $(CLIENT_OBJECTS) $(SYSNET)
+$(CLIENT) : $(OBJECTS) $(CLIENT_OBJECTS) $(SYSNET)
 	@echo "LD	$@"
-	@$(CC) $(CLIENT_OBJECTS) $(OBJECTS) $(CLI_SRV_OBJ) sysnet/src/network.o $(LDFLAGS) -o $(CLIENT)
+	@$(CC) $(CLIENT_OBJECTS) $(OBJECTS) sysnet/src/network.o $(LDFLAGS) -o $(CLIENT)
 
 
-$(SERVER) : $(CLIENT_SRV) $(SYSNET) $(OBJECTS) $(SRV_OBJECTS)
+$(SERVER) : $(SYSNET) $(OBJECTS) $(SRV_OBJECTS)
 	@echo "LD 	$@"
-	@$(CC) $(SRV_OBJECTS) $(OBJECTS) $(CLI_SRV_OBJ) sysnet/src/network.o $(LDFLAGS) -o $(SERVER)
+	@$(CC) $(SRV_OBJECTS) $(OBJECTS) sysnet/src/network.o $(LDFLAGS) -o $(SERVER)
 
-$(CLIENT_SRV) :
-	@make -C $(CLIENT_SRV)/
 
 $(SYSNET) :
 	@make -C $(SYSNET)
@@ -119,7 +112,6 @@ doc :
 
 # clean files
 clean :
-	make -C client-srv clean
 	make -C sysnet clean
 	rm -rf 	$(CLIENT) $(CLIENT_OBJECTS) \
 	$(SERVER) $(SRV_OBJECTS) $(OBJECTS) \

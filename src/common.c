@@ -16,9 +16,9 @@
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 /* local headers */
-#include <include/client_tool.h>
 #include <include/client.h>
 #include <include/common.h>
+#include <include/xml.h>
 #include "sysnet/include/network.h"
 
 #ifdef DEBUG
