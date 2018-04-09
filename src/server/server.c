@@ -11,6 +11,11 @@
 #include <unistd.h>
 #include <errno.h>
 #include <string.h>
+#include <errno.h>
+#include <netdb.h>
+#include <time.h>
+#include <stdbool.h>
+#include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 /* local headers */
@@ -114,4 +119,163 @@ int init_srv_daemon(void){
 	close(STDERR_FILENO);
 
 	return 0;
+}
+
+/**
+ * @brief
+ * TCP server function to handle multiple clients
+ * @return returns 0 if everything's done well or a number != 0 if any issue or just exit().
+ * @see https://www.thegeekstuff.com/2012/02/c-daemon-process/
+ */
+
+int tcp_server(const char* service_port)
+{
+	int err;
+	int sock_server;
+	int sock;
+	struct addrinfo  hints;
+	struct addrinfo *results;
+
+	struct sockaddr_in* addr_in;
+	socklen_t length = 0;
+	char hostname [NI_MAXHOST];
+	char servname [NI_MAXSERV];
+
+	// Create srv socket & attribute service number
+	if ((sock_server = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
+		perror("socket");
+		return -1;
+	}
+
+	memset(&hints, 0, sizeof(hints));
+	hints.ai_family = AF_INET;
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_flags = AI_PASSIVE;
+	if ((err = getaddrinfo(NULL, service_port,  &hints, &results)) != 0) {
+		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(err));
+		close(sock_server);
+		return -1;
+	}
+
+	err = bind(sock_server, results->ai_addr, results->ai_addrlen);
+	freeaddrinfo(results);
+	if (err < 0) {
+		perror("bind");
+		close(sock_server);
+		return -1;
+	}
+
+	length = sizeof(struct sockaddr_in);
+	if (getsockname(sock_server, (struct sockaddr *) &addr_in, &length) < 0) {
+		perror ("getsockname");
+		return -1;
+	}
+	if (getnameinfo((struct sockaddr *) &addr_in, length,
+	                hostname, NI_MAXHOST,
+	                servname, NI_MAXSERV,
+	                NI_NUMERICHOST | NI_NUMERICSERV) == 0)
+		#ifdef DEBUG
+		fprintf (stdout, "IP = %s, Port = %s \n", hostname, servname);
+		#endif
+	listen(sock_server, 5);
+
+	while (1) {
+		sock = accept(sock_server, NULL, NULL);
+		if (sock < 0) {
+			perror("accept");
+			return -1;
+		}
+		switch (fork()) {
+			case 0 : // son
+				close(sock_server);
+				manage_co(sock);
+				exit(EXIT_SUCCESS);
+			case -1 :
+				perror("fork");
+				return -1;
+			default : // father
+				close(sock);
+		}
+	}
+	return 0;
+}
+
+/**
+ * @brief
+ * Here we deal with the data we received. Data is splited in two file : client.log and server.xml.
+ * In server.log, "normal" data from the scan it's for debugging purpose
+ * XML data is stored in server.xml
+ * @param sock : socket of the server
+ */
+void manage_co(int sock)
+{
+	struct sockaddr * sockaddr;
+	socklen_t length = 0;
+	char hostname [NI_MAXHOST];
+	char port [NI_MAXSERV];
+	char buffer[256];
+	int  buf_len;
+	bool isXML = false;
+
+	getpeername(sock, NULL, &length);
+	if (length == 0)
+		return;
+	sockaddr = malloc(length);
+	if (getpeername(sock, sockaddr, & length) < 0) {
+		perror ("getpeername");
+		free(sockaddr);
+		return;
+	}
+
+	FILE *fp = fopen("server.log" ,"a+"); // or w+ idk yet
+	FILE *fp_xml = NULL;
+
+	if (getnameinfo(sockaddr, length,
+	                hostname, NI_MAXHOST,
+	                port, NI_MAXSERV,
+	                NI_NUMERICHOST | NI_NUMERICSERV) == 0) {
+		sprintf (buffer, "IP:%s\tPort: %s\n", hostname, port);
+		fprintf(stdout, "%s\n", buffer);
+		fprintf(fp, "%s\n", buffer);
+	}
+	free(sockaddr);
+	while (1) {
+		buf_len = read(sock, buffer, 256);
+
+		if (buf_len < 0) {
+			perror("read");
+			exit(EXIT_SUCCESS);
+		}
+		if (buf_len == 0)
+			break;
+
+		if (strstr(buffer, "-xml-") != NULL){
+			isXML = true;
+			fp_xml = fopen("server.xml" ,"w+");
+		}
+		else {
+			if (strstr(buffer, "-end_xml-") != NULL)
+			{
+				fclose(fp_xml);
+				isXML = false;
+			}
+		}
+		if (isXML)
+		{
+			if (strstr(buffer, "-xml-") == NULL && strstr(buffer, "-end_xml-") == NULL)
+			{
+				fprintf(stdout, "%s\r\n",buffer);
+				fprintf(fp_xml, "%s\n", buffer);
+			}
+		} else {
+			fprintf(stdout, "%s\r\n",buffer);
+			fprintf(fp, "%s\n", buffer);
+		}
+
+		memset(buffer, 0, 256);
+		buffer[buf_len] = '\0';
+	}
+	fclose(fp_xml);
+	fclose(fp);
+	close(sock);
 }

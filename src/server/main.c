@@ -12,7 +12,6 @@
 #include <signal.h>
 /* local headers */
 #include <include/server.h>
-#include <include/server_tool.h>
 #include <include/common.h>
 #include <include/xml.h>
 #include <include/network.h>
