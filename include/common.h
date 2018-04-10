@@ -2,7 +2,7 @@
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 
-#define VERSION "0.0.1"
+#define TOOL_VERSION "0.0.1"
 #define TOOLNAME "ragnarok"
 #define SRV_TOOLNAME "ragnarok-srv"
 

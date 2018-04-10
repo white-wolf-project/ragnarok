@@ -28,14 +28,14 @@ static FILE* dbg = NULL; // file used only in DEBUG mode.
 /**
  * @brief
  * prints version informations :
- * TOOLNAME, VERSION, DATE and TIME
+ * TOOLNAME, TOOL_VERSION, DATE and TIME
  * @return void, no return
  */
 void version(){
 	#ifdef DEBUG
-		fprintf(stdout, "%s, version %s-DEBUG\nCompiled on %s at %s\nCopyright 2018 - White Wolf Team\n", TOOLNAME, VERSION, __DATE__, __TIME__);
+		fprintf(stdout, "%s, version %s-DEBUG\nCompiled on %s at %s\nCopyright 2018 - White Wolf Team\n", TOOLNAME, TOOL_VERSION, __DATE__, __TIME__);
 	#else
-		fprintf(stdout, "%s, version %s\nCompiled on %s at %s\nCopyright 2018 - White Wolf Team\n", TOOLNAME, VERSION, __DATE__, __TIME__);
+		fprintf(stdout, "%s, version %s\nCompiled on %s at %s\nCopyright 2018 - White Wolf Team\n", TOOLNAME, TOOL_VERSION, __DATE__, __TIME__);
 	#endif
 }
 
