@@ -30,9 +30,9 @@
 #include <sys/time.h>
 #include <iwlib.h>
 /* local headers */
-#include <include/client_tool.h>
 #include <include/client.h>
 #include <include/common.h>
+#include "sysnet/include/network.h"
 
 /****************************** TYPES ******************************/
 
