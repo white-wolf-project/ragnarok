@@ -1,14 +1,15 @@
-# DB.py
+#!/usr/bin/env python3
+##
+# @file ragnarok_bdd.py
+# @brief Create database for ragnarok
+#
 
 import mysql.connector
 from mysql.connector import errorcode
-import sys
 
-
-DB_NAME = 'ragnarok_bdd'
+DB_NAME = "ragnarok_bdd"
 
 TABLES = {}
-
 
 TABLES['Info_AP'] = (
 	"CREATE TABLE `Info_AP` ("
@@ -56,16 +57,23 @@ TABLES['Blank'] = (
 	"  `X3` varchar(100) NOT NULL"
  	") ENGINE=InnoDB")
 
+## Function : create_database(cursor)
+#
+# Function used to create database
+# @param cursor
 def create_database(cursor):
 	try:
-		cursor.execute(
-			"CREATE DATABASE {} DEFAULT CHARACTER SET 'utf8'".format(DB_NAME))
+		cursor.execute("CREATE DATABASE {} DEFAULT CHARACTER SET 'utf8'".format(DB_NAME))
 	except mysql.connector.Error as err:
 		print("Failed creating database: {}".format(err))
 		exit(1)
 
+## Function : create_tables(cursor)
+#
+# Function used to create tables for the database
+# @param cursor
 def create_tables(cursor):
-	cnx = cnx = mysql.connector.connect(user='root', password='root',                                                   host='localhost')
+	cnx = cnx = mysql.connector.connect(user='root', password='root', host='localhost')
 	for name, ddl in TABLES.items():
 		try:
 			print("Creating table {}: ".format(name))
@@ -81,9 +89,12 @@ def create_tables(cursor):
 	cursor.close()
 	cnx.close()
 
+## Function : init_bdd()
+#
+# Function used init ragnarok database, to prepare for setting data in tables
+# @param cursor
 def init_bdd():
-	
-	cnx = mysql.connector.connect(user='root', password='root',						      host='localhost')
+	cnx = mysql.connector.connect(user='root', password='root', host='localhost')
 	cursor = cnx.cursor()
 
 	create_database(cursor)
@@ -97,17 +108,12 @@ def init_bdd():
 		else:
 			print(err)
 			exit(1)
-
 	try:
-		cnx = mysql.connector.connect(user='root', password='root',
-								  host='localhost',
-								  database='ragnarok')
+		cnx = mysql.connector.connect(user='root', password='root', host='localhost', database='ragnarok')
 
 	except mysql.connector.Error as err:
-
 		if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-			print("Something is wrong with your user name or password")
-
+			print("Incorrect username or password")
 		else:
 			print(err)
 
@@ -115,6 +121,4 @@ def init_bdd():
 	cnx.close()
 
 if __name__ == '__main__':
-
 	init_bdd()
-
