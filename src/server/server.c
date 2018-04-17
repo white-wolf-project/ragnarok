@@ -18,6 +18,8 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <my_global.h>
+#include <mysql.h>
 /* local headers */
 #include <include/server.h>
 #include <include/common.h>
@@ -230,10 +232,7 @@ void manage_co(int sock)
 	FILE *fp = fopen("server.log" ,"a+"); // or w+ idk yet
 	FILE *fp_xml = NULL;
 
-	if (getnameinfo(sockaddr, length,
-	                hostname, NI_MAXHOST,
-	                port, NI_MAXSERV,
-	                NI_NUMERICHOST | NI_NUMERICSERV) == 0) {
+	if (getnameinfo(sockaddr, length, hostname, NI_MAXHOST, port, NI_MAXSERV, NI_NUMERICHOST | NI_NUMERICSERV) == 0) {
 		sprintf (buffer, "IP:%s\tPort: %s\n", hostname, port);
 		fprintf(stdout, "%s\n", buffer);
 		fprintf(fp, "%s\n", buffer);
@@ -278,4 +277,46 @@ void manage_co(int sock)
 	fclose(fp_xml);
 	fclose(fp);
 	close(sock);
+}
+
+/**
+ * @brief
+ * TODO : change db name
+ * Check if the ragnarok_bdd datase exists
+ * We open a connection to the SQL server. Then we check if you can create a new DB. If it already exists then run another script.
+ * @param db_name : name of database to check for
+ * @return true if database exists
+ * @see https://dev.mysql.com/
+ */
+bool check4db(const char *db_name)
+{
+	char err[128];
+	char create_db[64];
+	MYSQL *con = mysql_init(NULL);
+	if (con == NULL)
+	{
+		fprintf(stderr, "%s\n", mysql_error(con));
+		exit(1);
+	}
+	/*TODO : change host, user, passwd and host values */
+	if (mysql_real_connect(con, "localhost", "root", "root", NULL, 0, NULL, 0) == NULL)
+	{
+		fprintf(stderr, "%s\n", mysql_error(con));
+		mysql_close(con);
+		return false;
+	}
+	sprintf(create_db, "CREATE DATABASE %s", db_name);
+	if (mysql_query(con, create_db))
+	{
+		sprintf(err, "Can't create database '%s'; database exists", db_name);
+		if (!strcmp(mysql_error(con), err))
+		{
+			mysql_close(con);
+			return true;
+		} else {
+			mysql_close(con);
+			return false;
+		}
+	}
+	return false;
 }
