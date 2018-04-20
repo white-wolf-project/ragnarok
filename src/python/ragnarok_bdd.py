@@ -13,8 +13,9 @@ TABLES = {}
 
 TABLES['Info_AP'] = (
 	"CREATE TABLE `Info_AP` ("
-	"  `Mac` varchar(25) NOT NULL,"
-	"  `ESSID` varchar(50) NULL,"
+	"  `Id_AP` int NOT NULL AUTO_INCREMENT,"
+	"  `Mac` varchar(25),"
+	"  `ESSID` varchar(50),"
 	"  `Time` varchar(25)  NOT NULL,"
 	"  `Id_encryption` int(25) NOT NULL ,"
 	"  `Channel` varchar(25) NOT NULL,"
@@ -23,7 +24,7 @@ TABLES['Info_AP'] = (
 	"  `Frequency` varchar(25) NOT NULL,"
    	"  `Id_quality` varchar(25) NOT NULL,"
 	"  `MAC_Rasb` varchar(25) NOT NULL,"
-	"  PRIMARY KEY (`Mac`)"
+	"  PRIMARY KEY (`Id_AP`)"
 	") ENGINE=InnoDB")
 
 TABLES['Encryption'] = (
@@ -44,17 +45,17 @@ TABLES['Device_info'] = (
 TABLES['Quality'] = (
 	"CREATE TABLE `Quality` ("
 	"  `Id_quality` int NOT NULL AUTO_INCREMENT,"
-	"  `Qual_Rpi1` int NOT NULL,"
-	"  `Qual_Rpi2` int NOT NULL,"
-	"  `Qual_Rpi3` int NOT NULL,"
+	"  `Qual_Rpi1` int,"
+	"  `Qual_Rpi2` int,"
+	"  `Qual_Rpi3` int,"
 	"  PRIMARY KEY (`Id_quality`)"
 	") ENGINE=InnoDB")
 
 TABLES['Blank'] = (
 	"CREATE TABLE `Blank` ("
-	"  `X1` varchar(100) NOT NULL,"
-	"  `X2` varchar(100) NOT NULL,"
-	"  `X3` varchar(100) NOT NULL"
+	"  `X1` varchar(100) ,"
+	"  `X2` varchar(100) ,"
+	"  `X3` varchar(100) "
  	") ENGINE=InnoDB")
 
 ## Function : create_database(cursor)
