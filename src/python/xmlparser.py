@@ -61,11 +61,11 @@ def insert_encryption(db_conn, Encryption_name):
 # Function used to insert encryption information in the database
 # @param db_conn
 # @param Encryption_name
-def insert_quality(db_conn, Qual_Rpi1, Qual_Rpi2, Qual_Rpi3):
-	curs = db_conn.cursor() 
-	sql = "INSERT INTO Quality VALUES (NULL, '%s', '%s', '%s');" % \
-		(Qual_Rpi1, Qual_Rpi2, Qual_Rpi3)
-	curs.execute(sql)
+# def insert_quality(db_conn, Qual_Rpi1, Qual_Rpi2, Qual_Rpi3):
+# 	curs = db_conn.cursor() 
+# 	sql = "INSERT INTO Quality VALUES (NULL, '%s', '%s', '%s');" % \
+# 		(Qual_Rpi1, Qual_Rpi2, Qual_Rpi3)
+# 	curs.execute(sql)
 
 ## Function : ap_data_from_element
 # Parse data in the XML file
@@ -97,6 +97,13 @@ def parse(xmlfile):
 
 	return APs, RASBs, conn
 
+def defqual1(db_conn,mac_rasb, mac, qual):
+	curs = db_conn.cursor()
+	sql = "UPDATE Quality SET Qual_Rpi1 = '%s' WHERE (Device_info.Mac) = '%s' AND Info_AP.Mac = '%s'" % \
+			(qual,mac_rasb,mac)
+	curs.execute(sql)
+
+
 
 ## Function : usage
 # usage function
@@ -104,15 +111,29 @@ def usage():
 	print("usage : %s <file>" % sys.argv[0])
 
 if __name__ == '__main__':
-	if len(sys.argv) != 3 :
+	if len(sys.argv) != 4 :
 		usage()
 		sys.exit(1)
 	else :
 		xmlfile1 = sys.argv[1]
 		xmlfile2 = sys.argv[2]
+		xmlfile3 = sys.argv[3]
 
 
 	APs, RASBs, conn = parse(xmlfile1)
+	for AP in APs:
+		mac, channel, frequency, quality, signal, essid, beacon, encryption, time, mac_rasb = ap_data_from_element(AP,RASBs)
+		insert_encryption(conn, encryption)
+		conn.commit()
+		insert_info_ap(conn, mac, essid, time, encryption, channel, beacon, signal, frequency, 1, mac_rasb)
+	conn.commit()
+	insert_device_info(conn, time, mac_rasb, 0)
+	conn.commit()
+
+	defqual1(conn,mac_rasb,mac,quality)
+	conn.commit()
+
+	APs, RASBs, conn = parse(xmlfile2)
 	for AP in APs:
 		mac, channel, frequency, quality, signal, essid, beacon, encryption, time, mac_rasb = ap_data_from_element(AP,RASBs)
 		insert_encryption(conn, encryption)
@@ -126,7 +147,7 @@ if __name__ == '__main__':
 	insert_quality(conn,qual1,qual2,qual3)
 	conn.commit()
 
-	APs, RASBs, conn = parse(xmlfile2)
+	APs, RASBs, conn = parse(xmlfile3)
 	for AP in APs:
 		mac, channel, frequency, quality, signal, essid, beacon, encryption, time, mac_rasb = ap_data_from_element(AP,RASBs)
 		insert_encryption(conn, encryption)
