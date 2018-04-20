@@ -99,10 +99,15 @@ def parse(xmlfile):
 
 def defqual1(db_conn,mac_rasb, mac, qual):
 	curs = db_conn.cursor()
-	sql = "UPDATE Quality SET Qual_Rpi1 = '%s' WHERE (Device_info.Mac) = '%s' AND Info_AP.Mac = '%s'" % \
+	sql = "UPDATE Quality SET Qual_Rpi1 = '%s' WHERE (SELECT Device_info.Mac FROM Device_info WHERE Device_info.Mac = '%s') AND (SELECT Info_AP.Mac FROM Info_AP WHERE Info_AP.Mac = '%s')" % \
 			(qual,mac_rasb,mac)
 	curs.execute(sql)
 
+def foreignkey(db_conn):
+	curs = db_conn.cursor()
+	sql1 = "ALTER TABLE Info_AP ADD FOREIGN KEY (`Id_encryption`) REFERENCES `Encryption`(Id_encryption)"
+	sql2 = "ALTER TABLE Info_AP ADD FOREIGN KEY (`MAC_Rasb`) REFERENCES `Device_info`(Mac)"
+	sql3 = "ALTER TABLE Info_AP ADD FOREIGN KEY (`Id_quality`) REFERENCES `Quality`(Id_quality)"
 
 
 ## Function : usage
@@ -119,19 +124,21 @@ if __name__ == '__main__':
 		xmlfile2 = sys.argv[2]
 		xmlfile3 = sys.argv[3]
 
-
 	APs, RASBs, conn = parse(xmlfile1)
+	
+	foreignkey(conn)
+
 	for AP in APs:
 		mac, channel, frequency, quality, signal, essid, beacon, encryption, time, mac_rasb = ap_data_from_element(AP,RASBs)
 		insert_encryption(conn, encryption)
 		conn.commit()
 		insert_info_ap(conn, mac, essid, time, encryption, channel, beacon, signal, frequency, 1, mac_rasb)
-	conn.commit()
+		conn.commit()
+		defqual1(conn,mac_rasb,mac,quality)
+		conn.commit()
 	insert_device_info(conn, time, mac_rasb, 0)
 	conn.commit()
 
-	defqual1(conn,mac_rasb,mac,quality)
-	conn.commit()
 
 	APs, RASBs, conn = parse(xmlfile2)
 	for AP in APs:
@@ -144,7 +151,7 @@ if __name__ == '__main__':
 	conn.commit()
  
 	qual1,qual2,qual3 = 1,2,3
-	insert_quality(conn,qual1,qual2,qual3)
+	# insert_quality(conn,qual1,qual2,qual3)
 	conn.commit()
 
 	APs, RASBs, conn = parse(xmlfile3)
@@ -158,5 +165,5 @@ if __name__ == '__main__':
 	conn.commit()
  
 	qual1,qual2,qual3 = 1,2,3
-	insert_quality(conn,qual1,qual2,qual3)
+	# insert_quality(conn,qual1,qual2,qual3)
 	conn.commit()

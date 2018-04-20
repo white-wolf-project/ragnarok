@@ -11,22 +11,6 @@ DB_NAME = "ragnarok_bdd"
 
 TABLES = {}
 
-TABLES['Info_AP'] = (
-	"CREATE TABLE `Info_AP` ("
-	"  `Id_AP` int NOT NULL AUTO_INCREMENT,"
-	"  `Mac` varchar(25),"
-	"  `ESSID` varchar(50),"
-	"  `Time` varchar(25)  NOT NULL,"
-	"  `Id_encryption` int(25) NOT NULL ,"
-	"  `Channel` varchar(25) NOT NULL,"
-	"  `Beacon` varchar(25) NOT NULL,"
-	"  `Signal` varchar(25) NOT NULL,"
-	"  `Frequency` varchar(25) NOT NULL,"
-   	"  `Id_quality` varchar(25) NOT NULL,"
-	"  `MAC_Rasb` varchar(25) NOT NULL,"
-	"  PRIMARY KEY (`Id_AP`)"
-	") ENGINE=InnoDB")
-
 TABLES['Encryption'] = (
 	"CREATE TABLE `Encryption` ("
 	"  `Id_encryption` int NOT NULL AUTO_INCREMENT,"
@@ -45,9 +29,9 @@ TABLES['Device_info'] = (
 TABLES['Quality'] = (
 	"CREATE TABLE `Quality` ("
 	"  `Id_quality` int NOT NULL AUTO_INCREMENT,"
-	"  `Qual_Rpi1` int,"
-	"  `Qual_Rpi2` int,"
-	"  `Qual_Rpi3` int,"
+	"  `Qual_Rpi1` int DEFAULT NULL,"
+	"  `Qual_Rpi2` int DEFAULT NULL,"
+	"  `Qual_Rpi3` int DEFAULT NULL,"
 	"  PRIMARY KEY (`Id_quality`)"
 	") ENGINE=InnoDB")
 
@@ -57,6 +41,23 @@ TABLES['Blank'] = (
 	"  `X2` varchar(100) ,"
 	"  `X3` varchar(100) "
  	") ENGINE=InnoDB")
+
+TABLES['Info_AP'] = (
+	"CREATE TABLE `Info_AP` ("
+	"  `Id_AP` int NOT NULL AUTO_INCREMENT,"
+	"  `Mac` varchar(25),"
+	"  `ESSID` varchar(50),"
+	"  `Time` varchar(25)  NOT NULL,"
+	"  `Id_encryption` int(25) NOT NULL ,"
+	"  `Channel` varchar(25) NOT NULL,"
+	"  `Beacon` varchar(25) NOT NULL,"
+	"  `Signal` varchar(25) NOT NULL,"
+	"  `Frequency` varchar(25) NOT NULL,"
+   	"  `Id_quality` varchar(25) NOT NULL,"
+	"  `MAC_Rasb` varchar(25) NOT NULL,"
+	"  PRIMARY KEY (`Id_AP`)"
+	") ENGINE=InnoDB")
+
 
 ## Function : create_database(cursor)
 #
@@ -68,6 +69,7 @@ def create_database(cursor):
 	except mysql.connector.Error as err:
 		print("Failed creating database: {}".format(err))
 		exit(1)
+		
 
 ## Function : create_tables(cursor)
 #
