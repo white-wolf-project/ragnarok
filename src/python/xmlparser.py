@@ -22,10 +22,10 @@ import sys
 # @param frequency
 # @param id_quality
 # @param MAC_Rasb
-def insert_info_ap(db_conn, mac, essid, time, encryption, channel, beacon, signal, frequency, id_quality, MAC_Rasb): 
+def insert_info_ap(db_conn, mac, essid, time, encryption, channel, beacon, signal, frequency, quality, MAC_Rasb): 
 	curs = db_conn.cursor() 
 	sql = "INSERT INTO Info_AP VALUES (NULL,'%s', '%s', '%s', (SELECT Id_encryption FROM Encryption WHERE Encryption.Encryption_name = '%s'), '%s', '%s', '%s', '%s', '%s', '%s');" % \
-		(mac, essid, time, encryption, channel, beacon, signal, frequency, id_quality, MAC_Rasb)
+		(mac, essid, time, encryption, channel, beacon, signal, frequency, quality, MAC_Rasb)
 	curs.execute(sql)
 
 ## Function : insert_device_info
@@ -97,13 +97,18 @@ def parse(xmlfile):
 
 	return APs, RASBs, conn
 
-def defqual1(db_conn,mac_rasb, mac, qual):
-	curs = db_conn.cursor()
-	sql = "UPDATE Quality SET Qual_Rpi1 = '%s' WHERE (Device_info.Mac) = '%s' AND Info_AP.Mac = '%s'" % \
-			(qual,mac_rasb,mac)
-	curs.execute(sql)
+# def defqual1(db_conn,mac_rasb, mac, qual):
+# 	curs = db_conn.cursor()
+# 	print(qual)
+# 	sql = "INSERT INTO Quality VALUES (NULL, '%s', NULL, NULL) ;" % \
+# 			(qual)
+# 	curs.execute(sql)
 
-
+# def foreignkey(db_conn):
+# 	curs = db_conn.cursor()
+# 	sql = "ALTER TABLE Info_AP ADD FOREIGN KEY (Id_quality) REFERENCES Quality(Id_quality)"
+# 	curs.execute(sql)
+# 	db_conn.commit()
 
 ## Function : usage
 # usage function
@@ -119,44 +124,48 @@ if __name__ == '__main__':
 		xmlfile2 = sys.argv[2]
 		xmlfile3 = sys.argv[3]
 
-
 	APs, RASBs, conn = parse(xmlfile1)
+	
+	# foreignkey(conn)
+	# conn.commit()
+
 	for AP in APs:
 		mac, channel, frequency, quality, signal, essid, beacon, encryption, time, mac_rasb = ap_data_from_element(AP,RASBs)
 		insert_encryption(conn, encryption)
 		conn.commit()
-		insert_info_ap(conn, mac, essid, time, encryption, channel, beacon, signal, frequency, 1, mac_rasb)
-	conn.commit()
+		insert_info_ap(conn, mac, essid, time, encryption, channel, beacon, signal, frequency, quality, mac_rasb)
+		conn.commit()
+		# defqual1(conn,mac_rasb,mac,quality)
+		# conn.commit()
 	insert_device_info(conn, time, mac_rasb, 0)
 	conn.commit()
-
-	defqual1(conn,mac_rasb,mac,quality)
-	conn.commit()
+	# foreignkey(conn)
+	# conn.commit()
 
 	APs, RASBs, conn = parse(xmlfile2)
 	for AP in APs:
 		mac, channel, frequency, quality, signal, essid, beacon, encryption, time, mac_rasb = ap_data_from_element(AP,RASBs)
 		insert_encryption(conn, encryption)
 		conn.commit()
-		insert_info_ap(conn, mac, essid, time, encryption, channel, beacon, signal, frequency, 1, mac_rasb)
-	conn.commit()
+		insert_info_ap(conn, mac, essid, time, encryption, channel, beacon, signal, frequency, quality, mac_rasb)
+		conn.commit()
 	insert_device_info(conn, time, mac_rasb, 0)
 	conn.commit()
  
-	qual1,qual2,qual3 = 1,2,3
-	insert_quality(conn,qual1,qual2,qual3)
-	conn.commit()
+	# qual1,qual2,qual3 = 1,2,3
+	# insert_quality(conn,qual1,qual2,qual3)
+	# conn.commit()
 
 	APs, RASBs, conn = parse(xmlfile3)
 	for AP in APs:
 		mac, channel, frequency, quality, signal, essid, beacon, encryption, time, mac_rasb = ap_data_from_element(AP,RASBs)
 		insert_encryption(conn, encryption)
 		conn.commit()
-		insert_info_ap(conn, mac, essid, time, encryption, channel, beacon, signal, frequency, 1, mac_rasb)
-	conn.commit()
+		insert_info_ap(conn, mac, essid, time, encryption, channel, beacon, signal, frequency, quality, mac_rasb)
+		conn.commit()
 	insert_device_info(conn, time, mac_rasb, 0)
 	conn.commit()
  
-	qual1,qual2,qual3 = 1,2,3
-	insert_quality(conn,qual1,qual2,qual3)
-	conn.commit()
+	# qual1,qual2,qual3 = 1,2,3
+	# insert_quality(conn,qual1,qual2,qual3)
+	# conn.commit()

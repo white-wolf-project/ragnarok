@@ -11,22 +11,6 @@ DB_NAME = "ragnarok_bdd"
 
 TABLES = {}
 
-TABLES['Info_AP'] = (
-	"CREATE TABLE `Info_AP` ("
-	"  `Id_AP` int NOT NULL AUTO_INCREMENT,"
-	"  `Mac` varchar(25),"
-	"  `ESSID` varchar(50),"
-	"  `Time` varchar(25)  NOT NULL,"
-	"  `Id_encryption` int(25) NOT NULL ,"
-	"  `Channel` varchar(25) NOT NULL,"
-	"  `Beacon` varchar(25) NOT NULL,"
-	"  `Signal` varchar(25) NOT NULL,"
-	"  `Frequency` varchar(25) NOT NULL,"
-   	"  `Id_quality` varchar(25) NOT NULL,"
-	"  `MAC_Rasb` varchar(25) NOT NULL,"
-	"  PRIMARY KEY (`Id_AP`)"
-	") ENGINE=InnoDB")
-
 TABLES['Encryption'] = (
 	"CREATE TABLE `Encryption` ("
 	"  `Id_encryption` int NOT NULL AUTO_INCREMENT,"
@@ -42,21 +26,38 @@ TABLES['Device_info'] = (
 	"  PRIMARY KEY (`Mac`)"
 	") ENGINE=InnoDB")
 
-TABLES['Quality'] = (
-	"CREATE TABLE `Quality` ("
-	"  `Id_quality` int NOT NULL AUTO_INCREMENT,"
-	"  `Qual_Rpi1` int,"
-	"  `Qual_Rpi2` int,"
-	"  `Qual_Rpi3` int,"
-	"  PRIMARY KEY (`Id_quality`)"
+# TABLES['Quality'] = (
+# 	"CREATE TABLE `Quality` ("
+# 	"  `Id_quality` int NOT NULL AUTO_INCREMENT PRIMARY KEY,"
+# 	"  `Qual_Rpi1` varchar(10) DEFAULT '0',"
+# 	"  `Qual_Rpi2` varchar(10) DEFAULT '0',"
+# 	"  `Qual_Rpi3` varchar(10) DEFAULT '0'"
+# 	") ENGINE=InnoDB")
+
+# TABLES['Blank'] = (
+# 	"CREATE TABLE `Blank` ("
+# 	"  `X1` varchar(100) ,"
+# 	"  `X2` varchar(100) ,"
+# 	"  `X3` varchar(100) "
+#  	") ENGINE=InnoDB")
+
+TABLES['Info_AP'] = (
+	"CREATE TABLE `Info_AP` ("
+	"  `Id_AP` int NOT NULL AUTO_INCREMENT,"
+	"  `Mac` varchar(25) ,"
+	"  `ESSID` varchar(50) ,"
+	"  `Time` varchar(25) ,"
+	"  `Id_encryption` int(25) ,"
+	"  `Channel` varchar(25) ,"
+	"  `Beacon` varchar(25) ,"
+	"  `Signal` varchar(25) ,"
+	"  `Frequency` varchar(25) ,"
+	# "  `Id_quality` varchar(25),"
+	"  `Quality` varchar(25) ,"
+	"  `MAC_Rasb` varchar(25) ,"
+	"  PRIMARY KEY (`Id_AP`)"
 	") ENGINE=InnoDB")
 
-TABLES['Blank'] = (
-	"CREATE TABLE `Blank` ("
-	"  `X1` varchar(100) ,"
-	"  `X2` varchar(100) ,"
-	"  `X3` varchar(100) "
- 	") ENGINE=InnoDB")
 
 ## Function : create_database(cursor)
 #
@@ -68,6 +69,7 @@ def create_database(cursor):
 	except mysql.connector.Error as err:
 		print("Failed creating database: {}".format(err))
 		exit(1)
+		
 
 ## Function : create_tables(cursor)
 #
