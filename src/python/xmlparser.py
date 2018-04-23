@@ -82,12 +82,13 @@ def ap_data_from_element(info_AP, info_rasb):
 	time = info_rasb.find("time").text
 	mac_rasb = info_rasb.find("mac").text
 	encryption = info_AP.find("encryption").text
+	ip = info_rasb.find("IP").text
 	# 	encryption = "None"
 	# else :
 	# 	encryption = info_AP.find("encryption").text
 
 
-	return mac, channel, frequency, quality, signal, essid, beacon, encryption, time, mac_rasb
+	return mac, channel, frequency, quality, signal, essid, beacon, encryption, time, mac_rasb,ip
 
 def parse(xmlfile):
 	conn = mysql.connector.connect(host="localhost", user="root", password="root", database="ragnarok_bdd")
@@ -130,14 +131,14 @@ if __name__ == '__main__':
 	# conn.commit()
 
 	for AP in APs:
-		mac, channel, frequency, quality, signal, essid, beacon, encryption, time, mac_rasb = ap_data_from_element(AP,RASBs)
+		mac, channel, frequency, quality, signal, essid, beacon, encryption, time, mac_rasb, ip = ap_data_from_element(AP,RASBs)
 		insert_encryption(conn, encryption)
 		conn.commit()
 		insert_info_ap(conn, mac, essid, time, encryption, channel, beacon, signal, frequency, quality, mac_rasb)
 		conn.commit()
 		# defqual1(conn,mac_rasb,mac,quality)
 		# conn.commit()
-	insert_device_info(conn, time, mac_rasb, 0)
+	insert_device_info(conn, time, mac_rasb, ip)
 	conn.commit()
 	# foreignkey(conn)
 	# conn.commit()
@@ -149,7 +150,7 @@ if __name__ == '__main__':
 		conn.commit()
 		insert_info_ap(conn, mac, essid, time, encryption, channel, beacon, signal, frequency, quality, mac_rasb)
 		conn.commit()
-	insert_device_info(conn, time, mac_rasb, 0)
+	insert_device_info(conn, time, mac_rasb, ip)
 	conn.commit()
  
 	# qual1,qual2,qual3 = 1,2,3
@@ -163,7 +164,7 @@ if __name__ == '__main__':
 		conn.commit()
 		insert_info_ap(conn, mac, essid, time, encryption, channel, beacon, signal, frequency, quality, mac_rasb)
 		conn.commit()
-	insert_device_info(conn, time, mac_rasb, 0)
+	insert_device_info(conn, time, mac_rasb, ip)
 	conn.commit()
  
 	# qual1,qual2,qual3 = 1,2,3
