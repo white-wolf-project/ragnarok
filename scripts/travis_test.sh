@@ -29,4 +29,5 @@ cd ..
 # links libs
 sudo ldconfig
 # build ragnarok
-make
+make CFLAGS="-DDEBUG -I. -I/usr/include/libxml2/ -I/usr/include/python3.5 -I/usr/include/mysql -Isysnet -c -Wall -g -DDEVELOPMENT -DTRAVIS" -n
+make CFLAGS="-DDEBUG -I. -I/usr/include/libxml2/ -I/usr/include/python3.5 -I/usr/include/mysql -Isysnet -c -Wall -g -DDEVELOPMENT -DTRAVIS"
