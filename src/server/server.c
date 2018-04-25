@@ -205,7 +205,8 @@ int tcp_server(const char* service_port)
 /**
  * @brief
  * Here we deal with the data we received. Data is splited in two file : client.log and server.xml.
- * In server.log, "normal" data from the scan it's for debugging purpose
+ * In server.log, "normal" data from the scan it's for debugging purpose.
+ * We also call Python3 scripts to handle XML files, still in early stage for the moment.
  * XML data is stored in server.xml
  * @param sock : socket of the server
  */
@@ -257,6 +258,12 @@ void manage_co(int sock)
 			{
 				fclose(fp_xml);
 				isXML = false;
+				if (check4db("ragnarok_bdd") != true){
+					run_python("src/python/ragnarok_bdd.py", NULL);
+					run_python("src/python/xmlparser.py", "src/python/ragnarok.xml");
+				} else {
+					run_python("src/python/xmlparser.py", "src/python/ragnarok.xml");
+				}
 			}
 		}
 		if (isXML)
@@ -283,7 +290,8 @@ void manage_co(int sock)
  * @brief
  * TODO : change db name
  * Check if the ragnarok_bdd datase exists
- * We open a connection to the SQL server. Then we check if you can create a new DB. If it already exists then run another script.
+ * We open a connection to the SQL server. Then we check if you can create a new DB.
+ * If DB is created we just delete it and return false to let Python scripts do their job.
  * @param db_name : name of database to check for
  * @return true if database exists
  * @see https://dev.mysql.com/
@@ -291,32 +299,39 @@ void manage_co(int sock)
 bool check4db(const char *db_name)
 {
 	char err[128];
-	char create_db[64];
+	char db_query[64];
 	MYSQL *con = mysql_init(NULL);
+
 	if (con == NULL)
 	{
 		fprintf(stderr, "%s\n", mysql_error(con));
 		exit(1);
 	}
-	/*TODO : change host, user, passwd and host values */
+
+	/* connection to mysql server */
 	if (mysql_real_connect(con, "localhost", "root", "root", NULL, 0, NULL, 0) == NULL)
 	{
 		fprintf(stderr, "%s\n", mysql_error(con));
 		mysql_close(con);
 		return false;
 	}
-	sprintf(create_db, "CREATE DATABASE %s", db_name);
-	if (mysql_query(con, create_db))
+	/* try to create DB, if it already exists then return true else we return false */
+	sprintf(db_query, "CREATE DATABASE %s", db_name);
+	if (mysql_query(con, db_query))
 	{
 		sprintf(err, "Can't create database '%s'; database exists", db_name);
 		if (!strcmp(mysql_error(con), err))
 		{
+			fprintf(stdout, "%s\n", err);
 			mysql_close(con);
 			return true;
-		} else {
-			mysql_close(con);
-			return false;
 		}
+	} else {
+		/* we delete DB after testing to not break python scripts */
+		sprintf(db_query, "DROP DATABASE %s", db_name);
+		mysql_query(con, db_query);
+		mysql_close(con);
+		return false;
 	}
 	return false;
 }
