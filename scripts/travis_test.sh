@@ -13,7 +13,7 @@
 #
 
 # install few tools
-sudo apt-get install -y make build-essential libssl-dev wget git python3  m4 autoconf libtool autotools-dev libiw-dev libxml2-dev
+sudo apt-get install -y make build-essential libssl-dev wget git python3 libpython3.5-dev python3-dev m4 autoconf libtool autotools-dev libiw-dev libxml2-dev
 # clone dependencie 
 git clone https://github.com/HewlettPackard/wireless-tools.git
 # build wireless-tools
