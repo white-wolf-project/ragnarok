@@ -86,6 +86,12 @@ int run_python(const char *pyscript, const char *param) {
 	FILE* file;
 	wchar_t *argvw[2] = {0};
 
+	if (!file_exists(pyscript))
+	{
+		fprintf(stderr, "%s: %s\n", pyscript, strerror(errno));
+		return -2;
+	}
+
 	argvw[0] = Py_DecodeLocale(pyscript, NULL);
 
 	if (param != NULL)
