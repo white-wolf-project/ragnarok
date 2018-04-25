@@ -13,7 +13,7 @@ extern xmlNodePtr device_AP_name_child, info_ap_child;
 void version();
 void debug(const char* format, ...);
 bool file_exists(const char* file);
-int run_python(const char *pyscript);
+int run_python(const char *pyscript, const char *param);
 char *get_date_and_time(void);
 char *get_txt(const char *str, const char *p1, const char *p2);
 
