@@ -18,9 +18,9 @@ SYSNET = sysnet
 VERSION = $(shell cat resources/control.srv| grep Version | cut -d:  -f 2)
 DEBUG ?= 1
 BUILD ?= DEVELOPMENT
-MYSQL_LIBS = -lmysqlclient -lpthread -lz -lm -lrt -ldl
+MYSQL_LIBS = -lmysqlclient -lpthread -lz -lrt -ldl
 CFLAGS = $(DBG) -I. -I/usr/include/libxml2/ -I/usr/include/python3.$(python3v) -I/usr/include/mysql -I$(SYSNET) -c -Wall -g
-LDFLAGS = -liw -lxml2 -lpython3.$(python3m) $(MYSQL_LIBS)
+LDFLAGS = -lm -liw -lxml2 -lpython3.$(python3m) $(MYSQL_LIBS)
 CROSS_COMPILE ?=
 
 CLIENT_OBJECTS = $(CLIENT_SRC)/main.o \

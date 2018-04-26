@@ -2,8 +2,9 @@
 os :
   - linux
 
-dist: trusty
+dist: xenial
 sudo: required
+group: edge
 
 language: C
 
