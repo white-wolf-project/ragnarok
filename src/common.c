@@ -76,15 +76,20 @@ bool file_exists(const char* file){
  * Function based on libpyton, use to run Python 3 scripts
  * run like this :
  * @code
- * run_python("file.py");
+ * run_python("file.py", NULL);
+ * @endcode
+ * or
+ * @code
+ * run_python("file.py", args);
  * @endcode
  * @param pyscript : Path or name of python script to run
- * @param param : argument to set; put NULL if there is no arg needed.
+ * @param param : argument to set; put NULL if there is no arg needed. Array needs only three args
  * @return 0 is everything's gone well, or -2 if Python file is not found
  */
-int run_python(const char *pyscript, const char *param) {
+int run_python(const char *pyscript, const char *param[]) {
 	FILE* file;
-	wchar_t *argvw[2] = {0};
+	wchar_t *argvw[4];
+
 	if (!file_exists(pyscript))
 	{
 		fprintf(stderr, "%s: %s\n", pyscript, strerror(errno));
@@ -95,7 +100,12 @@ int run_python(const char *pyscript, const char *param) {
 
 	if (param != NULL)
 	{
-		argvw[1] = Py_DecodeLocale(param, NULL);
+		for (int i = 1; i <= 3; i++)
+		{
+			debug("%d : %s\n", i, param[i]);
+
+			argvw[i] = Py_DecodeLocale(param[i], NULL);
+		}
 	}
 
 	Py_SetProgramName(argvw[0]);
@@ -103,7 +113,7 @@ int run_python(const char *pyscript, const char *param) {
 
 	if (param != NULL)
 	{
-		PySys_SetArgv(2, argvw);
+		PySys_SetArgv(4, argvw);
 	}
 
 	file = fopen(pyscript,"r");
