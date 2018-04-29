@@ -81,10 +81,11 @@ def ap_data_from_element(info_AP, info_rasb):
 	frequency = info_AP.find("frequency").text
 	time = info_rasb.find("time").text
 	mac_rasb = info_rasb.find("mac").text
-	encryption = info_AP.find("encryption").text
-	# 	encryption = "None"
-	# else :
-	# 	encryption = info_AP.find("encryption").text
+
+	if info_AP.find("encryption") == None:
+		encryption = "None"
+	else :
+		encryption = info_AP.find("encryption").text
 
 
 	return mac, channel, frequency, quality, signal, essid, beacon, encryption, time, mac_rasb
@@ -115,57 +116,31 @@ def parse(xmlfile):
 def usage():
 	print("usage : %s <file>" % sys.argv[0])
 
+
 if __name__ == '__main__':
 	if len(sys.argv) != 4 :
 		usage()
 		sys.exit(1)
 	else :
-		xmlfile1 = sys.argv[1]
-		xmlfile2 = sys.argv[2]
-		xmlfile3 = sys.argv[3]
+		xmlfiles = sys.argv
 
-	APs, RASBs, conn = parse(xmlfile1)
-	
-	# foreignkey(conn)
-	# conn.commit()
+	for i in range(1, len(sys.argv)):
+		APs, RASBs, conn = parse(xmlfiles[i])
 
-	for AP in APs:
-		mac, channel, frequency, quality, signal, essid, beacon, encryption, time, mac_rasb = ap_data_from_element(AP,RASBs)
-		insert_encryption(conn, encryption)
-		conn.commit()
-		insert_info_ap(conn, mac, essid, time, encryption, channel, beacon, signal, frequency, quality, mac_rasb)
-		conn.commit()
-		# defqual1(conn,mac_rasb,mac,quality)
+		# foreignkey(conn)
 		# conn.commit()
-	insert_device_info(conn, time, mac_rasb, 0)
-	conn.commit()
-	# foreignkey(conn)
-	# conn.commit()
 
-	APs, RASBs, conn = parse(xmlfile2)
-	for AP in APs:
-		mac, channel, frequency, quality, signal, essid, beacon, encryption, time, mac_rasb = ap_data_from_element(AP,RASBs)
-		insert_encryption(conn, encryption)
+		for AP in APs:
+			mac, channel, frequency, quality, signal, essid, beacon, encryption, time, mac_rasb = ap_data_from_element(AP,RASBs)
+			insert_encryption(conn, encryption)
+			conn.commit()
+			insert_info_ap(conn, mac, essid, time, encryption, channel, beacon, signal, frequency, quality, mac_rasb)
+			conn.commit()
+			# defqual1(conn,mac_rasb,mac,quality)
+			# conn.commit()
+		insert_device_info(conn, time, mac_rasb, 0)
 		conn.commit()
-		insert_info_ap(conn, mac, essid, time, encryption, channel, beacon, signal, frequency, quality, mac_rasb)
-		conn.commit()
-	insert_device_info(conn, time, mac_rasb, 0)
-	conn.commit()
- 
-	# qual1,qual2,qual3 = 1,2,3
-	# insert_quality(conn,qual1,qual2,qual3)
-	# conn.commit()
 
-	APs, RASBs, conn = parse(xmlfile3)
-	for AP in APs:
-		mac, channel, frequency, quality, signal, essid, beacon, encryption, time, mac_rasb = ap_data_from_element(AP,RASBs)
-		insert_encryption(conn, encryption)
-		conn.commit()
-		insert_info_ap(conn, mac, essid, time, encryption, channel, beacon, signal, frequency, quality, mac_rasb)
-		conn.commit()
-	insert_device_info(conn, time, mac_rasb, 0)
-	conn.commit()
- 
-	# qual1,qual2,qual3 = 1,2,3
-	# insert_quality(conn,qual1,qual2,qual3)
-	# conn.commit()
+		# qual1,qual2,qual3 = 1,2,3
+		# insert_quality(conn,qual1,qual2,qual3)
+		# conn.commit()
