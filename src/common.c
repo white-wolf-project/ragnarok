@@ -103,8 +103,12 @@ int run_python(const char *pyscript, const char *param[]) {
 		for (int i = 1; i <= 3; i++)
 		{
 			debug("%d : %s\n", i, param[i]);
-
-			argvw[i] = Py_DecodeLocale(param[i], NULL);
+			if (file_exists(param[i])){
+				argvw[i] = Py_DecodeLocale(param[i], NULL);
+			} else {
+				debug("%s : %s\n", param[i], strerror(errno));
+				return -1;
+			}
 		}
 	}
 
