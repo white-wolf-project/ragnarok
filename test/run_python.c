@@ -1,4 +1,11 @@
-/* gcc run_python.c  -I/usr/include/python3.5 -Wall -g -o run_python -lpython3.5m */
+/**
+ * @file run_python.c
+ * @author Mathieu Hautebas
+ * @date 29 April 2018
+ * @brief file to test python code embedded in ragnarok-srv
+ * build like this : @verbatim gcc run_python.c  -I/usr/include/python3.5 -Wall -g -o run_python -lpython3.5m @endverbatim
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -34,11 +41,7 @@ int run_python(const char *pyscript, const char *param[]) {
 	FILE* file;
 	wchar_t *argvw[5];
 	
-	/*if (!file_exists(pyscript))
-	{
-		fprintf(stderr, "%s: %s\n", pyscript, strerror(errno));
-		return -2;
-	}*/
+	/*TODO : check for all files */
 	file = fopen(pyscript,"r");
 	if (file == NULL){
 		fprintf(stderr, "%s: %s\n", pyscript, strerror(errno));
