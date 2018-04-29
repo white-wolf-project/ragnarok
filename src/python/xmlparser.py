@@ -124,7 +124,7 @@ if __name__ == '__main__':
 	else :
 		xmlfiles = sys.argv
 
-	for i in range(1, len(sys.argv)):
+	for i in range(1, len(xmlfiles)):
 		APs, RASBs, conn = parse(xmlfiles[i])
 
 		# foreignkey(conn)
