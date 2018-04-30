@@ -137,7 +137,7 @@ int tcp_server(const char* service_port)
 	int sock;
 	struct addrinfo  hints;
 	struct addrinfo *results;
-
+	int count = 0;
 	struct sockaddr_in* addr_in;
 	socklen_t length = 0;
 	char hostname [NI_MAXHOST];
@@ -180,7 +180,6 @@ int tcp_server(const char* service_port)
 		fprintf (stdout, "IP = %s, Port = %s \n", hostname, servname);
 		#endif
 	listen(sock_server, 5);
-
 	while (1) {
 		sock = accept(sock_server, NULL, NULL);
 		if (sock < 0) {
@@ -190,7 +189,7 @@ int tcp_server(const char* service_port)
 		switch (fork()) {
 			case 0 : // son
 				close(sock_server);
-				manage_co(sock);
+				manage_co(sock, count);
 				exit(EXIT_SUCCESS);
 			case -1 :
 				perror("fork");
@@ -198,6 +197,8 @@ int tcp_server(const char* service_port)
 			default : // father
 				close(sock);
 		}
+		if (count++ == 3)
+			count = 0;
 	}
 	return 0;
 }
@@ -209,8 +210,9 @@ int tcp_server(const char* service_port)
  * We also call Python3 scripts to handle XML files, still in early stage for the moment.
  * XML data is stored in server.xml
  * @param sock : socket of the server
+ * @param counter : count number of opened sessions, once counter hits 3, run python script will all 3 xml files
  */
-void manage_co(int sock)
+void manage_co(int sock, int counter)
 {
 	struct sockaddr * sockaddr;
 	socklen_t length = 0;
@@ -218,12 +220,17 @@ void manage_co(int sock)
 	char port [NI_MAXSERV];
 	char buffer[256];
 	int  buf_len;
+	char xml_filename[32];
 	bool isXML = false;
+	const char *arg_tab[3] = {0};
 
 	getpeername(sock, NULL, &length);
+
 	if (length == 0)
 		return;
+
 	sockaddr = malloc(length);
+
 	if (getpeername(sock, sockaddr, & length) < 0) {
 		perror ("getpeername");
 		free(sockaddr);
@@ -246,23 +253,40 @@ void manage_co(int sock)
 			perror("read");
 			exit(EXIT_SUCCESS);
 		}
-		if (buf_len == 0)
+		if (buf_len == 0){
 			break;
-
+		}
 		if (strstr(buffer, "-xml-") != NULL){
 			isXML = true;
-			fp_xml = fopen("server.xml" ,"w+");
+			sprintf(xml_filename, "server_%d.xml", counter);
+			fp_xml = fopen(xml_filename ,"w+");
 		}
 		else {
 			if (strstr(buffer, "-end_xml-") != NULL)
 			{
 				fclose(fp_xml);
 				isXML = false;
-				if (check4db("ragnarok_bdd") != true){
-					run_python("src/python/ragnarok_bdd.py", NULL);
-					run_python("src/python/xmlparser.py", "src/python/ragnarok.xml");
-				} else {
-					run_python("src/python/xmlparser.py", "src/python/ragnarok.xml");
+				#ifdef RELEASE
+				arg_tab[0] = NULL;
+				arg_tab[1] = "/var/opt/ragnarok1.xml";
+				arg_tab[2] = "/var/opt/ragnarok2.xml";
+				arg_tab[3] = "/var/opt/ragnarok3.xml";
+				#else
+				arg_tab[0] = NULL;
+				arg_tab[1] = "src/python/test/ragnarok1.xml";
+				arg_tab[2] = "src/python/test/ragnarok2.xml";
+				arg_tab[3] = "src/python/test/ragnarok3.xml";
+				#endif
+
+				/* 0, 1, 2 */
+				if (counter == 2)
+				{
+					if (check4db("ragnarok_bdd") != true){
+						run_python("src/python/ragnarok_bdd.py", NULL);
+						run_python("src/python/xmlparser.py", arg_tab);
+					} else {
+						run_python("src/python/xmlparser.py", arg_tab);
+					}
 				}
 			}
 		}
@@ -270,20 +294,17 @@ void manage_co(int sock)
 		{
 			if (strstr(buffer, "-xml-") == NULL && strstr(buffer, "-end_xml-") == NULL)
 			{
-				fprintf(stdout, "%s\r\n",buffer);
+				debug("%s\r\n", buffer);
 				fprintf(fp_xml, "%s\n", buffer);
 			}
 		} else {
-			fprintf(stdout, "%s\r\n",buffer);
+			debug("%s\r\n",buffer);
 			fprintf(fp, "%s\n", buffer);
+			fclose(fp);
 		}
-
 		memset(buffer, 0, 256);
 		buffer[buf_len] = '\0';
 	}
-	fclose(fp_xml);
-	fclose(fp);
-	close(sock);
 }
 
 /**

@@ -61,7 +61,7 @@ static struct option longopts[] = {
 	{ "interface",	required_argument,	NULL, 'f'},
 	{ "wireless",	required_argument,	NULL, 'w'},
 	{ "xml",		required_argument,	NULL, 'x'},
-	{ "deamon", 	no_argument, 		NULL, 'd'},
+	{ "no-deamon", 	no_argument, 		NULL, 'n'},
 	{ "stop",		no_argument,		NULL, 's'},
 	{ "version", 	no_argument,		NULL, 'v'},
 	{ "help", 		no_argument,		NULL, 'h'},
@@ -111,7 +111,7 @@ int main(int argc, char  *argv[]){
 	char *mac_addr, *wireless;
 	const char *xmlfile;
 
-	while((opt = getopt_long(argc, (char**)argv, "ipfwvhxds", longopts, &optindex)) != -1){
+	while((opt = getopt_long(argc, (char**)argv, "ipfwvhxns", longopts, &optindex)) != -1){
 		switch(opt){
 			case 'h':
 				usage(argc, argv);
@@ -139,11 +139,13 @@ int main(int argc, char  *argv[]){
 				newwireless = argv[optind];
 				is_wireless_iface = 1;
 				break;
-			case 'd' :
+			case 'n' :
 				is_deamon = false;
 				break;
 			case 's' :
 				stop_client = 1;
+				break;
+			default :
 				break;
 		}
 	}
