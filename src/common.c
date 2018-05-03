@@ -19,7 +19,8 @@
 #include <include/client.h>
 #include <include/common.h>
 #include <include/xml.h>
-#include "sysnet/include/network.h"
+/*#include <include/log.h>
+*/#include "sysnet/include/network.h"
 
 #ifdef DEBUG
 static FILE* dbg = NULL; // file used only in DEBUG mode.
@@ -44,8 +45,8 @@ void version(){
  * We call this function almost everywhere.
  * But it prints to stdout/stderr only
  * when you build the project in DEBUG mode (we use #ifdef DEBUG ... #endif)
- * @param format : Path or name of python script to run
- * @param ... : like printf, which are params
+ * @param format : data like printf
+ * @param ... : like printf, variable params
  * @return void, no return
  */
 void debug(const char* format, ...) {
@@ -56,6 +57,51 @@ void debug(const char* format, ...) {
 	va_end(vargs);
 	#endif
 }
+
+/**
+ * @brief
+ * Since we daemonize our tools, we need logs to check if everything's done as we expected
+ * initial idea is from rxi on Github
+ * @param type : it's the type of log we want ragnarok.log (0) or ragnarok-srv.log (1)
+ * @param file : pointer to char, name of the file (eg common.c)
+ * @param line : line of file (eg common.c:67)
+ * @param format :  data like printf
+ * @param ... : like printf, variable params
+ * @return returns 0 or an int != 0 if there is a fail
+ * @see https://github.com/rxi/log.c
+ */
+int logger(int type, const char *file, int line, const char *format, ...){
+	const char *log_file;
+	char data_fmt[256];
+	char data2log[512];
+	if (type == 0)
+	{
+		log_file = "ragnarok.log";
+	}  else if (type == 1){
+		log_file = "ragnarok-srv.log";
+	} else {
+		fprintf(stderr, "%d : type not supported\n", type);
+		return -1;
+	}
+
+	FILE *fp = fopen(log_file, "a+");
+	if (fp == NULL){
+		fprintf(stderr, "%s : %s\n", log_file, strerror(errno));
+		return -2;
+	}
+
+	va_list vargs;
+	va_start(vargs, format);
+	vsprintf(data_fmt, format, vargs);
+	va_end(vargs);
+
+	sprintf(data2log, "%s INFO %s:%d: %s", get_date_and_time(), file, line, data_fmt);
+	fprintf(fp, "%s\n", data2log);
+
+	fclose(fp);
+	return 0;
+}
+
 
 /**
  * @brief
