@@ -1,5 +1,7 @@
 #include <stdbool.h>
 
+#define LOG_TYPE 1
+
 extern int sock;
 char *iface, *port;
 
