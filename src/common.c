@@ -19,8 +19,7 @@
 #include <include/client.h>
 #include <include/common.h>
 #include <include/xml.h>
-/*#include <include/log.h>
-*/#include "sysnet/include/network.h"
+#include "sysnet/include/network.h"
 
 #ifdef DEBUG
 static FILE* dbg = NULL; // file used only in DEBUG mode.
