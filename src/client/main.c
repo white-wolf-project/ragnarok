@@ -109,7 +109,7 @@ int main(int argc, char  *argv[]){
 	bool is_deamon = true;
 	char *newip, *newport, *wired_iface, *newwireless;
 	char *mac_addr, *wireless;
-	const char *xmlfile;
+	const char *xmlfile, *pidfile;
 
 	while((opt = getopt_long(argc, (char**)argv, "ipfwvhxns", longopts, &optindex)) != -1){
 		switch(opt){
@@ -149,18 +149,26 @@ int main(int argc, char  *argv[]){
 				break;
 		}
 	}
+	#ifdef RELEASE
+		pidfile = "/etc/ragnarok/ragnarok.pid";
+	#else
+		pidfile = "ragnarok.pid";
+	#endif
 
 	if (stop_client){
-		client_pid = get_instance_pid("ragnarok.pid");
+		client_pid = get_instance_pid(pidfile);
+
 		/* No need to kill something that does not exist*/
 		if (client_pid == -1)
 			return 0;
-		remove("ragnarok.pid");
+
+		remove(pidfile);
 		close(sock);
 		kill(client_pid, SIGINT);
 		debug("[i] ragnarok stopped\n");
 		return 0;
 	}
+
 
 	debug("%s\n", logo);
 	if (!xconfig){
@@ -170,8 +178,6 @@ int main(int argc, char  *argv[]){
 		xmlfile = "config/client.xml";
 		#endif
 	}
-
-	debug("%s\n", get_date_and_time());
 
 	// parse XML file to get default server IP/port and
 	// interface to use for AP scan
@@ -239,8 +245,11 @@ int main(int argc, char  *argv[]){
 	// Idea is to use config.xml instead of hardcoded values in code
 	mac_addr = get_mac_addr(wireless);
 	send_data(sock, "mac : %s\n", mac_addr);
+
+	log_it("starting server");
 	if (is_deamon == true){
-		init_client_daemon();
+		init_client_daemon(pidfile);
+		log_it("PID is %d", get_instance_pid(pidfile));
 		while(1){
 			init_xml("ragnarok.xml");
 			run_iwlist(get_wireless());

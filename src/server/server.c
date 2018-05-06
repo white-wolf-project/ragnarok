@@ -45,6 +45,7 @@ void INThandler(int sig)
  * init deamon for the server
  * First we check if the pidfile exists. If it exists, it means client is already running.
  * Print pid of process the quit.
+ * @param pidfile
  * @code
  * if (file_exists(pidfile))
  * {
@@ -66,10 +67,9 @@ void INThandler(int sig)
  * @return returns 0 if everything's done well or a number != 0 if any issue or just exit().
  * @see https://www.thegeekstuff.com/2012/02/c-daemon-process/
  */
-int init_srv_daemon(void){
+int init_srv_daemon(const char *pidfile){
 	pid_t process_id = 0;
 	pid_t sid = 0;
-	char *pidfile = "ragnarok-srv.pid";
 	char *pid_val = NULL;
 	size_t len = 0;
 

@@ -73,14 +73,24 @@ int logger(int type, const char *file, int line, const char *format, ...){
 	const char *log_file;
 	char data_fmt[256];
 	char data2log[512];
-	if (type == 0)
-	{
-		log_file = "ragnarok.log";
-	}  else if (type == 1){
-		log_file = "ragnarok-srv.log";
-	} else {
-		fprintf(stderr, "%d : type not supported\n", type);
-		return -1;
+
+	switch(type){
+		case 1:
+			#ifdef RELEASE
+				log_file = "/etc/ragnarok/ragnarok.log";
+			#else
+				log_file = "ragnarok.log";
+			#endif
+			break;
+		case 2:
+			#ifdef RELEASE
+				log_file = "/etc/ragnarok/ragnarok-srv.log";
+			#else
+				log_file = "ragnarok-srv.log";
+			#endif
+		default :
+			fprintf(stderr, "%d : type not supported\n", type);
+			return -1;
 	}
 
 	FILE *fp = fopen(log_file, "a+");

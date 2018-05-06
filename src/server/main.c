@@ -51,7 +51,7 @@ int main(int argc, char *argv[]){
 	int srv_pid = 0;
 	bool is_deamon = true;
 	char *newport, *newiface;
-	const char *xmlfile;
+	const char *xmlfile, *pidfile;
 	while((opt = getopt_long(argc, (char**)argv, "pfvhxns", longopts, &optindex)) != -1){
 		switch(opt){
 			case 'h':
@@ -81,18 +81,29 @@ int main(int argc, char *argv[]){
 				return -1;
 		}
 	}
+
+	#ifdef RELEASE
+		pidfile = "/etc/ragnarok/ragnarok-srv.pid";
+	#else
+		pidfile = "ragnarok-srv.pid";
+	#endif
+
 	if (stop_srv){
-		srv_pid = get_instance_pid("ragnarok-srv.pid");
-		/* No need to kill something that does exist*/
+
+		srv_pid = get_instance_pid(pidfile);
+
+		/* No need to kill something that doesn't exist*/
 		if (srv_pid == -1)
 			return 0;
-		remove("ragnarok-srv.pid");
+
+		remove(pidfile);
 		kill(srv_pid, SIGINT);
 		debug("[i] server stopped\n");
 		return 0;
 	}
 
 	log_it("starting server");
+
 	/*
 		if you don't specify a config file
 		then set default XML for RELEASE or DEV/DEBUG
@@ -128,9 +139,10 @@ int main(int argc, char *argv[]){
 
 	if (is_deamon == true)
 	{
-		init_srv_daemon();
+		init_srv_daemon(pidfile);
 		log_it("deamon started");
 	}
+	log_it("PID is %d", get_instance_pid(pidfile));
 	/* init daemon TCP server */
 	tcp_server(port);
 	return 0;
