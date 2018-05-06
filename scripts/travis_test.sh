@@ -24,7 +24,7 @@ git clone https://github.com/matteyeux/libcpuid
 cd libcpuid
 ./autogen.sh
 make
-make install
+sudo make install
 cd ..
 # links libs
 sudo ldconfig
