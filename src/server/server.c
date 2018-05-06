@@ -222,7 +222,7 @@ void manage_co(int sock, int counter)
 	int  buf_len;
 	char xml_filename[32];
 	bool isXML = false;
-	const char *arg_tab[3] = {0};
+	const char *arg_tab[4] = {0};
 
 	getpeername(sock, NULL, &length);
 
@@ -242,6 +242,7 @@ void manage_co(int sock, int counter)
 
 	if (getnameinfo(sockaddr, length, hostname, NI_MAXHOST, port, NI_MAXSERV, NI_NUMERICHOST | NI_NUMERICSERV) == 0) {
 		sprintf (buffer, "IP:%s\tPort: %s\n", hostname, port);
+		log_it("new client : %s", buffer);
 		fprintf(stdout, "%s\n", buffer);
 		fprintf(fp, "%s\n", buffer);
 	}

@@ -81,7 +81,6 @@ int main(int argc, char *argv[]){
 				return -1;
 		}
 	}
-
 	if (stop_srv){
 		srv_pid = get_instance_pid("ragnarok-srv.pid");
 		/* No need to kill something that does exist*/
@@ -93,6 +92,7 @@ int main(int argc, char *argv[]){
 		return 0;
 	}
 
+	log_it("starting server");
 	/*
 		if you don't specify a config file
 		then set default XML for RELEASE or DEV/DEBUG
@@ -103,6 +103,7 @@ int main(int argc, char *argv[]){
 		#else
 		xmlfile = "config/server.xml";
 		#endif
+		log_it("using %s as config file", xmlfile);
 	}
 
 	/* parse XML file to get iface (for sysnet) and port to run server */
@@ -128,6 +129,7 @@ int main(int argc, char *argv[]){
 	if (is_deamon == true)
 	{
 		init_srv_daemon();
+		log_it("deamon started");
 	}
 	/* init daemon TCP server */
 	tcp_server(port);
