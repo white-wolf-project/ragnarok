@@ -17,7 +17,7 @@ sudo apt-get install -y make build-essential libssl-dev wget git python3 python3
 # clone dependencie 
 git clone https://github.com/HewlettPackard/wireless-tools.git
 # build wireless-tools
-make -C wireless-tools/wireless_tools install
+sudo make -C wireless-tools/wireless_tools install
 
 # Install libcpuid
 git clone https://github.com/matteyeux/libcpuid
