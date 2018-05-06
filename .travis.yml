@@ -3,7 +3,7 @@ os :
   - linux
 
 dist: xenial
-sudo: false
+sudo: true
 group: edge
 
 language: C
