@@ -11,6 +11,10 @@ language: C
 compiler:
   - gcc
 
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install -y wireless-tools
+
 script :
   - ./scripts/travis_test.sh
 
