@@ -73,11 +73,23 @@ int logger(int type, const char *file, int line, const char *format, ...){
 	const char *log_file;
 	char data_fmt[256];
 	char data2log[512];
+
 	if (type == 0)
 	{
-		log_file = "ragnarok.log";
+		#ifdef RELEASE
+			log_file = "/etc/ragnarok/ragnarok.log";
+		#else
+			log_file = "ragnarok.log";
+		#endif
+
 	}  else if (type == 1){
-		log_file = "ragnarok-srv.log";
+
+		#ifdef RELEASE
+			log_file = "/etc/ragnarok/ragnarok-srv.log";
+		#else
+			log_file = "ragnarok-srv.log";
+		#endif
+
 	} else {
 		fprintf(stderr, "%d : type not supported\n", type);
 		return -1;
