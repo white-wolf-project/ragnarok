@@ -44,8 +44,8 @@ void version(){
  * We call this function almost everywhere.
  * But it prints to stdout/stderr only
  * when you build the project in DEBUG mode (we use #ifdef DEBUG ... #endif)
- * @param format : Path or name of python script to run
- * @param ... : like printf, which are params
+ * @param format : data like printf
+ * @param ... : like printf, variable params
  * @return void, no return
  */
 void debug(const char* format, ...) {
@@ -56,6 +56,61 @@ void debug(const char* format, ...) {
 	va_end(vargs);
 	#endif
 }
+
+/**
+ * @brief
+ * Since we daemonize our tools, we need logs to check if everything's done as we expected
+ * initial idea is from rxi on Github
+ * @param type : it's the type of log we want ragnarok.log (0) or ragnarok-srv.log (1)
+ * @param file : pointer to char, name of the file (eg common.c)
+ * @param line : line of file (eg common.c:67)
+ * @param format :  data like printf
+ * @param ... : like printf, variable params
+ * @return returns 0 or an int != 0 if there is a fail
+ * @see https://github.com/rxi/log.c
+ */
+int logger(int type, const char *file, int line, const char *format, ...){
+	const char *log_file;
+	char data_fmt[256];
+	char data2log[512];
+
+	switch(type){
+		case 1:
+			#ifdef RELEASE
+				log_file = "/etc/ragnarok/ragnarok.log";
+			#else
+				log_file = "ragnarok.log";
+			#endif
+			break;
+		case 2:
+			#ifdef RELEASE
+				log_file = "/etc/ragnarok/ragnarok-srv.log";
+			#else
+				log_file = "ragnarok-srv.log";
+			#endif
+		default :
+			fprintf(stderr, "%d : type not supported\n", type);
+			return -1;
+	}
+
+	FILE *fp = fopen(log_file, "a+");
+	if (fp == NULL){
+		fprintf(stderr, "%s : %s\n", log_file, strerror(errno));
+		return -2;
+	}
+
+	va_list vargs;
+	va_start(vargs, format);
+	vsprintf(data_fmt, format, vargs);
+	va_end(vargs);
+
+	sprintf(data2log, "%s INFO %s:%d: %s", get_date_and_time(), file, line, data_fmt);
+	fprintf(fp, "%s\n", data2log);
+
+	fclose(fp);
+	return 0;
+}
+
 
 /**
  * @brief
@@ -76,19 +131,51 @@ bool file_exists(const char* file){
  * Function based on libpyton, use to run Python 3 scripts
  * run like this :
  * @code
- * run_python("file.py");
+ * run_python("file.py", NULL);
+ * @endcode
+ * or
+ * @code
+ * run_python("file.py", args);
  * @endcode
  * @param pyscript : Path or name of python script to run
+ * @param param : argument to set; put NULL if there is no arg needed. Array needs only three args
  * @return 0 is everything's gone well, or -2 if Python file is not found
  */
-int run_python(const char *pyscript){
-	Py_Initialize();
-	FILE* file = fopen(pyscript, "r");
+int run_python(const char *pyscript, const char *param[]) {
+	FILE* file;
+	wchar_t *argvw[4];
+
 	if (!file_exists(pyscript))
 	{
 		fprintf(stderr, "%s: %s\n", pyscript, strerror(errno));
 		return -2;
 	}
+
+	argvw[0] = Py_DecodeLocale(pyscript, NULL);
+
+	if (param != NULL)
+	{
+		for (int i = 1; i <= 3; i++)
+		{
+			debug("%d : %s\n", i, param[i]);
+			if (file_exists(param[i])){
+				argvw[i] = Py_DecodeLocale(param[i], NULL);
+			} else {
+				debug("%s : %s\n", param[i], strerror(errno));
+				return -1;
+			}
+		}
+	}
+
+	Py_SetProgramName(argvw[0]);
+	Py_Initialize();
+
+	if (param != NULL)
+	{
+		PySys_SetArgv(4, argvw);
+	}
+
+	file = fopen(pyscript,"r");
 	PyRun_SimpleFile(file, pyscript);
 	Py_Finalize();
 	return 0;

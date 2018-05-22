@@ -34,10 +34,10 @@ function install_libcpuid(){
 sudo apt-get update && sudo apt-get upgrade -y
 
 # install build tools 
-sudo apt-get install -y make build-essential libssl-dev libreadline-dev libsqlite3-dev libmysql++-dev wget git python3 python3-pip \
-libnl-3-dev apache2 nmap m4 autoconf libtool autotools-dev libiw-dev libxml2-dev vim zsh htop python3.5-dev
+sudo apt-get install -y make build-essential libssl-dev mysql-server mysql-client \
+libmysql++-dev wget git python3-dev python3-pip apache2 m4 autoconf libtool autotools-dev libiw-dev libxml2-dev
 
-if [[ $(arch) != "armv71" && $(arch) != "aarch64" ]];then
+if [[ `arch | cut -c1-3` != "arm" && `arch | cut -c1-3` != "aar" ]];then
 	sudo apt-get install -y gcc-arm-linux-gnueabihf
 fi
 
@@ -55,3 +55,8 @@ git clone https://github.com/white-wolf-project/wireless-tools.git
 sudo make -C wireless-tools/wireless_tools install
 
 sudo ldconfig
+
+sudo a2enmod proxy_fcgi setenvif
+sudo a2enconf php7.0-fpm
+sudo service apache2 restart
+

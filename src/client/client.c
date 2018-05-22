@@ -29,8 +29,7 @@
 
 int sock;
 
-/*char  *ipaddr, *port, *iface;
-*//**
+/**
  * @brief
  * Function to send data to server.
  * example usage :
@@ -139,7 +138,7 @@ int read_and_send_data(const char *xmlfile){
  * @param results : pointer in struct addrinfo
  * @return returns 0 if everything's done well or a number != 0 if any issue or just exit().
  */
-int init_client (int server, char *host, char *port, struct addrinfo **results)
+int init_client(int server, char *host, char *port, struct addrinfo **results)
 {
 	int err;
 	struct addrinfo  hints;
@@ -161,6 +160,7 @@ int init_client (int server, char *host, char *port, struct addrinfo **results)
  * init deamon for the client
  * First we check if the pidfile exists. If it exists, it means client is already running.
  * Print pid of process the quit.
+ * @param pidfile
  * @code
  * if (file_exists(pidfile))
  * {
@@ -182,10 +182,9 @@ int init_client (int server, char *host, char *port, struct addrinfo **results)
  * @return returns 0 if everything's done well or a number != 0 if any issue or just exit().
  * @see https://www.thegeekstuff.com/2012/02/c-daemon-process/
  */
-int init_client_daemon(void){
+int init_client_daemon(const char *pidfile){
 	pid_t process_id = 0;
 	pid_t sid = 0;
-	char *pidfile = "ragnarok.pid";
 	char *pid_val = NULL;
 	size_t len = 0;
 

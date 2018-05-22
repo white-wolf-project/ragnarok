@@ -45,6 +45,7 @@ void INThandler(int sig)
  * init deamon for the server
  * First we check if the pidfile exists. If it exists, it means client is already running.
  * Print pid of process the quit.
+ * @param pidfile
  * @code
  * if (file_exists(pidfile))
  * {
@@ -66,10 +67,9 @@ void INThandler(int sig)
  * @return returns 0 if everything's done well or a number != 0 if any issue or just exit().
  * @see https://www.thegeekstuff.com/2012/02/c-daemon-process/
  */
-int init_srv_daemon(void){
+int init_srv_daemon(const char *pidfile){
 	pid_t process_id = 0;
 	pid_t sid = 0;
-	char *pidfile = "ragnarok-srv.pid";
 	char *pid_val = NULL;
 	size_t len = 0;
 
@@ -137,7 +137,7 @@ int tcp_server(const char* service_port)
 	int sock;
 	struct addrinfo  hints;
 	struct addrinfo *results;
-
+	int count = 0;
 	struct sockaddr_in* addr_in;
 	socklen_t length = 0;
 	char hostname [NI_MAXHOST];
@@ -180,7 +180,6 @@ int tcp_server(const char* service_port)
 		fprintf (stdout, "IP = %s, Port = %s \n", hostname, servname);
 		#endif
 	listen(sock_server, 5);
-
 	while (1) {
 		sock = accept(sock_server, NULL, NULL);
 		if (sock < 0) {
@@ -190,7 +189,7 @@ int tcp_server(const char* service_port)
 		switch (fork()) {
 			case 0 : // son
 				close(sock_server);
-				manage_co(sock);
+				manage_co(sock, count);
 				exit(EXIT_SUCCESS);
 			case -1 :
 				perror("fork");
@@ -198,6 +197,8 @@ int tcp_server(const char* service_port)
 			default : // father
 				close(sock);
 		}
+		if (count++ == 3)
+			count = 0;
 	}
 	return 0;
 }
@@ -205,11 +206,13 @@ int tcp_server(const char* service_port)
 /**
  * @brief
  * Here we deal with the data we received. Data is splited in two file : client.log and server.xml.
- * In server.log, "normal" data from the scan it's for debugging purpose
+ * In server.log, "normal" data from the scan it's for debugging purpose.
+ * We also call Python3 scripts to handle XML files, still in early stage for the moment.
  * XML data is stored in server.xml
  * @param sock : socket of the server
+ * @param counter : count number of opened sessions, once counter hits 3, run python script will all 3 xml files
  */
-void manage_co(int sock)
+void manage_co(int sock, int counter)
 {
 	struct sockaddr * sockaddr;
 	socklen_t length = 0;
@@ -217,12 +220,17 @@ void manage_co(int sock)
 	char port [NI_MAXSERV];
 	char buffer[256];
 	int  buf_len;
+	char xml_filename[32];
 	bool isXML = false;
+	const char *arg_tab[4] = {0};
 
 	getpeername(sock, NULL, &length);
+
 	if (length == 0)
 		return;
+
 	sockaddr = malloc(length);
+
 	if (getpeername(sock, sockaddr, & length) < 0) {
 		perror ("getpeername");
 		free(sockaddr);
@@ -234,6 +242,7 @@ void manage_co(int sock)
 
 	if (getnameinfo(sockaddr, length, hostname, NI_MAXHOST, port, NI_MAXSERV, NI_NUMERICHOST | NI_NUMERICSERV) == 0) {
 		sprintf (buffer, "IP:%s\tPort: %s\n", hostname, port);
+		log_it("new client : %s", buffer);
 		fprintf(stdout, "%s\n", buffer);
 		fprintf(fp, "%s\n", buffer);
 	}
@@ -245,45 +254,66 @@ void manage_co(int sock)
 			perror("read");
 			exit(EXIT_SUCCESS);
 		}
-		if (buf_len == 0)
+		if (buf_len == 0){
 			break;
-
+		}
 		if (strstr(buffer, "-xml-") != NULL){
 			isXML = true;
-			fp_xml = fopen("server.xml" ,"w+");
+			sprintf(xml_filename, "server_%d.xml", counter);
+			fp_xml = fopen(xml_filename ,"w+");
 		}
 		else {
 			if (strstr(buffer, "-end_xml-") != NULL)
 			{
 				fclose(fp_xml);
 				isXML = false;
+				#ifdef RELEASE
+				arg_tab[0] = NULL;
+				arg_tab[1] = "/var/opt/ragnarok1.xml";
+				arg_tab[2] = "/var/opt/ragnarok2.xml";
+				arg_tab[3] = "/var/opt/ragnarok3.xml";
+				#else
+				arg_tab[0] = NULL;
+				arg_tab[1] = "src/python/test/ragnarok1.xml";
+				arg_tab[2] = "src/python/test/ragnarok2.xml";
+				arg_tab[3] = "src/python/test/ragnarok3.xml";
+				#endif
+
+				/* 0, 1, 2 */
+				if (counter == 2)
+				{
+					if (check4db("ragnarok_bdd") != true){
+						run_python("src/python/ragnarok_bdd.py", NULL);
+						run_python("src/python/xmlparser.py", arg_tab);
+					} else {
+						run_python("src/python/xmlparser.py", arg_tab);
+					}
+				}
 			}
 		}
 		if (isXML)
 		{
 			if (strstr(buffer, "-xml-") == NULL && strstr(buffer, "-end_xml-") == NULL)
 			{
-				fprintf(stdout, "%s\r\n",buffer);
+				debug("%s\r\n", buffer);
 				fprintf(fp_xml, "%s\n", buffer);
 			}
 		} else {
-			fprintf(stdout, "%s\r\n",buffer);
+			debug("%s\r\n",buffer);
 			fprintf(fp, "%s\n", buffer);
+			fclose(fp);
 		}
-
 		memset(buffer, 0, 256);
 		buffer[buf_len] = '\0';
 	}
-	fclose(fp_xml);
-	fclose(fp);
-	close(sock);
 }
 
 /**
  * @brief
  * TODO : change db name
  * Check if the ragnarok_bdd datase exists
- * We open a connection to the SQL server. Then we check if you can create a new DB. If it already exists then run another script.
+ * We open a connection to the SQL server. Then we check if you can create a new DB.
+ * If DB is created we just delete it and return false to let Python scripts do their job.
  * @param db_name : name of database to check for
  * @return true if database exists
  * @see https://dev.mysql.com/
@@ -291,32 +321,39 @@ void manage_co(int sock)
 bool check4db(const char *db_name)
 {
 	char err[128];
-	char create_db[64];
+	char db_query[64];
 	MYSQL *con = mysql_init(NULL);
+
 	if (con == NULL)
 	{
 		fprintf(stderr, "%s\n", mysql_error(con));
 		exit(1);
 	}
-	/*TODO : change host, user, passwd and host values */
+
+	/* connection to mysql server */
 	if (mysql_real_connect(con, "localhost", "root", "root", NULL, 0, NULL, 0) == NULL)
 	{
 		fprintf(stderr, "%s\n", mysql_error(con));
 		mysql_close(con);
 		return false;
 	}
-	sprintf(create_db, "CREATE DATABASE %s", db_name);
-	if (mysql_query(con, create_db))
+	/* try to create DB, if it already exists then return true else we return false */
+	sprintf(db_query, "CREATE DATABASE %s", db_name);
+	if (mysql_query(con, db_query))
 	{
 		sprintf(err, "Can't create database '%s'; database exists", db_name);
 		if (!strcmp(mysql_error(con), err))
 		{
+			fprintf(stdout, "%s\n", err);
 			mysql_close(con);
 			return true;
-		} else {
-			mysql_close(con);
-			return false;
 		}
+	} else {
+		/* we delete DB after testing to not break python scripts */
+		sprintf(db_query, "DROP DATABASE %s", db_name);
+		mysql_query(con, db_query);
+		mysql_close(con);
+		return false;
 	}
 	return false;
 }
