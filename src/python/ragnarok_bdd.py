@@ -112,7 +112,7 @@ def init_bdd():
 			print(err)
 			exit(1)
 	try:
-		cnx = mysql.connector.connect(user='root', password='root', host='localhost', database='ragnarok')
+		cnx = mysql.connector.connect(user='root', password='root', host='localhost', database='ragnarok_bdd')
 
 	except mysql.connector.Error as err:
 		if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
