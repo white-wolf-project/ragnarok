@@ -69,6 +69,7 @@ def create_database(cursor):
 	except mysql.connector.Error as err:
 		print("Failed creating database: {}".format(err))
 		exit(1)
+
 		
 
 ## Function : create_tables(cursor)
@@ -76,7 +77,7 @@ def create_database(cursor):
 # Function used to create tables for the database
 # @param cursor
 def create_tables(cursor):
-	cnx = cnx = mysql.connector.connect(user='root', password='root', host='localhost')
+	cnx = mysql.connector.connect(user='root', password='root', host='localhost', database='ragnarok_bdd')
 	for name, ddl in TABLES.items():
 		try:
 			print("Creating table {}: ".format(name))
@@ -111,14 +112,6 @@ def init_bdd():
 		else:
 			print(err)
 			exit(1)
-	try:
-		cnx = mysql.connector.connect(user='root', password='root', host='localhost', database='ragnarok_bdd')
-
-	except mysql.connector.Error as err:
-		if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-			print("Incorrect username or password")
-		else:
-			print(err)
 
 	create_tables(cursor)
 	cnx.close()
