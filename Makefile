@@ -57,7 +57,7 @@ ifeq ($(BUILD), DEVELOPMENT)
 	CFLAGS += -DDEVELOPMENT
 endif
 
-.PHONY : all clean $(SYSNET) package mrproper srv_package client_package doc
+.PHONY : all clean $(SYSNET) package mrproper srv_package client_package doc test
 
 all : $(SERVER) $(CLIENT)
 
@@ -111,6 +111,10 @@ doc :
 	mkdir docs
 	doxygen resources/Doxyfile
 
+# build test files
+test :
+	make -C test
+
 # clean files
 clean :
 	make -C sysnet clean
@@ -121,3 +125,4 @@ clean :
 # clean more files
 mrproper : clean
 	rm -rf libcpuid srv_deb client_deb release wireless-tools docs
+	make -C test clean
