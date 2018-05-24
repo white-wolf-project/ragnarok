@@ -54,7 +54,7 @@ int main(int argc, char const *argv[]){
 		perror("fopen");
 		return 1;
 	}
-	printf("%d\n", strlen("-xml-"));
+	printf("%ld\n", strlen("-xml-"));
 	if(write(sock , "-xml-\0" , strlen("-xml-\0")) < 0)
 	{
 		puts("Send failed");
