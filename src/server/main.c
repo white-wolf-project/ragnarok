@@ -141,8 +141,8 @@ int main(int argc, char *argv[]){
 	{
 		init_srv_daemon(pidfile);
 		log_it("deamon started");
+		log_it("PID is %d", get_instance_pid(pidfile));
 	}
-	log_it("PID is %d", get_instance_pid(pidfile));
 	/* init daemon TCP server */
 	tcp_server(port);
 	return 0;
