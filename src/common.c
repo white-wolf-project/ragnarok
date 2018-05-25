@@ -75,19 +75,20 @@ int logger(int type, const char *file, int line, const char *format, ...){
 	char data2log[512];
 
 	switch(type){
-		case 1:
+		case 0:
 			#ifdef RELEASE
 				log_file = "/etc/ragnarok/ragnarok.log";
 			#else
 				log_file = "ragnarok.log";
 			#endif
 			break;
-		case 2:
+		case 1:
 			#ifdef RELEASE
 				log_file = "/etc/ragnarok/ragnarok-srv.log";
 			#else
 				log_file = "ragnarok-srv.log";
 			#endif
+			break;
 		default :
 			fprintf(stderr, "%d : type not supported\n", type);
 			return -1;

@@ -19,9 +19,9 @@ int main(int argc, char const *argv[])
 	if (argc != 4)
 	{	
 		arg_tab[0] = NULL;
-		arg_tab[1] = "../src/python/test/ragnarok1.xml"; 
-		arg_tab[2] = "../src/python/test/ragnarok2.xml"; 
-		arg_tab[3] = "../src/python/test/ragnarok3.xml";
+		arg_tab[1] = "server_0.xml"; 
+		arg_tab[2] = "server_1.xml"; 
+		arg_tab[3] = "server_2.xml";
 	} 
 	else {
 		for (int i = 1; i < argc; ++i)
