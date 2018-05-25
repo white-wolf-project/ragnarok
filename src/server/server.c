@@ -197,8 +197,12 @@ int tcp_server(const char* service_port)
 			default : // father
 				close(sock);
 		}
-		if (count++ == 3)
+		count++;
+		if (count == 3){
 			count = 0;
+			debug("remove db");
+			remove_db("ragnarok_bdd");
+		}
 	}
 	return 0;
 }
@@ -258,6 +262,7 @@ void manage_co(int sock, int counter)
 			break;
 		}
 		if (strstr(buffer, "-xml-") != NULL){
+			log_it("now receiving XML data");
 			isXML = true;
 			sprintf(xml_filename, "server_%d.xml", counter);
 			fp_xml = fopen(xml_filename ,"w+");
@@ -265,6 +270,7 @@ void manage_co(int sock, int counter)
 		else {
 			if (strstr(buffer, "-end_xml-") != NULL)
 			{
+				log_it("XML data reception is done");
 				fclose(fp_xml);
 				isXML = false;
 				#ifdef RELEASE
@@ -274,18 +280,23 @@ void manage_co(int sock, int counter)
 				arg_tab[3] = "/var/opt/ragnarok3.xml";
 				#else
 				arg_tab[0] = NULL;
-				arg_tab[1] = "src/python/test/ragnarok1.xml";
-				arg_tab[2] = "src/python/test/ragnarok2.xml";
-				arg_tab[3] = "src/python/test/ragnarok3.xml";
+				arg_tab[1] = "test/server_0.xml";
+				arg_tab[2] = "test/server_1.xml";
+				arg_tab[3] = "test/server_2.xml";
 				#endif
-
+				debug("counter : %d\n", counter);
 				/* 0, 1, 2 */
 				if (counter == 2)
 				{
+					log_it("check if ragnarok_bdd exists");
+					/* this statement is not really useful, we don't need it for the moment */
 					if (check4db("ragnarok_bdd") != true){
+						log_it("ragnarok_bdd does not exist, creating it");
 						run_python("src/python/ragnarok_bdd.py", NULL);
+						sleep(1);
 						run_python("src/python/xmlparser.py", arg_tab);
 					} else {
+						log_it("DB found");
 						run_python("src/python/xmlparser.py", arg_tab);
 					}
 				}
@@ -295,11 +306,11 @@ void manage_co(int sock, int counter)
 		{
 			if (strstr(buffer, "-xml-") == NULL && strstr(buffer, "-end_xml-") == NULL)
 			{
-				debug("%s\r\n", buffer);
+				// debug("%s\r\n", buffer);
 				fprintf(fp_xml, "%s\n", buffer);
 			}
 		} else {
-			debug("%s\r\n",buffer);
+			// debug("%s\r\n",buffer);
 			fprintf(fp, "%s\n", buffer);
 			fclose(fp);
 		}
@@ -344,7 +355,6 @@ bool check4db(const char *db_name)
 		sprintf(err, "Can't create database '%s'; database exists", db_name);
 		if (!strcmp(mysql_error(con), err))
 		{
-			fprintf(stdout, "%s\n", err);
 			mysql_close(con);
 			return true;
 		}
@@ -356,4 +366,41 @@ bool check4db(const char *db_name)
 		return false;
 	}
 	return false;
+}
+
+/**
+ * @brief
+ * TODO : change db name
+ * DROP database. We don't update it properly our database, so we decided to just delete it.
+ * @param db_name : name of database to check for
+ * @return a number != 0 if something goes wrong
+ * @see https://dev.mysql.com/
+ */
+int remove_db(const char *db_name){
+	char db_query[64];
+	MYSQL *con = mysql_init(NULL);
+
+	if (con == NULL)
+	{
+		fprintf(stderr, "%s\n", mysql_error(con));
+		exit(1);
+	}
+
+	/* connection to mysql server */
+	if (mysql_real_connect(con, "localhost", "root", "root", NULL, 0, NULL, 0) == NULL)
+	{
+		fprintf(stderr, "%s\n", mysql_error(con));
+		mysql_close(con);
+		return -1;
+	}
+
+	/* drop database */
+	sprintf(db_query, "DROP DATABASE %s", db_name);
+	if (mysql_query(con, db_query))
+	{
+		debug("%s\n", mysql_error(con));
+		mysql_close(con);
+		return -2;
+	}
+	return 0;
 }
