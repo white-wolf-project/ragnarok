@@ -35,7 +35,8 @@ sudo apt-get update && sudo apt-get upgrade -y
 
 # install build tools 
 sudo apt-get install -y make build-essential libssl-dev mysql-server mysql-client \
-libmysql++-dev wget git python3-dev python3-pip apache2 m4 autoconf libtool autotools-dev libiw-dev libxml2-dev
+libmysql++-dev wget git python3-dev python3-pip apache2 m4 autoconf libtool autotools-dev \
+libiw-dev libxml2-dev php7.0-dev php7.0-fpm
 
 if [[ `arch | cut -c1-3` != "arm" && `arch | cut -c1-3` != "aar" ]];then
 	sudo apt-get install -y gcc-arm-linux-gnueabihf
