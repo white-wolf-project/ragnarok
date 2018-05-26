@@ -200,7 +200,7 @@ int tcp_server(const char* service_port)
 		count++;
 		if (count == 3){
 			count = 0;
-			debug("remove db");
+			log_it("remove database");
 			remove_db("ragnarok_bdd");
 		}
 	}
@@ -218,16 +218,19 @@ int tcp_server(const char* service_port)
  */
 void manage_co(int sock, int counter)
 {
-	struct sockaddr * sockaddr;
-	socklen_t length = 0;
+	int  buf_len;
+	int xml_start = 0;
+	int xml_end = 0;
+	const char *arg_tab[4] = {0};
 	char hostname [NI_MAXHOST];
 	char port [NI_MAXSERV];
 	char buffer[256];
-	int  buf_len;
+	char *end_of_xml;
 	char xml_filename[32];
+	struct sockaddr * sockaddr;
 	bool isXML = false;
-	const char *arg_tab[4] = {0};
 
+	socklen_t length = 0;
 	getpeername(sock, NULL, &length);
 
 	if (length == 0)
@@ -241,6 +244,7 @@ void manage_co(int sock, int counter)
 		return;
 	}
 
+	/* we send non-XML data to server.log */
 	FILE *fp = fopen("server.log" ,"a+"); // or w+ idk yet
 	FILE *fp_xml = NULL;
 
@@ -261,9 +265,11 @@ void manage_co(int sock, int counter)
 		if (buf_len == 0){
 			break;
 		}
-		if (strstr(buffer, "-xml-") != NULL){
+
+		if (strstr(buffer , "-xml-") != NULL){
 			log_it("now receiving XML data");
 			isXML = true;
+			xml_start = 1;
 			sprintf(xml_filename, "server_%d.xml", counter);
 			fp_xml = fopen(xml_filename ,"w+");
 		}
@@ -271,6 +277,7 @@ void manage_co(int sock, int counter)
 			if (strstr(buffer, "-end_xml-") != NULL)
 			{
 				log_it("XML data reception is done");
+				xml_end = 1; xml_start = 0;
 				fclose(fp_xml);
 				isXML = false;
 				#ifdef RELEASE
@@ -280,15 +287,17 @@ void manage_co(int sock, int counter)
 				arg_tab[3] = "/var/opt/ragnarok3.xml";
 				#else
 				arg_tab[0] = NULL;
-				arg_tab[1] = "test/server_0.xml";
-				arg_tab[2] = "test/server_1.xml";
-				arg_tab[3] = "test/server_2.xml";
+				arg_tab[1] = "server_0.xml";
+				arg_tab[2] = "server_1.xml";
+				arg_tab[3] = "server_2.xml";
 				#endif
 				debug("counter : %d\n", counter);
+
 				/* 0, 1, 2 */
 				if (counter == 2)
 				{
 					log_it("check if ragnarok_bdd exists");
+
 					/* this statement is not really useful, we don't need it for the moment */
 					if (check4db("ragnarok_bdd") != true){
 						log_it("ragnarok_bdd does not exist, creating it");
@@ -296,26 +305,34 @@ void manage_co(int sock, int counter)
 						sleep(1);
 						run_python("src/python/xmlparser.py", arg_tab);
 					} else {
-						log_it("DB found");
+						log_it("ragnarok_bdd found");
 						run_python("src/python/xmlparser.py", arg_tab);
 					}
 				}
 			}
 		}
+
+		end_of_xml = strstr(buffer, "-end_xml-");
+
 		if (isXML)
 		{
-			if (strstr(buffer, "-xml-") == NULL && strstr(buffer, "-end_xml-") == NULL)
-			{
-				// debug("%s\r\n", buffer);
-				fprintf(fp_xml, "%s\n", buffer);
+			if (xml_start == 1){
+				fwrite(buffer + strlen("-xml-"), sizeof(char), buf_len - strlen("-xml-"), fp_xml);
+				xml_start = 0;
+			} else if (xml_end == 1){
+				end_of_xml[0] = '\0';
+				fwrite(buffer, sizeof(char), buf_len, fp_xml);
+				xml_end = 0;
+			} else {
+				fwrite(buffer, sizeof(char), buf_len, fp_xml);
 			}
-		} else {
-			// debug("%s\r\n",buffer);
-			fprintf(fp, "%s\n", buffer);
+		}
+		else {
+			debug("%s\r\n",buffer);
+			fprintf(fp, "%s", buffer);
 			fclose(fp);
 		}
 		memset(buffer, 0, 256);
-		buffer[buf_len] = '\0';
 	}
 }
 
