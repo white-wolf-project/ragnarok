@@ -26,20 +26,6 @@ TABLES['Device_info'] = (
 	"  PRIMARY KEY (`Mac`)"
 	") ENGINE=InnoDB")
 
-# TABLES['Quality'] = (
-# 	"CREATE TABLE `Quality` ("
-# 	"  `Id_quality` int NOT NULL AUTO_INCREMENT PRIMARY KEY,"
-# 	"  `Qual_Rpi1` varchar(10) DEFAULT '0',"
-# 	"  `Qual_Rpi2` varchar(10) DEFAULT '0',"
-# 	"  `Qual_Rpi3` varchar(10) DEFAULT '0'"
-# 	") ENGINE=InnoDB")
-
-# TABLES['Blank'] = (
-# 	"CREATE TABLE `Blank` ("
-# 	"  `X1` varchar(100) ,"
-# 	"  `X2` varchar(100) ,"
-# 	"  `X3` varchar(100) "
-#  	") ENGINE=InnoDB")
 
 TABLES['Info_AP'] = (
 	"CREATE TABLE `Info_AP` ("
@@ -52,7 +38,6 @@ TABLES['Info_AP'] = (
 	"  `Beacon` varchar(25) ,"
 	"  `Signal` varchar(25) ,"
 	"  `Frequency` varchar(25) ,"
-	# "  `Id_quality` varchar(25),"
 	"  `Quality` varchar(25) ,"
 	"  `MAC_Rasb` varchar(25) ,"
 	"  PRIMARY KEY (`Id_AP`)"

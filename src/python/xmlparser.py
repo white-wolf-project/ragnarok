@@ -57,15 +57,6 @@ def insert_encryption(db_conn, Encryption_name):
 	else:
 		pass
 
-## Function : insert_quality
-# Function used to insert encryption information in the database
-# @param db_conn
-# @param Encryption_name
-# def insert_quality(db_conn, Qual_Rpi1, Qual_Rpi2, Qual_Rpi3):
-# 	curs = db_conn.cursor() 
-# 	sql = "INSERT INTO Quality VALUES (NULL, '%s', '%s', '%s');" % \
-# 		(Qual_Rpi1, Qual_Rpi2, Qual_Rpi3)
-# 	curs.execute(sql)
 
 ## Function : ap_data_from_element
 # Parse data in the XML file
@@ -81,14 +72,19 @@ def ap_data_from_element(info_AP, info_rasb):
 	frequency = info_AP.find("frequency").text
 	time = info_rasb.find("time").text
 	mac_rasb = info_rasb.find("mac").text
+<<<<<<< HEAD
+	encryption = info_AP.find("encryption").text
+	ip = info_rasb.find("IP").text
+=======
 
 	if info_AP.find("encryption") == None:
 		encryption = "None"
 	else :
 		encryption = info_AP.find("encryption").text
+>>>>>>> upstream/master
 
 
-	return mac, channel, frequency, quality, signal, essid, beacon, encryption, time, mac_rasb
+	return mac, channel, frequency, quality, signal, essid, beacon, encryption, time, mac_rasb,ip
 
 def parse(xmlfile):
 	conn = mysql.connector.connect(host="localhost", user="root", password="root", database="ragnarok_bdd")
@@ -98,18 +94,6 @@ def parse(xmlfile):
 
 	return APs, RASBs, conn
 
-# def defqual1(db_conn,mac_rasb, mac, qual):
-# 	curs = db_conn.cursor()
-# 	print(qual)
-# 	sql = "INSERT INTO Quality VALUES (NULL, '%s', NULL, NULL) ;" % \
-# 			(qual)
-# 	curs.execute(sql)
-
-# def foreignkey(db_conn):
-# 	curs = db_conn.cursor()
-# 	sql = "ALTER TABLE Info_AP ADD FOREIGN KEY (Id_quality) REFERENCES Quality(Id_quality)"
-# 	curs.execute(sql)
-# 	db_conn.commit()
 
 ## Function : usage
 # usage function
@@ -122,6 +106,46 @@ if __name__ == '__main__':
 		usage()
 		sys.exit(1)
 	else :
+<<<<<<< HEAD
+		xmlfile1 = sys.argv[1]
+		xmlfile2 = sys.argv[2]
+		xmlfile3 = sys.argv[3]
+
+	APs, RASBs, conn = parse(xmlfile1)
+
+
+	for AP in APs:
+		mac, channel, frequency, quality, signal, essid, beacon, encryption, time, mac_rasb, ip = ap_data_from_element(AP,RASBs)
+		insert_encryption(conn, encryption)
+		conn.commit()
+		insert_info_ap(conn, mac, essid, time, encryption, channel, beacon, signal, frequency, quality, mac_rasb)
+		conn.commit()
+
+	insert_device_info(conn, time, mac_rasb, ip)
+	conn.commit()
+
+
+	APs, RASBs, conn = parse(xmlfile2)
+	for AP in APs:
+		mac, channel, frequency, quality, signal, essid, beacon, encryption, time, mac_rasb = ap_data_from_element(AP,RASBs)
+		insert_encryption(conn, encryption)
+		conn.commit()
+		insert_info_ap(conn, mac, essid, time, encryption, channel, beacon, signal, frequency, quality, mac_rasb)
+		conn.commit()
+	insert_device_info(conn, time, mac_rasb, ip)
+	conn.commit()
+
+
+	APs, RASBs, conn = parse(xmlfile3)
+	for AP in APs:
+		mac, channel, frequency, quality, signal, essid, beacon, encryption, time, mac_rasb = ap_data_from_element(AP,RASBs)
+		insert_encryption(conn, encryption)
+		conn.commit()
+		insert_info_ap(conn, mac, essid, time, encryption, channel, beacon, signal, frequency, quality, mac_rasb)
+		conn.commit()
+	insert_device_info(conn, time, mac_rasb, ip)
+	conn.commit()
+=======
 		xmlfiles = sys.argv
 
 	for i in range(1, len(xmlfiles)):
@@ -144,3 +168,4 @@ if __name__ == '__main__':
 		# qual1,qual2,qual3 = 1,2,3
 		# insert_quality(conn,qual1,qual2,qual3)
 		# conn.commit()
+>>>>>>> upstream/master
