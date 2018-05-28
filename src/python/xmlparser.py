@@ -148,7 +148,7 @@ if __name__ == '__main__':
 				pass
 
 		print("[+] inserting Raspberry Pi info data")
-		insert_device_info(conn, time, mac_rasb, 0)
+		insert_device_info(conn, time, mac_rasb, addr_ip)
 		conn.commit()
 
 	print("[i] closing connection to ragnarok_bdd")
