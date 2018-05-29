@@ -21,9 +21,9 @@
 #include <my_global.h>
 #include <mysql.h>
 /* local headers */
-#include <include/server.h>
 #include <include/common.h>
-
+#include <include/server.h>
+#include <include/server_util.h>
 int sock;
 
 /**
@@ -221,15 +221,12 @@ void manage_co(int sock, int counter)
 	int  buf_len;
 	int xml_start = 0;
 	int xml_end = 0;
-	const char *arg_tab[4] = {0};
 	char hostname [NI_MAXHOST];
 	char port [NI_MAXSERV];
-	char buffer[256];
-	char *end_of_xml;
+	char buffer[257];
 	char xml_filename[32];
 	struct sockaddr * sockaddr;
 	bool isXML = false;
-
 	socklen_t length = 0;
 	getpeername(sock, NULL, &length);
 
@@ -246,7 +243,6 @@ void manage_co(int sock, int counter)
 
 	/* we send non-XML data to server.log */
 	FILE *fp = fopen("server.log" ,"a+"); // or w+ idk yet
-	FILE *fp_xml = NULL;
 
 	if (getnameinfo(sockaddr, length, hostname, NI_MAXHOST, port, NI_MAXSERV, NI_NUMERICHOST | NI_NUMERICSERV) == 0) {
 		sprintf (buffer, "IP:%s\tPort: %s\n", hostname, port);
@@ -255,7 +251,10 @@ void manage_co(int sock, int counter)
 		fprintf(fp, "%s\n", buffer);
 	}
 	free(sockaddr);
+	int xml_checker;
+	FILE *fp_xml;
 	while (1) {
+		memset(buffer, 0, 257);
 		buf_len = read(sock, buffer, 256);
 
 		if (buf_len < 0) {
@@ -266,73 +265,40 @@ void manage_co(int sock, int counter)
 			break;
 		}
 
-		if (strstr(buffer , "-xml-") != NULL){
-			log_it("now receiving XML data");
+		/* check the begining and the end of the XML data */
+		xml_checker = check4xml(buffer);
+		if (xml_checker == 0)
+		{	
 			isXML = true;
 			xml_start = 1;
+			sleep(1);
 			sprintf(xml_filename, "server_%d.xml", counter);
 			fp_xml = fopen(xml_filename ,"w+");
-		}
+			write_to_xml(fp_xml, buffer, buf_len, xml_start, xml_end);
+			xml_start = 0;
+		} 
+		else if (xml_checker == 1) {
+			xml_end = 1; xml_start = 0;
+			write_to_xml(fp_xml, buffer, buf_len, xml_start, xml_end);
+			handle_xml_data(counter);
+		} 
 		else {
-			if (strstr(buffer, "-end_xml-") != NULL)
-			{
-				log_it("XML data reception is done");
-				xml_end = 1; xml_start = 0;
-				fclose(fp_xml);
-				isXML = false;
-				#ifdef RELEASE
-				arg_tab[0] = NULL;
-				arg_tab[1] = "/var/opt/ragnarok1.xml";
-				arg_tab[2] = "/var/opt/ragnarok2.xml";
-				arg_tab[3] = "/var/opt/ragnarok3.xml";
-				#else
-				arg_tab[0] = NULL;
-				arg_tab[1] = "server_0.xml";
-				arg_tab[2] = "server_1.xml";
-				arg_tab[3] = "server_2.xml";
-				#endif
-				debug("counter : %d\n", counter);
+			if (isXML)
+			{	
+				write_to_xml(fp_xml, buffer, buf_len, xml_start, xml_end);
 
-				/* 0, 1, 2 */
-				if (counter == 2)
-				{
-					log_it("check if ragnarok_bdd exists");
-
-					/* this statement is not really useful, we don't need it for the moment */
-					if (check4db("ragnarok_bdd") != true){
-						log_it("ragnarok_bdd does not exist, creating it");
-						run_python("src/python/ragnarok_bdd.py", NULL);
-						sleep(1);
-						run_python("src/python/xmlparser.py", arg_tab);
-					} else {
-						log_it("ragnarok_bdd found");
-						run_python("src/python/xmlparser.py", arg_tab);
-					}
+				if (xml_end == 1){
+					isXML = false;
+					fclose(fp_xml);
 				}
+
+			}
+			else {
+				//debug("%s\r\n",buffer);
+				fprintf(fp, "%s", buffer);
+				fclose(fp);
 			}
 		}
-
-		end_of_xml = strstr(buffer, "-end_xml-");
-
-		if (isXML)
-		{
-			if (xml_start == 1){
-				fwrite(buffer + strlen("-xml-"), sizeof(char), buf_len - strlen("-xml-"), fp_xml);
-				xml_start = 0;
-			} else if (xml_end == 1){
-				end_of_xml[0] = '\0';
-				fwrite(buffer, sizeof(char), buf_len, fp_xml);
-				xml_end = 0;
-			} else {
-				fwrite(buffer, sizeof(char), buf_len, fp_xml);
-			}
-		}
-		else {
-			debug("%s\r\n",buffer);
-			fprintf(fp, "%s", buffer);
-			fclose(fp);
-		}
-		memset(buffer, 0, 256);
 	}
 }
 
