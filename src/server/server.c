@@ -29,6 +29,7 @@ int sock;
  * @brief
  * Catch ctrl+c to close sock and exit correctly
  * Since it's a deamon this function is useless. I keep it for the moment
+ * @param int sig : signal
  * @return void, no return just exit() the program
  */
 void INThandler(int sig)
@@ -44,7 +45,7 @@ void INThandler(int sig)
  * init deamon for the server
  * First we check if the pidfile exists. If it exists, it means client is already running.
  * Print pid of process the quit.
- * @param pidfile
+ * @param const char *pidfile
  * @code
  * if (file_exists(pidfile))
  * {
@@ -125,6 +126,7 @@ int init_srv_daemon(const char *pidfile){
 /**
  * @brief
  * TCP server function to handle multiple clients
+ * @param const char* service_port
  * @return returns 0 if everything's done well or a number != 0 if any issue or just exit().
  * @see https://www.thegeekstuff.com/2012/02/c-daemon-process/
  */
@@ -212,8 +214,8 @@ int tcp_server(const char* service_port)
  * In server.log, "normal" data from the scan it's for debugging purpose.
  * We also call Python3 scripts to handle XML files, still in early stage for the moment.
  * XML data is stored in server.xml
- * @param sock : socket of the server
- * @param counter : count number of opened sessions, once counter hits 3, run python script will all 3 xml files
+ * @param int sock : socket of the server
+ * @param int counter : count number of opened sessions, once counter hits 3, run python script will all 3 xml files
  */
 void manage_co(int sock, int counter)
 {

@@ -1,3 +1,11 @@
+/**
+ * @file server_util.c
+ * @author Mathieu Hautebas
+ * @date May 30th 2018
+ * @brief file containing functions for the server.
+ *
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -9,6 +17,12 @@
 #include <include/server_util.h>
 #include <include/common.h>
 
+/**
+ * @brief
+ * check if it's the beginning, the end or the middle of the XML file
+ * @param const char *data
+ * @return returns 0 if it's XML start 1 if xml ends or 2
+ */
 int check4xml(const char *data){
 	if (strstr(data , "-xml-") != NULL){
 		return 0;
@@ -18,8 +32,19 @@ int check4xml(const char *data){
 		return 2;
 	}
 }
-
-// xml_val = end or begin 1 = end; 0 = begin
+/**
+ * @brief
+ * function used to write our XML data to a file as raw data
+ * @param FILE *fp_xml
+ * @param const char *xml_data
+ * @param int xml_data_len
+ * @param int xml_start
+ * @param int xml_end
+ * if xml data started we write to our XML after -xml- which is a sort of tag I made
+ * if xml data ends then set first char of end_of_xml to \0.
+ * else it's just our XML data
+ * @return void
+ */
 void write_to_xml(FILE *fp_xml, const char *xml_data, int xml_data_len, int xml_start, int xml_end){
 	char *end_of_xml = strstr(xml_data, "-end_xml-");
 
@@ -33,20 +58,31 @@ void write_to_xml(FILE *fp_xml, const char *xml_data, int xml_data_len, int xml_
 	}
 }
 
+/**
+ * @brief
+ * @verbatim handle_xml_data() @endverbatim is used to run the python3 code
+ * we call it once we have 3 xml files. At some point all the code will written be in C
+ * @param int counter
+ * if xml data started we write to our XML after -xml- which is a sort of tag I made
+ * if xml data ends then set first char of end_of_xml to \0.
+ * else it's just our XML data
+ * @return void
+ */
 int handle_xml_data(int counter){
 	const char *arg_tab[4] = {0};
 
-#ifdef RELEASE
-	arg_tab[0] = NULL;
-	arg_tab[1] = "/var/opt/ragnarok1.xml";
-	arg_tab[2] = "/var/opt/ragnarok2.xml";
-	arg_tab[3] = "/var/opt/ragnarok3.xml";
-#else
-	arg_tab[0] = NULL;
-	arg_tab[1] = "server_0.xml";
-	arg_tab[2] = "server_1.xml";
-	arg_tab[3] = "server_2.xml";
-#endif
+	#ifdef RELEASE
+		arg_tab[0] = NULL;
+		arg_tab[1] = "/var/opt/ragnarok1.xml";
+		arg_tab[2] = "/var/opt/ragnarok2.xml";
+		arg_tab[3] = "/var/opt/ragnarok3.xml";
+	#else
+		arg_tab[0] = NULL;
+		arg_tab[1] = "server_0.xml";
+		arg_tab[2] = "server_1.xml";
+		arg_tab[3] = "server_2.xml";
+	#endif
+
 	if (counter == 2) {
 		log_it("check if ragnarok_bdd exists");
 
@@ -72,7 +108,7 @@ int handle_xml_data(int counter){
  * Check if the ragnarok_bdd datase exists
  * We open a connection to the SQL server. Then we check if you can create a new DB.
  * If DB is created we just delete it and return false to let Python scripts do their job.
- * @param db_name : name of database to check for
+ * @param const char *db_name : name of database to check for
  * @return true if database exists
  * @see https://dev.mysql.com/
  */
@@ -119,7 +155,7 @@ bool check4db(const char *db_name)
  * @brief
  * TODO : change db name
  * DROP database. We don't update it properly our database, so we decided to just delete it.
- * @param db_name : name of database to check for
+ * @param const char *db_name : name of database to check for
  * @return a number != 0 if something goes wrong
  * @see https://dev.mysql.com/
  */
