@@ -279,22 +279,22 @@ void manage_co(int sock, int counter)
 		} 
 		else if (xml_checker == 1) {
 			xml_end = 1; xml_start = 0;
+
 			write_to_xml(fp_xml, buffer, buf_len, xml_start, xml_end);
+			fclose(fp_xml);
 			handle_xml_data(counter);
-		} 
+		}
 		else {
+			/* check if we are in the "middle" of the XML file */
 			if (isXML)
-			{	
+			{
 				write_to_xml(fp_xml, buffer, buf_len, xml_start, xml_end);
 
-				if (xml_end == 1){
+				if (xml_end == 1)
 					isXML = false;
-					fclose(fp_xml);
-				}
-
 			}
 			else {
-				//debug("%s\r\n",buffer);
+				// debug("%s\r\n",buffer);
 				fprintf(fp, "%s", buffer);
 				fclose(fp);
 			}
@@ -361,6 +361,7 @@ bool check4db(const char *db_name)
  */
 int remove_db(const char *db_name){
 	char db_query[64];
+	char err[128];
 	MYSQL *con = mysql_init(NULL);
 
 	if (con == NULL)
@@ -378,10 +379,19 @@ int remove_db(const char *db_name){
 	}
 
 	/* drop database */
+	sprintf(err, "Can't drop database '%s'; database doesn't exist", db_name);
 	sprintf(db_query, "DROP DATABASE %s", db_name);
 	if (mysql_query(con, db_query))
 	{
-		debug("%s\n", mysql_error(con));
+		/*
+		 * at the first run we should have an error and ret -2
+		 * because it can't delete something
+		 * that does not exists
+		*/
+		if (strcmp(mysql_error(con) ,err))
+		{
+			debug("%s\n", mysql_error(con));
+		}
 		mysql_close(con);
 		return -2;
 	}
