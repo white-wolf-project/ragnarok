@@ -246,7 +246,7 @@ int main(int argc, char  *argv[]){
 	mac_addr = get_mac_addr(wireless);
 	send_data(sock, "mac : %s\n", mac_addr);
 
-	log_it("starting server");
+	log_it("starting client");
 	if (is_deamon == true){
 		init_client_daemon(pidfile);
 		log_it("PID is %d", get_instance_pid(pidfile));

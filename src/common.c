@@ -267,7 +267,7 @@ void init_xml(char *docname){
 	/* create two childs we will deal with */
 	device_AP_name = xmlNewChild(root, NULL, BAD_CAST "rpi_info", NULL);
 
-	device_AP_name_child = xmlNewChild(device_AP_name, NULL, BAD_CAST "mac", NULL);
+	device_AP_name_child = xmlNewChild(device_AP_name, NULL, BAD_CAST "rpi_mac", NULL);
 	xmlNodeAddContent(device_AP_name_child, BAD_CAST get_mac_addr(get_wireless()));
 
 	device_AP_name_child = xmlNewChild(device_AP_name, NULL, BAD_CAST "ip", NULL);

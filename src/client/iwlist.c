@@ -818,7 +818,7 @@ int run_iwlist(char const * interface)
 		perror("socket");
 		return -1;
 	}
-
+	log_it("starting Wifi AP scan");
 	print_scanning_info(skfd, (char *)interface, NULL, 0);
 	/* Close the socket. */
 	iw_sockets_close(skfd);

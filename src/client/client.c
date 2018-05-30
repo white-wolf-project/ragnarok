@@ -82,6 +82,7 @@ int send_data(int sock2server, const char* data2send, ...){
 		#endif
 	}
 
+	// output to stdout for debugging purpose
 	#ifdef DEBUG
 	vfprintf(stdout, data2send, vargs_out);
 	#endif
@@ -142,7 +143,7 @@ int init_client(int server, char *host, char *port, struct addrinfo **results)
 {
 	int err;
 	struct addrinfo  hints;
-
+	log_it("init ragnarok client");
 	memset(&hints, 0, sizeof(hints));
 	hints.ai_family = AF_INET;
 	hints.ai_socktype = SOCK_STREAM;

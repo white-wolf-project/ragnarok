@@ -30,7 +30,8 @@ CLIENT_OBJECTS = $(CLIENT_SRC)/main.o \
 CLIENT_SOURCES = $(CLIENT_OBJECTS:.o=.c)
 
 SRV_OBJECTS = $(SRV_SRC)/main.o \
-              $(SRV_SRC)/server.o
+              $(SRV_SRC)/server.o \
+              $(SRV_SRC)/server_util.o
 
 SRV_SOURCES = $(SRV_OBJECTS:o=.c)	
 
