@@ -18,8 +18,7 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <my_global.h>
-#include <mysql.h>
+
 /* local headers */
 #include <include/common.h>
 #include <include/server.h>
@@ -300,100 +299,4 @@ void manage_co(int sock, int counter)
 			}
 		}
 	}
-}
-
-/**
- * @brief
- * TODO : change db name
- * Check if the ragnarok_bdd datase exists
- * We open a connection to the SQL server. Then we check if you can create a new DB.
- * If DB is created we just delete it and return false to let Python scripts do their job.
- * @param db_name : name of database to check for
- * @return true if database exists
- * @see https://dev.mysql.com/
- */
-bool check4db(const char *db_name)
-{
-	char err[128];
-	char db_query[64];
-	MYSQL *con = mysql_init(NULL);
-
-	if (con == NULL)
-	{
-		fprintf(stderr, "%s\n", mysql_error(con));
-		exit(1);
-	}
-
-	/* connection to mysql server */
-	if (mysql_real_connect(con, "localhost", "root", "root", NULL, 0, NULL, 0) == NULL)
-	{
-		fprintf(stderr, "%s\n", mysql_error(con));
-		mysql_close(con);
-		return false;
-	}
-	/* try to create DB, if it already exists then return true else we return false */
-	sprintf(db_query, "CREATE DATABASE %s", db_name);
-	if (mysql_query(con, db_query))
-	{
-		sprintf(err, "Can't create database '%s'; database exists", db_name);
-		if (!strcmp(mysql_error(con), err))
-		{
-			mysql_close(con);
-			return true;
-		}
-	} else {
-		/* we delete DB after testing to not break python scripts */
-		sprintf(db_query, "DROP DATABASE %s", db_name);
-		mysql_query(con, db_query);
-		mysql_close(con);
-		return false;
-	}
-	return false;
-}
-
-/**
- * @brief
- * TODO : change db name
- * DROP database. We don't update it properly our database, so we decided to just delete it.
- * @param db_name : name of database to check for
- * @return a number != 0 if something goes wrong
- * @see https://dev.mysql.com/
- */
-int remove_db(const char *db_name){
-	char db_query[64];
-	char err[128];
-	MYSQL *con = mysql_init(NULL);
-
-	if (con == NULL)
-	{
-		fprintf(stderr, "%s\n", mysql_error(con));
-		exit(1);
-	}
-
-	/* connection to mysql server */
-	if (mysql_real_connect(con, "localhost", "root", "root", NULL, 0, NULL, 0) == NULL)
-	{
-		fprintf(stderr, "%s\n", mysql_error(con));
-		mysql_close(con);
-		return -1;
-	}
-
-	/* drop database */
-	sprintf(err, "Can't drop database '%s'; database doesn't exist", db_name);
-	sprintf(db_query, "DROP DATABASE %s", db_name);
-	if (mysql_query(con, db_query))
-	{
-		/*
-		 * at the first run we should have an error and ret -2
-		 * because it can't delete something
-		 * that does not exists
-		*/
-		if (strcmp(mysql_error(con) ,err))
-		{
-			debug("%s\n", mysql_error(con));
-		}
-		mysql_close(con);
-		return -2;
-	}
-	return 0;
 }
