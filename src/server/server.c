@@ -277,13 +277,14 @@ void manage_co(int sock, int counter)
 			fp_xml = fopen(xml_filename ,"w+");
 			write_to_xml(fp_xml, buffer, buf_len, xml_start, xml_end);
 			xml_start = 0;
-		} 
+		}
 		else if (xml_checker == 1) {
 			xml_end = 1; xml_start = 0;
 
 			write_to_xml(fp_xml, buffer, buf_len, xml_start, xml_end);
 			fclose(fp_xml);
-			handle_xml_data(counter);
+			if (counter == 2)
+				handle_xml_data();
 		}
 		else {
 			/* check if we are in the "middle" of the XML file */

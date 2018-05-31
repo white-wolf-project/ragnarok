@@ -68,9 +68,9 @@ void write_to_xml(FILE *fp_xml, const char *xml_data, int xml_data_len, int xml_
  * else it's just our XML data
  * @return void
  */
-int handle_xml_data(int counter){
+int handle_xml_data(){
 	const char *arg_tab[4] = {0};
-
+	char python_cmd[256];
 	#ifdef RELEASE
 		arg_tab[0] = NULL;
 		arg_tab[1] = "/var/opt/ragnarok1.xml";
@@ -83,22 +83,20 @@ int handle_xml_data(int counter){
 		arg_tab[3] = "server_2.xml";
 	#endif
 
-	if (counter == 2) {
-		log_it("check if ragnarok_bdd exists");
+	sprintf(python_cmd, "python3 src/python/xmlparser.py %s %s %s", arg_tab[1], arg_tab[2], arg_tab[3]);
+	log_it("check if ragnarok_bdd exists");
 
-		/* this statement is not really useful, we don't need it for the moment */
-		if (check4db("ragnarok_bdd") != true) {
-			log_it("ragnarok_bdd does not exist, creating it");
-			run_python("src/python/ragnarok_bdd.py", NULL);
-			sleep(1);
-			// system("python3 src/python/xmlparser.py test/server_0.xml test/server_1.xml test/server_2.xml");
-			run_python("src/python/xmlparser.py", arg_tab);
-		} else {
-			log_it("ragnarok_bdd found");
-			// system("python3 src/python/xmlparser.py test/server_0.xml test/server_1.xml test/server_2.xml");
-			run_python("src/python/xmlparser.py", arg_tab);
-		}
+	/* this statement is not really useful, we don't need it for the moment */
+	if (check4db("ragnarok_bdd") != true) {
+		log_it("ragnarok_bdd does not exist, creating it");
+		system("src/python/ragnarok_bdd.py");
+		sleep(1);
+		system(python_cmd);
+	} else {
+		log_it("ragnarok_bdd found");
+		system(python_cmd);
 	}
+
 	return 0;
 }
 
