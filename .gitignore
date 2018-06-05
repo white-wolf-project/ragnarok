@@ -16,4 +16,5 @@ client_deb/
 srv_deb/
 test/run_python
 test/send_xml
+test/sql_db
 core
