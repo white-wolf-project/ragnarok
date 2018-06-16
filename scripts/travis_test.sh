@@ -29,7 +29,5 @@ cd ..
 # links libs
 sudo ldconfig
 # build ragnarok
-make -C sysnet -n
 make -C sysnet
-make -n
 make

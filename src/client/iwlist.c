@@ -804,7 +804,7 @@ static int print_scanning_info(int skfd, char *	ifname, char *	args[], int	count
 	else {
 		send_data(sock, "%-8.16s  No scan results\n\n", ifname);
 		free(buffer);
-		return(0);
+		exit(EXIT_FAILURE);
 	}
 	return 0;
 }
